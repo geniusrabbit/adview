@@ -1,0 +1,53 @@
+{
+  "compilerOptions": {
+//    "target": "es2022",
+    "moduleDetection": "force",
+    "isolatedModules": true,
+//    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+//    "module": "NodeNext",
+    "sourceMap": true,
+    "declarationMap": true,
+    "noEmit": true,
+//    "lib": ["es2022", "dom", "dom.iterable"],
+    "skipLibCheck": true,
+    "target": "ES5",
+    "module": "commonjs",
+    "jsx": "react",
+//    "rootDir": ".",
+    "outDir": "dist",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "typeRoots": ["./typings", "./node_modules/@types"],
+//    "composite": true,
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@adview/*": ["packages/*/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist"],
+  "include": [
+    "./typings/*",
+    "**/*.js",
+    "./.eslintrc.js",
+    "**/*.ts",
+    "**/*.test.tsx",
+    "**/*.tsx"
+  ]
+}
