@@ -7,7 +7,6 @@
     "build": "turbo run build",
     "lint": "npm run lint:js",
     "lint:js": "eslint ./packages --ext .ts,.tsx,.js,.jsx",
-    "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
     "publish": "turbo run build && changeset version && changeset publish"

@@ -1,12 +1,8 @@
 # AdView - React
-Here is monorepo with the following packages:
-
-* `@adview/react`: The main package for the AdView React library.
+AdView is a React library for displaying ads in your application. It provides a simple and flexible way to integrate ads into your app, with support for different ad formats and customization options.
 
 # Documentation
 ## Table of Contents
-* [Maintenance](#maintenance)
-* [Get Started](#get-started)
 * [AdUnit return values](#adunit-return-values)
 * [AdUnit configuration fields](#adunit-configuration-fields)
 * [Client](#client)
@@ -19,27 +15,6 @@ Here is monorepo with the following packages:
   * [Server simple use case of a single ad unit.](#server-simple-use-case-of-a-single-ad-unit)
   * [Server style customization by class name tokens
 
-
-
-## Maintenance
-To build the package, run the following command:
-
-```bash
-  npm run build
-```
-
-
-## Get Started
-To get started with AdView, you need to install the package using npm or yarn.
-
-```bash
-  npm i @adview/react -S
-````
-or
-
-```bash
-  yarn add @adview/react
-```
 
 ## AdUnit return values
 * For the simplest case, it will return the default template related to the ad unit format: `AdViewUnitBanner`, `AdViewUnitNative`, `AdViewUnitProxy`, and execute `onDefault` if it is defined.
