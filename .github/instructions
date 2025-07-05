@@ -3,3 +3,11 @@
 ## Important
 
 * All documentation and code comments should be in English.
+
+## Project Structure
+
+This project uses a monorepo structure with the following packages:
+
+* `@adview/core`: Core utilities and types for AdView ad management library.
+* `@adview/react`: React components and hooks for AdView.
+* `@adview/vue`: Vue components for AdView (future).
