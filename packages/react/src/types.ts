@@ -1,5 +1,5 @@
+import { AdViewAdFormat, AdViewConfig, AdViewGroupItem } from '@adview/core/typings';
 import { ReactElement, ReactNode } from 'react';
-import { AdViewAdFormat, AdViewGroupItem } from '../../../typings';
 
 /**
  * CSS class name tokens for styling native ad components.
@@ -104,15 +104,6 @@ export type AdViewUnitServerChildren =
 export type AdViewUnitDefault = (() => ReactNode) | ReactNode;
 
 /**
- * Configuration options for AdView components.
- * Contains server URL and other global settings.
- */
-export type AdViewConfig = {
-  /** Ad server URL template with {<id>} placeholder */
-  srcURL?: string;
-};
-
-/**
  * Base props for all AdViewUnit components.
  * Combines unit identification, configuration, and rendering options.
  */
@@ -139,3 +130,6 @@ export type AdLoadState = {
   /** True when loading is complete (success or failure) */
   isComplete: boolean;
 };
+
+// Re-export core types for React package compatibility
+export type { AdViewConfig } from '@adview/core/typings';

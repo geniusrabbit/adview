@@ -40,6 +40,9 @@
   "peerDependencies": {
     "react": "^19.1.0"
   },
+  "dependencies": {
+    "@adview/core": "file:../.."
+  },
   "author": "AdView Team",
   "license": "Apache-2.0",
   "publishConfig": {

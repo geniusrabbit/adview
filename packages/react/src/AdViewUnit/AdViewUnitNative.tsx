@@ -1,7 +1,5 @@
+import { getAssetByName, getPrepareURL, getSrcSetCSSThumbs } from '@adview/core/utils';
 import React from 'react';
-import getAssetByName from '../../../../utils/getAssetByName';
-import getPrepareURL from '../../../../utils/getPrepareURL';
-import getSrcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
 import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
 
 type AdViewUnitNativeProps = AdViewDataClient & {

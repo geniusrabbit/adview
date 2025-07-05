@@ -1,7 +1,7 @@
 'use client';
 
+import { executeImpressionsTracking } from '@adview/core/utils';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import executeImpressionsTracking from '../../../../utils/executeImpressionsTracking';
 
 type AdViewUnitTrackingProps = {
   impressions?: string[];

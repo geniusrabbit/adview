@@ -1,4 +1,4 @@
-import { AdViewConfig } from '@adview/react/src/types';
+import { AdViewConfig } from '../typings';
 import getRandomString from './getRandomString';
 
 /**

@@ -1,8 +1,6 @@
 import React from 'react';
 
-import adViewFetcher from '../../../../utils/adViewFetcher';
-import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
-import getResolveConfig from '../../../../utils/getResolveConfig';
+import { adViewFetcher, getAdRequestUrl, getResolveConfig } from '@adview/core/utils';
 import { AdViewUnitPropsBase, AdViewUnitServerChildren } from '../types';
 import AdViewUnitTracking from './/AdViewUnitTracking';
 import AdViewUnitWrapperServer from './AdViewUnitWrapper.server';

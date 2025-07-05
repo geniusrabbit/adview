@@ -194,3 +194,12 @@ export interface AdViewData {
  * Can be a static React node or a function that returns content.
  */
 export type AdViewUnitDefault = (() => ReactNode) | ReactNode;
+
+/**
+ * Configuration options for AdView components.
+ * Contains server URL and other global settings.
+ */
+export type AdViewConfig = {
+  /** Ad server URL template with {<id>} placeholder */
+  srcURL?: string;
+};

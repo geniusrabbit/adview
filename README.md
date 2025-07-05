@@ -49,6 +49,34 @@ npm install @adview/react
 yarn add @adview/react
 ```
 
+### Import Styles
+
+AdView supports multiple import styles for different use cases:
+
+#### Package-level imports (recommended)
+```typescript
+// React components
+import { AdViewUnit, AdViewProvider } from '@adview/react';
+
+// Server components
+import { AdViewUnitServer } from '@adview/react/server';
+```
+
+#### Direct utility imports
+```typescript
+// Core utilities (tree-shakable)
+import { adViewFetcher, getResolveConfig } from '@adview/core/utils';
+
+// TypeScript types
+import { AdViewData, AdViewConfig } from '@adview/core/typings';
+```
+
+Benefits:
+- **Tree-shaking**: Import only what you need
+- **Type safety**: Full TypeScript support
+- **Intellisense**: Better IDE autocomplete
+- **Future-proof**: Ready for framework extensions (@adview/vue, @adview/angular)
+
 ## Quick Start
 
 ### Basic Usage

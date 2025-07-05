@@ -1,10 +1,8 @@
 'use client';
 
+import { AdViewData } from '@adview/core/typings';
+import { adViewFetcher, getAdRequestUrl, getResolveConfig } from '@adview/core/utils';
 import { useContext, useEffect, useState } from 'react';
-import { AdViewData } from '../../../../typings';
-import adViewFetcher from '../../../../utils/adViewFetcher';
-import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
-import getResolveConfig from '../../../../utils/getResolveConfig';
 import { AdLoadState, AdViewConfig } from '../types';
 import { AdViewProviderContext } from './AdViewProvider';
 

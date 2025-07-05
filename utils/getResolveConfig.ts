@@ -1,4 +1,4 @@
-import { AdViewConfig } from '@adview/react/src/types';
+import { AdViewConfig } from '../typings';
 
 /**
  * Resolves and merges configuration options with environment defaults.
