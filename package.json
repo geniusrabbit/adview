@@ -1,50 +1,21 @@
 {
-  "name": "@adview/core",
-  "version": "1.0.2",
-  "description": "Core utilities and types for AdView ad management library",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs", 
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.mjs",
-      "require": "./dist/utils.js"
-    },
-    "./typings": {
-      "types": "./dist/typings.d.ts", 
-      "import": "./dist/typings.mjs",
-      "require": "./dist/typings.js"
-    }
-  },
-  "files": [
-    "dist",
-    "utils",
-    "typings",
-    "README.md",
-    "LICENSE"
-  ],
+  "name": "adview-monorepo",
+  "version": "1.0.0",
+  "description": "AdView monorepo - Modern ad management library for web applications",
+  "private": true,
   "author": "AdView Team",
   "packageManager": "npm@10.9.2",
   "scripts": {
-    "build": "npm run build:local && turbo run build",
-    "build:local": "tsup",
+    "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:local": "tsup --watch", 
-    "clean": "turbo run clean && npm run clean:local",
-    "clean:local": "rm -rf dist",
+    "clean": "turbo run clean",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "version": "changeset version",
     "release": "changeset publish",
     "publish": "npm run build && changeset version && changeset publish",
     "publish-check": "npm run build && npm run version-check && turbo run publish-check",
-    "version-check": "node -e \"console.log('Root:', require('./package.json').version); require('fs').readdirSync('./packages').forEach(p => { try { console.log(p + ':', require('./packages/' + p + '/package.json').version); } catch(e) {} })\""
+    "version-check": "node -e \"require('fs').readdirSync('./packages').forEach(p => { try { const pkg = require('./packages/' + p + '/package.json'); console.log(pkg.name + ':', pkg.version); } catch(e) {} })\""
   },
   "repository": {
     "type": "git",
@@ -108,9 +79,6 @@
     "turbo": "^2.5.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.1"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "lint-staged": {
     "{packages,bin}/**/*.{js,jsx,ts,tsx}": [

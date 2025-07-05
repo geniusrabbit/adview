@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { AdViewGroupItem } from '@adview/core/typings';
 import { adViewFetcher, getAdRequestUrl, getResolveConfig } from '@adview/core/utils';
 import { AdViewUnitPropsBase, AdViewUnitServerChildren } from '../types';
-import AdViewUnitTracking from './/AdViewUnitTracking';
+import AdViewUnitTracking from './AdViewUnitTracking';
 import AdViewUnitWrapperServer from './AdViewUnitWrapper.server';
 
 export type AdViewUnitServerProps = AdViewUnitPropsBase & {
@@ -27,7 +28,7 @@ async function AdViewUnitServer({
   const groupItems = responseGroup?.items;
 
   if (groupItems && groupItems.length) {
-    return groupItems.map(({ tracker, ...data }) => {
+    return groupItems.map(({ tracker, ...data }: AdViewGroupItem) => {
       return (
         <AdViewUnitTracking key={data.id} {...tracker}>
           <AdViewUnitWrapperServer data={data} onDefault={onDefault}>

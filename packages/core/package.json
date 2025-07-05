@@ -1,0 +1,67 @@
+{
+  "name": "@adview/core",
+  "version": "1.0.2",
+  "description": "Core utilities and types for AdView ad management library",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
+    },
+    "./typings": {
+      "types": "./dist/typings.d.ts",
+      "import": "./dist/typings.mjs",
+      "require": "./dist/typings.js"
+    }
+  },
+  "files": [
+    "dist",
+    "utils",
+    "typings",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint .",
+    "test": "echo 'Tests not implemented yet'",
+    "publish-check": "npm publish --dry-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geniusrabbit/adview.git"
+  },
+  "bugs": {
+    "url": "https://github.com/geniusrabbit/adview/issues"
+  },
+  "homepage": "https://github.com/geniusrabbit/adview#readme",
+  "keywords": [
+    "ad",
+    "view",
+    "AdView",
+    "AdView widgets"
+  ],
+  "author": "AdView Team",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

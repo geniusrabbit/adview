@@ -1,5 +1,8 @@
 import { AdViewConfig } from '../typings';
 
+// Type declaration for process object when available
+declare const process: any;
+
 /**
  * Resolves and merges configuration options with environment defaults.
  * Prioritizes passed config over environment variables.
@@ -8,8 +11,8 @@ import { AdViewConfig } from '../typings';
  * @returns Merged configuration with environment defaults applied
  */
 function getResolveConfig(config: AdViewConfig): AdViewConfig {
-  // Get default source URL from environment variable
-  const srcURL = process.env.ADSERVER_AD_JSONP_REQUEST_URL; // Default source URL for JSONP requests
+  // Get default source URL from environment variable (Node.js only)
+  const srcURL = typeof process !== 'undefined' ? process.env?.ADSERVER_AD_JSONP_REQUEST_URL : undefined;
 
   return {
     srcURL,
