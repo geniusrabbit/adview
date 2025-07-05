@@ -95,12 +95,12 @@ jobs:
             **Version**: `${{ env.PACKAGE_VERSION }}`
             
             ### Published Packages
-            - `adview@${{ env.PACKAGE_VERSION }}`
+            - `@adview/core@${{ env.PACKAGE_VERSION }}`
             - `@adview/react@${{ env.PACKAGE_VERSION }}`
             
             ### Installation
             ```bash
-            npm install adview@${{ env.PACKAGE_VERSION }}
+            npm install @adview/core@${{ env.PACKAGE_VERSION }}
             npm install @adview/react@${{ env.PACKAGE_VERSION }}
             ```
             
@@ -112,7 +112,7 @@ jobs:
         run: |
           echo "🎉 Successfully published packages for tag ${{ github.ref_name }}"
           echo "📋 Published packages:"
-          echo "  - adview@${{ env.PACKAGE_VERSION }}"
+          echo "  - @adview/core@${{ env.PACKAGE_VERSION }}"
           echo "  - @adview/react@${{ env.PACKAGE_VERSION }}"
           echo "🔗 Packages are now available on npm registry"
       

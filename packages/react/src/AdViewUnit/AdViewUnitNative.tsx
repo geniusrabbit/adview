@@ -1,8 +1,8 @@
-import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
-import getAssertByName from '../../../../utils/getAssertByName';
-import prepareURL from '../../../../utils/getPrepareURL';
-import srcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
 import React from 'react';
+import getAssetByName from '../../../../utils/getAssetByName';
+import getPrepareURL from '../../../../utils/getPrepareURL';
+import getSrcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
+import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
 
 type AdViewUnitNativeProps = AdViewDataClient & {
   classNames?: AdViewStyleTokensNative;
@@ -14,7 +14,7 @@ function AdViewUnitNative({
   url,
   classNames,
 }: AdViewUnitNativeProps) {
-  const asset = getAssertByName('main', assets);
+  const asset = getAssetByName('main', assets);
 
   if (!url) {
     return null;
@@ -25,7 +25,7 @@ function AdViewUnitNative({
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href={prepareURL(url)}
+        href={getPrepareURL(url)}
         className={classNames?.imageLink}
       >
         {asset && (
@@ -33,7 +33,7 @@ function AdViewUnitNative({
             alt={fields?.title}
             title={fields?.title}
             src={asset.path}
-            srcSet={asset.thumbs ? srcSetCSSThumbs(asset.thumbs) : undefined}
+            srcSet={asset.thumbs ? getSrcSetCSSThumbs(asset.thumbs) : undefined}
             className={classNames?.image}
             style={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
@@ -44,7 +44,7 @@ function AdViewUnitNative({
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href={prepareURL(url)}
+            href={getPrepareURL(url)}
             data-class="titleLink"
             className={classNames?.titleLink}
           >
@@ -55,7 +55,7 @@ function AdViewUnitNative({
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href={prepareURL(url)}
+            href={getPrepareURL(url)}
             data-class="descriptionLink"
             className={classNames?.descriptionLink}
           >
@@ -66,7 +66,7 @@ function AdViewUnitNative({
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href={prepareURL(url)}
+            href={getPrepareURL(url)}
             data-class="brandNameLink"
             className={classNames?.brandNameLink}
           >
@@ -77,7 +77,7 @@ function AdViewUnitNative({
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href={prepareURL(url)}
+            href={getPrepareURL(url)}
             data-class="phoneLink"
             className={classNames?.phoneLink}
           >
@@ -88,7 +88,7 @@ function AdViewUnitNative({
           <a
             target="_blank"
             rel="noopener noreferrer"
-            href={prepareURL(url)}
+            href={getPrepareURL(url)}
             data-class="urlLink"
             className={classNames?.urlLink}
           >

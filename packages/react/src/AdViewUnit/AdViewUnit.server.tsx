@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
 import adViewFetcher from '../../../../utils/adViewFetcher';
-import { AdViewUnitPropsBase, AdViewUnitServerChildren } from '../types';
+import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
 import getResolveConfig from '../../../../utils/getResolveConfig';
+import { AdViewUnitPropsBase, AdViewUnitServerChildren } from '../types';
 import AdViewUnitTracking from './/AdViewUnitTracking';
 import AdViewUnitWrapperServer from './AdViewUnitWrapper.server';
 

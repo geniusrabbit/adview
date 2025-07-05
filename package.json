@@ -1,7 +1,7 @@
 {
-  "name": "adview",
+  "name": "@adview/core",
   "version": "1.0.0",
-  "description": "Widgets and components from AdView Team",
+  "description": "Core utilities and types for AdView ad management library",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs", 
   "types": "./dist/index.d.ts",

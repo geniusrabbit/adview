@@ -6,7 +6,7 @@ This guide explains how to publish packages from the AdView monorepo to npm.
 
 The AdView monorepo contains multiple packages:
 
-- **Core package**: `adview` - Shared utilities and types
+- **Core package**: `@adview/core` - Shared utilities, types, and common functionality
 - **Framework packages**: `@adview/react` - Framework-specific implementations
 
 All packages are configured for publication to npm with proper build pipelines and version management.
@@ -111,9 +111,10 @@ npm run publish
 
 ## Package Details
 
-### Core Package: `adview`
+### Core Package: `@adview/core`
 
-- **Package Name**: `adview`
+- **Package Name**: `@adview/core`
+- **Scope**: `@adview`
 - **Registry**: `https://registry.npmjs.org/`
 - **Public Access**: ✅
 - **Build Target**: ESM + CommonJS

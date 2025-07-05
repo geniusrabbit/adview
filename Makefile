@@ -47,7 +47,7 @@ publish-check: build ## Check if packages are ready for publishing
 .PHONY: version-check
 version-check: ## Show version of all packages
 	@echo "Package versions:"
-	@echo "Root package: $$(jq -r '.version' package.json)"
+	@echo "@adview/core: $$(jq -r '.version' package.json)"
 	@for pkg in packages/*; do \
 		if [ -f "$$pkg/package.json" ]; then \
 			echo "$$(basename $$pkg): $$(jq -r '.version' $$pkg/package.json)"; \

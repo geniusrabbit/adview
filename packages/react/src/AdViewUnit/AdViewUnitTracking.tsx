@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import executeTracking from '../../../../utils/executeImpressionsTracking';
+import executeImpressionsTracking from '../../../../utils/executeImpressionsTracking';
 
 type AdViewUnitTrackingProps = {
   impressions?: string[];
@@ -19,14 +19,14 @@ function AdViewUnitTracking({
   const isServer = typeof window === 'undefined';
   const wrapperRef = useRef<HTMLDivElement>(null);
   const executeImpressionsTrackingHandler = useCallback(
-    () => executeTracking(impressions),
+    () => executeImpressionsTracking(impressions),
     [impressions],
   );
   const trackingObserverInstanceHandler = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          executeTracking(views);
+          executeImpressionsTracking(views);
           trackingObserverInstance?.unobserve(wrapperRef.current!);
         }
       });
@@ -39,7 +39,7 @@ function AdViewUnitTracking({
       : null;
   }, [isServer, trackingObserverInstanceHandler]);
   const clickTrackerHandler = useCallback(() => {
-    executeTracking(clicks);
+    executeImpressionsTracking(clicks);
 
     wrapperRef.current?.removeEventListener('click', clickTrackerHandler);
   }, [clicks]);

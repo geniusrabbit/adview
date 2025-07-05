@@ -1,7 +1,7 @@
 import React from 'react';
-import getAssetByName from '../../../../utils/getAssertByName';
-import prepareURL from '../../../../utils/getPrepareURL';
-import srcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
+import getAssetByName from '../../../../utils/getAssetByName';
+import getPrepareURL from '../../../../utils/getPrepareURL';
+import getSrcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
 import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
 
 type AdViewUnitBannerProps = AdViewDataClient & {
@@ -16,7 +16,7 @@ function AdViewUnitBanner({ assets, url }: AdViewUnitBannerProps) {
       <a
         target="_blank"
         rel="noopener noreferrer"
-        href={prepareURL(url)}
+        href={getPrepareURL(url)}
         className="banner"
         style={{ fontSize: 0 }}
       >
@@ -24,7 +24,7 @@ function AdViewUnitBanner({ assets, url }: AdViewUnitBannerProps) {
           <img
             alt="main"
             src={asset.path}
-            srcSet={asset.thumbs ? srcSetCSSThumbs(asset.thumbs) : ''}
+            srcSet={asset.thumbs ? getSrcSetCSSThumbs(asset.thumbs) : ''}
           />
         )}
       </a>

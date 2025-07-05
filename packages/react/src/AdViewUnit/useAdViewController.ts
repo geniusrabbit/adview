@@ -1,12 +1,12 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { AdViewProviderContext } from './AdViewProvider';
-import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
-import { AdLoadState, AdViewConfig } from '../types';
-import adViewFetcher from '../../../../utils/adViewFetcher';
-import getResolveConfig from '../../../../utils/getResolveConfig';
 import { AdViewData } from '../../../../typings';
+import adViewFetcher from '../../../../utils/adViewFetcher';
+import { getAdRequestUrl } from '../../../../utils/getCollectPageData';
+import getResolveConfig from '../../../../utils/getResolveConfig';
+import { AdLoadState, AdViewConfig } from '../types';
+import { AdViewProviderContext } from './AdViewProvider';
 
 type UseAdViewControllerProps = [AdViewData | null, Error | null, AdLoadState];
 

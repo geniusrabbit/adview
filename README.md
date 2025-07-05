@@ -21,7 +21,8 @@ AdView is a modern, type-safe React library for displaying and managing advertis
 
 This monorepo contains the following packages:
 
-- `@adview/react`: The main package for the AdView React library.
+- `@adview/core`: Core utilities, types, and shared functionality
+- `@adview/react`: React components and hooks for AdView
 
 ## Table of Contents
 
@@ -200,7 +201,7 @@ The library automatically collects browser data for ad targeting:
 You can extend data collection by adding custom scrapers:
 
 ```typescript
-import { pageScrapers } from '@adview/react/utils';
+import { pageScrapers } from '@adview/core/utils';
 
 // Add custom scraper
 pageScrapers.push(() => ({
@@ -289,16 +290,17 @@ npm run release   # Publish packages
 ```text
 adview/
 ├── packages/
-│   └── react/              # Main React package
-│       ├── src/
-│       │   ├── AdViewUnit/ # Core components
-│       │   ├── types.ts    # TypeScript definitions
-│       │   ├── index.ts    # Client exports
-│       │   └── server.ts   # Server exports
-│       └── package.json
-├── utils/                  # Shared utilities
-├── typings/               # Global type definitions
-└── package.json          # Monorepo configuration
+│   ├── react/              # React components and hooks
+│   │   ├── src/
+│   │   │   ├── AdViewUnit/ # Core components
+│   │   │   ├── types.ts    # TypeScript definitions
+│   │   │   ├── index.ts    # Client exports
+│   │   │   └── server.ts   # Server exports
+│   │   └── package.json
+│   └── (future packages: vue, angular, etc.)
+├── utils/                  # Shared utilities (@adview/core)
+├── typings/               # Global type definitions (@adview/core)
+└── package.json          # Core package (@adview/core)
 ```
 
 ## Contributing
