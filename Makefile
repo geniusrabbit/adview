@@ -8,9 +8,9 @@ deps: ## Install dependencies
 	@echo "Installing dependencies..."
 	npm install
 
-.PHONY: build-react
-build-react: ## Build the React package
-	@echo "Building React package..."
+.PHONY: build
+build: ## Build packages
+	@echo "Building packages..."
 	npm run build
 
 .PHONY: help

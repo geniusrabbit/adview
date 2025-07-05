@@ -1,15 +1,15 @@
-import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
-import prepareURL from '../../../../utils/getPrepareURL';
-import getAssertByName from '../../../../utils/getAssertByName';
-import srcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
 import React from 'react';
+import getAssetByName from '../../../../utils/getAssertByName';
+import prepareURL from '../../../../utils/getPrepareURL';
+import srcSetCSSThumbs from '../../../../utils/getSrcSetCSSThumbs';
+import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
 
 type AdViewUnitBannerProps = AdViewDataClient & {
   classNames?: AdViewStyleTokensNative;
 };
 
 function AdViewUnitBanner({ assets, url }: AdViewUnitBannerProps) {
-  const asset = getAssertByName('main', assets);
+  const asset = getAssetByName('main', assets);
 
   return (
     <center>
