@@ -24,7 +24,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "keywords": [
     "adview",
@@ -40,5 +41,8 @@
     "react": "^19.1.0"
   },
   "author": "AdView Team",
-  "license": "MIT"
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
 }

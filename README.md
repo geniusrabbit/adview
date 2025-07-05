@@ -327,3 +327,125 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📧 **Email**: [support@geniusrabbit.com](mailto:support@geniusrabbit.com)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/geniusrabbit/adview/issues)
 - 📖 **Documentation**: [GitHub Wiki](https://github.com/geniusrabbit/adview/wiki)
+
+## Publishing to npm
+
+For detailed instructions on publishing packages to npm, see [PUBLISHING.md](./PUBLISHING.md).
+
+**Quick commands:**
+
+```bash
+# Check packages are ready for publishing
+make publish-check
+
+# Check current versions
+make version-check
+
+# Login to npm (first time only)
+npm login
+
+# Publish all packages
+npm run publish
+```
+
+## Creating New Framework Packages
+
+To add support for new frameworks (Vue, Angular, etc.):
+
+```bash
+# Create new package structure
+make create-package name=vue framework=Vue language=typescript
+
+# Navigate and implement
+cd packages/vue
+# ... implement Vue components ...
+
+# Build and test
+npm run build
+npm publish --dry-run
+```
+
+## Publishing & CI/CD
+
+### Quick Publishing
+
+The monorepo supports automated publishing with version management:
+
+```bash
+# Method 1: Quick publish with changeset
+npx changeset add
+npx changeset version
+npm run publish
+
+# Method 2: Manual version bump and publish
+npm version patch  # or minor, major
+npm publish
+```
+
+### Automated Publishing with Tags
+
+The repository includes GitHub Actions for automated publishing:
+
+1. **Push a version tag** to trigger publishing:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+
+2. **GitHub Actions** automatically:
+   - Builds all packages
+   - Runs tests and linting
+   - Publishes to npm registry
+   - Creates GitHub release
+
+### CI/CD Workflows
+
+Three GitHub Actions workflows are configured:
+
+- **`ci.yml`**: Runs tests, lint, build on PRs and pushes
+- **`publish.yml`**: Publishes packages when version tags are pushed
+- **`release.yml`**: Manages changeset-based releases on main branch
+
+See [PUBLISHING.md](./PUBLISHING.md) for detailed publishing instructions.
+
+## Troubleshooting
+
+### Permission Errors
+
+```bash
+npm ERR! code E403
+npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/@adview%2freact
+```
+
+**Solution**: Ensure you have publishing permissions for the `@adview` scope.
+
+### Authentication Errors
+
+```bash
+npm ERR! code E401
+npm ERR! 401 Unauthorized
+```
+
+**Solution**: Run `npm login` again.
+
+### Package Already Exists
+
+```bash
+npm ERR! code E409
+npm ERR! Cannot publish over existing version
+```
+
+**Solution**: Increment version number in `package.json`.
+
+### Automated CI/CD Publishing
+
+For automated publishing in CI/CD pipelines:
+
+```bash
+# Use npm token for authentication
+echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+
+# Build and publish
+npm run build
+npm run publish
+```

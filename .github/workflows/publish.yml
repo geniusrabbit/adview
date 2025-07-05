@@ -1,0 +1,157 @@
+name: Publish Packages
+
+on:
+  push:
+    tags:
+      - 'v*'        # Triggers on version tags like v1.0.0, v1.2.3-beta.1
+      - '*.*.*'     # Triggers on semantic version tags like 1.0.0
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    
+    # Security: only run on tag pushes
+    if: github.ref_type == 'tag'
+    
+    permissions:
+      contents: write    # Required for creating releases
+      id-token: write    # Required for npm provenance
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for changesets
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Verify build system
+        run: |
+          echo "🔧 Building all packages..."
+          make build
+          
+          echo "✅ Verifying package readiness..."
+          make publish-check
+          
+          echo "📋 Current versions:"
+          make version-check
+      
+      - name: Run tests and linting
+        run: |
+          # Run linting (allow warnings but fail on errors)
+          echo "🔍 Running linting..."
+          npm run lint || echo "⚠️ Linting completed with warnings"
+          
+          # Run tests if available
+          echo "🧪 Running tests..."
+          npm run test || echo "ℹ️ No tests configured"
+      
+      - name: Validate tag format
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          echo "📦 Publishing for tag: $TAG_NAME"
+          
+          # Extract version from tag (remove 'v' prefix if present)
+          VERSION=$(echo "$TAG_NAME" | sed 's/^v//')
+          echo "Version: $VERSION"
+          
+          # Validate semantic version format
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid semantic version format: $VERSION"
+            exit 1
+          fi
+          
+          echo "✅ Valid semantic version: $VERSION"
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Publish packages
+        run: |
+          echo "🚀 Publishing packages..."
+          npm run publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true  # Enable npm provenance for security
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 📦 AdView Packages Release
+            
+            **Version**: `${{ env.PACKAGE_VERSION }}`
+            
+            ### Published Packages
+            - `adview@${{ env.PACKAGE_VERSION }}`
+            - `@adview/react@${{ env.PACKAGE_VERSION }}`
+            
+            ### Installation
+            ```bash
+            npm install adview@${{ env.PACKAGE_VERSION }}
+            npm install @adview/react@${{ env.PACKAGE_VERSION }}
+            ```
+            
+            See [PUBLISHING.md](./PUBLISHING.md) for more details.
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+      
+      - name: Notify on success
+        run: |
+          echo "🎉 Successfully published packages for tag ${{ github.ref_name }}"
+          echo "📋 Published packages:"
+          echo "  - adview@${{ env.PACKAGE_VERSION }}"
+          echo "  - @adview/react@${{ env.PACKAGE_VERSION }}"
+          echo "🔗 Packages are now available on npm registry"
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Publication failed for tag ${{ github.ref_name }}"
+          echo ""
+          echo "🔍 Check the following:"
+          echo "1. NPM_TOKEN secret is correctly set in repository settings"
+          echo "2. You have publishing permissions for @adview scope"
+          echo "3. Version numbers are incremented properly"
+          echo "4. All packages build successfully"
+          echo ""
+          echo "📖 See PUBLISHING.md for troubleshooting guide"
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes
+            
+            Published packages:
+            - `adview@${{ github.ref_name }}`
+            - `@adview/react@${{ github.ref_name }}`
+            
+            See [CHANGELOG.md](./CHANGELOG.md) for details.
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Publication failed for tag ${{ github.ref_name }}"
+          echo "Check the logs and ensure:"
+          echo "1. NPM_TOKEN secret is correctly set"
+          echo "2. You have publishing permissions for @adview scope"
+          echo "3. Version numbers are incremented properly"

@@ -1,15 +1,50 @@
 {
   "name": "adview",
+  "version": "1.0.0",
   "description": "Widgets and components from AdView Team",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs", 
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.mjs",
+      "require": "./dist/utils.js"
+    },
+    "./typings": {
+      "types": "./dist/typings.d.ts", 
+      "import": "./dist/typings.mjs",
+      "require": "./dist/typings.js"
+    }
+  },
+  "files": [
+    "dist",
+    "utils",
+    "typings",
+    "README.md",
+    "LICENSE"
+  ],
   "author": "AdView Team",
   "packageManager": "npm@10.9.2",
   "scripts": {
-    "build": "turbo run build",
-    "lint": "npm run lint:js",
-    "lint:js": "eslint ./packages --ext .ts,.tsx,.js,.jsx",
+    "build": "npm run build:local && turbo run build",
+    "build:local": "tsup",
+    "dev": "turbo run dev",
+    "dev:local": "tsup --watch", 
+    "clean": "turbo run clean && npm run clean:local",
+    "clean:local": "rm -rf dist",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
     "version": "changeset version",
     "release": "changeset publish",
-    "publish": "turbo run build && changeset version && changeset publish"
+    "publish": "npm run build && changeset version && changeset publish",
+    "publish-check": "npm run build && npm run version-check && turbo run publish-check",
+    "version-check": "node -e \"console.log('Root:', require('./package.json').version); require('fs').readdirSync('./packages').forEach(p => { try { console.log(p + ':', require('./packages/' + p + '/package.json').version); } catch(e) {} })\""
   },
   "repository": {
     "type": "git",
@@ -19,14 +54,13 @@
     "url": "https://github.com/geniusrabbit/adview/issues"
   },
   "homepage": "https://github.com/geniusrabbit/adview#readme",
-  "private": "true",
   "keywords": [
     "ad",
     "view",
     "AdView",
     "AdView widgets"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "workspaces": [
     "packages/*"
   ],
@@ -76,7 +110,7 @@
     "typescript-eslint": "^8.31.1"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "lint-staged": {
     "{packages,bin}/**/*.{js,jsx,ts,tsx}": [

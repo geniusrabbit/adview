@@ -4,17 +4,35 @@
     "build": {
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "passThroughEnv": ["NODE_ENV"]
+    },
+    "build:local": {
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"],
+      "passThroughEnv": ["NODE_ENV"]
     },
     "lint": {
       "dependsOn": ["^lint"]
+    },
+    "test": {
+      "dependsOn": ["^test"],
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.js", "vitest.config.ts"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
+    "dev:local": {
+      "cache": false,
+      "persistent": true
+    },
     "clean": {
       "cache": false
+    },
+    "clean:local": {
+      "cache": false
     }
-  }
+  },
+  "globalDependencies": ["package.json", "tsconfig.json", "turbo.json"]
 }
