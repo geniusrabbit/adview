@@ -1,11 +1,11 @@
-import { defineConfig, Options } from 'tsup';
 import { preserveDirectivesPlugin } from 'esbuild-plugin-preserve-directives';
+import { defineConfig, Options } from 'tsup';
 
 const cfg: Options = {
   clean: true,
   dts: true,
   format: ['cjs', 'esm'],
-  splitting: true,
+  splitting: false,
   bundle: true,
   target: 'es2022',
   external: ['react'],
