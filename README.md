@@ -54,6 +54,7 @@ yarn add @adview/react
 AdView supports multiple import styles for different use cases:
 
 #### Package-level imports (recommended)
+
 ```typescript
 // React components
 import { AdViewUnit, AdViewProvider } from '@adview/react';
@@ -63,6 +64,7 @@ import { AdViewUnitServer } from '@adview/react/server';
 ```
 
 #### Direct utility imports
+
 ```typescript
 // Core utilities (tree-shakable)
 import { adViewFetcher, getResolveConfig } from '@adview/core/utils';
@@ -72,6 +74,7 @@ import { AdViewData, AdViewConfig } from '@adview/core/typings';
 ```
 
 Benefits:
+
 - **Tree-shaking**: Import only what you need
 - **Type safety**: Full TypeScript support
 - **Intellisense**: Better IDE autocomplete
@@ -417,6 +420,7 @@ npm publish
 The repository includes GitHub Actions for automated publishing:
 
 1. **Push a version tag** to trigger publishing:
+
    ```bash
    git tag v1.0.1
    git push origin v1.0.1

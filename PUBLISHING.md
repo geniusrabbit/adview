@@ -378,16 +378,13 @@ Configure these secrets in your GitHub repository settings:
 
 **Required:**
 
-
 - `NPM_TOKEN`: Your npm authentication token with publishing permissions
-
 
 **Optional (auto-provided by GitHub):**
 
 - `GITHUB_TOKEN`: Automatically provided for GitHub API access
 
 #### 2. npm Token Setup
-
 
 1. **Create npm token:**
 
@@ -404,7 +401,6 @@ Configure these secrets in your GitHub repository settings:
    - Click "New repository secret"
    - Name: `NPM_TOKEN`
    - Value: Your npm token
-
 
 #### 3. Permissions Setup
 
@@ -548,11 +544,9 @@ Add notification steps:
 
 ### Troubleshooting CI/CD
 
-
 #### Common Issues
 
 1. **npm Token Invalid:**
-
 
    ```
    npm ERR! code E401
@@ -562,9 +556,7 @@ Add notification steps:
 
    **Solution:** Regenerate npm token and update GitHub secret
 
-
 2. **Permission Denied:**
-
 
    ```
    npm ERR! code E403
@@ -574,9 +566,7 @@ Add notification steps:
 
    **Solution:** Verify @adview scope permissions
 
-
 3. **Build Failures:**
-
 
    ```
    Error: Command failed: make build
@@ -591,16 +581,13 @@ Add notification steps:
    fatal: tag 'v1.0.0' already exists
    ```
 
-
    **Solution:** Use a different version number
 
 ## CI/CD Integration
 
 ### GitHub Actions Workflows
 
-
 The repository includes three automated workflows:
-
 
 #### 1. CI Workflow (`.github/workflows/ci.yml`)
 
@@ -613,7 +600,6 @@ The repository includes three automated workflows:
 
 - Verifies package contents
 - Checks for changeset files on PRs
-
 
 #### 2. Publish Workflow (`.github/workflows/publish.yml`)
 
@@ -640,7 +626,6 @@ The repository includes three automated workflows:
 
 The easiest way to trigger automated publishing:
 
-
 ```bash
 # Create and push a version tag
 git tag v1.0.1
@@ -650,7 +635,6 @@ git push origin v1.0.1
 npm version patch  # creates v1.0.1 tag
 git push --follow-tags
 ```
-
 
 ### Setup Requirements
 
