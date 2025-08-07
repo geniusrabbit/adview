@@ -202,4 +202,6 @@ export type AdViewUnitDefault = (() => ReactNode) | ReactNode;
 export type AdViewConfig = {
   /** Ad server URL template with {<id>} placeholder */
   srcURL?: string;
+  /** Default ad data */
+  defaultAdData?: AdViewData[];
 };

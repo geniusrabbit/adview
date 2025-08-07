@@ -23,7 +23,9 @@ function useAdViewController(
     setAdLoadState('loading');
 
     try {
-      const response = await adViewFetcher(requestUrl);
+      console.log('Requesting ad data from:', adViewFetcher, 'with URL:', requestUrl);
+      const response = await adViewFetcher(requestUrl, baseConfig.defaultAdData);
+      console.log('AdViewController response:', response);
 
       if (response instanceof Error) {
         setAdLoadState('error');

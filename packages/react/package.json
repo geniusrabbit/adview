@@ -1,6 +1,6 @@
 {
   "name": "@adview/react",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "AdView React",
   "scripts": {
     "build": "tsup",
@@ -16,12 +16,12 @@
     ".": {
       "import": "./dist/index.cjs",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.cts"
+      "types": "./dist/index.d.ts"
     },
     "./server": {
       "import": "./dist/server.cjs",
       "module": "./dist/server.js",
-      "types": "./dist/server.d.cts"
+      "types": "./dist/server.d.ts"
     }
   },
   "files": [
@@ -42,7 +42,7 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@adview/core": "^1.0.4"
+    "@adview/core": "^1.0.5"
   },
   "author": "AdView Team",
   "license": "Apache-2.0",

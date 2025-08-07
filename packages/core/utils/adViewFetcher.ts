@@ -8,7 +8,7 @@ import { AdViewData } from '../typings';
  * @returns Promise resolving to ad data or rejecting with error
  * @throws Error when HTTP request fails or response is invalid
  */
-async function adViewFetcher(url: string): Promise<AdViewData | Error> {
+async function adViewFetcher(url: string, defaultData?: AdViewData[]): Promise<AdViewData | Error> {
   try {
     // Fetch ad data from the server
     const response = await fetch(url);
@@ -20,9 +20,24 @@ async function adViewFetcher(url: string): Promise<AdViewData | Error> {
 
     // Parse JSON response
     const responseJson = await response.json();
+    console.log('=======:', responseJson, responseJson.groups?.length, responseJson.groups[0]?.items?.length);
+    if ((!responseJson || typeof responseJson !== 'object' || !responseJson.groups?.length ||
+      (responseJson.groups?.length === 1 && !responseJson.groups[0]?.items?.length)
+    ) && !!defaultData && defaultData?.length > 0) {
+      let adItem = defaultData[Math.floor(Math.random() * defaultData.length)];
+      if (adItem?.groups && adItem?.groups.length > 0) {
+        return adItem;
+      }
+    }
 
     return responseJson;
   } catch (error) {
+    if (!!defaultData && defaultData?.length > 0) {
+      let adItem = defaultData[Math.floor(Math.random() * defaultData.length)];
+      if (adItem?.groups && adItem?.groups.length > 0) {
+        return adItem;
+      }
+    }
     // Re-throw to allow caller to handle the error
     throw error;
   }
