@@ -1,23 +1,22 @@
-import AdViewUnitTypeSwitch from './AdViewUnit/AdViewUnitTypeSwitch';
+import AdViewUnitServer from './AdViewUnit/AdViewUnit.server';
 import AdViewUnitBanner from './AdViewUnit/AdViewUnitBanner';
 import AdViewUnitNative from './AdViewUnit/AdViewUnitNative';
 import AdViewUnitProxy from './AdViewUnit/AdViewUnitProxy';
-import AdViewUnitServer from './AdViewUnit/AdViewUnit.server';
+import AdViewUnitTypeSwitch from './AdViewUnit/AdViewUnitTypeSwitch';
 
 const AdView = {
-  AdViewUnitServer,
-  AdViewUnitTypeSwitch,
-  AdViewUnitBanner,
-  AdViewUnitNative,
-  AdViewUnitProxy,
+  UnitServer: AdViewUnitServer,
+  UnitTypeSwitch: AdViewUnitTypeSwitch,
+  UnitBanner: AdViewUnitBanner,
+  UnitNative: AdViewUnitNative,
+  UnitProxy: AdViewUnitProxy,
 };
 
 export {
-  AdViewUnitServer,
-  AdViewUnitTypeSwitch,
   AdViewUnitBanner,
   AdViewUnitNative,
-  AdViewUnitProxy,
+  AdViewUnitProxy, AdViewUnitServer,
+  AdViewUnitTypeSwitch
 };
 
 export default AdView;
