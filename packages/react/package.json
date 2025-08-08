@@ -1,6 +1,6 @@
 {
   "name": "@adview/react",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "AdView React",
   "scripts": {
     "build": "tsup",
@@ -42,7 +42,7 @@
     "react": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@adview/core": "^1.0.5"
+    "@adview/core": "^1.0.6"
   },
   "author": "AdView Team",
   "license": "Apache-2.0",

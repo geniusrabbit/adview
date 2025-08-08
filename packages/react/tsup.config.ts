@@ -7,6 +7,8 @@ const cfg: Options = {
   format: ['cjs', 'esm'],
   splitting: false,
   bundle: true,
+  minify: false,
+  sourcemap: true,
   target: 'es2022',
   external: ['react'],
 };

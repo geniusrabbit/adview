@@ -11,20 +11,12 @@ export {
   AdViewUnitTypeSwitch
 };
 
-type AdViewType = {
-  Banner: typeof AdViewUnitBanner;
-  Native: typeof AdViewUnitNative;
-  Proxy: typeof AdViewUnitProxy;
-  Server: typeof AdViewUnitServer;
-  TypeSwitch: typeof AdViewUnitTypeSwitch;
-};  
-
-let AdView: AdViewType = {
-  Banner: AdViewUnitBanner,
-  Native: AdViewUnitNative,
-  Proxy: AdViewUnitProxy,
-  Server: AdViewUnitServer,
-  TypeSwitch: AdViewUnitTypeSwitch,
+class AdView {
+  static Banner = AdViewUnitBanner;
+  static Native = AdViewUnitNative;
+  static Proxy = AdViewUnitProxy;
+  static Server = AdViewUnitServer;
+  static TypeSwitch = AdViewUnitTypeSwitch;
 };
 
 export default AdView;

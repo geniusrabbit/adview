@@ -20,7 +20,6 @@ async function adViewFetcher(url: string, defaultData?: AdViewData[]): Promise<A
 
     // Parse JSON response
     const responseJson = await response.json();
-    console.log('=======:', responseJson, responseJson.groups?.length, responseJson.groups[0]?.items?.length);
     if ((!responseJson || typeof responseJson !== 'object' || !responseJson.groups?.length ||
       (responseJson.groups?.length === 1 && !responseJson.groups[0]?.items?.length)
     ) && !!defaultData && defaultData?.length > 0) {
