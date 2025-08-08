@@ -247,7 +247,7 @@ export default function HomePage() {
                 <div className="test-card">
                   <h3>Banner Ad (728x90)</h3>
                   <div className='ad-container'>
-                    <AdView.UnitClient unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6f" format="banner">
+                    <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6f" format="banner">
                       {({ data, state, error }) => (
                         <div
                           className="ad-cl-banner"
@@ -321,14 +321,14 @@ export default function HomePage() {
                           )}
                         </div>
                       )}
-                    </AdView.UnitClient>
+                    </AdView.Unit>
                   </div>
                 </div>
                 
                 <div className="test-card">
                   <h3>Square Ad (250x250)</h3>
                   <div className='ad-container'>
-                    <AdView.UnitClient unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
+                    <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
                       {({ data, state, error }) => (
                         <div
                           className="ad-cl-square"
@@ -392,7 +392,7 @@ export default function HomePage() {
                           )}
                         </div>
                       )}
-                    </AdView.UnitClient>
+                    </AdView.Unit>
                   </div>
                 </div>
               </div>
