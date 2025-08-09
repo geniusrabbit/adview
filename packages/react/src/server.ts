@@ -11,12 +11,15 @@ export {
   AdViewUnitTypeSwitch
 };
 
-class AdView {
-  static Banner = AdViewUnitBanner;
-  static Native = AdViewUnitNative;
-  static Proxy = AdViewUnitProxy;
-  static Server = AdViewUnitServer;
-  static TypeSwitch = AdViewUnitTypeSwitch;
-};
+const AdView = {};
 
-export default AdView;
+const AdViewExport = Object.assign(AdView, {
+  Provider: AdViewUnitServer,
+  Unit: AdViewUnitServer,
+  Banner: AdViewUnitBanner,
+  Native: AdViewUnitNative,
+  Proxy: AdViewUnitProxy,
+  TypeSwitch: AdViewUnitTypeSwitch
+});
+
+export default AdViewExport;
