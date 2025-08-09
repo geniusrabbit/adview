@@ -6,25 +6,11 @@ import AdViewUnitProxy from './AdViewUnit/AdViewUnitProxy';
 import AdViewUnitTypeSwitch from './AdViewUnit/AdViewUnitTypeSwitch';
 
 export {
-  AdViewProvider, AdViewUnitBanner,
-  AdViewUnitClient, AdViewUnitNative,
-  AdViewUnitProxy, AdViewUnitTypeSwitch,
   AdViewUnitBanner as Banner,
-  AdViewUnitClient as Client,
   AdViewUnitNative as Native,
+  AdViewProvider as Provider,
   AdViewUnitProxy as Proxy,
-  AdViewUnitTypeSwitch as TypeSwitch
+  AdViewUnitTypeSwitch as TypeSwitch,
+  AdViewUnitClient as Unit
 };
 
-const AdView = {};
-
-const AdViewExport = Object.assign(AdView, {
-  Provider: AdViewProvider,
-  Unit: AdViewUnitClient,
-  Banner: AdViewUnitBanner,
-  Native: AdViewUnitNative,
-  Proxy: AdViewUnitProxy,
-  TypeSwitch: AdViewUnitTypeSwitch
-});
-
-export default AdViewExport;

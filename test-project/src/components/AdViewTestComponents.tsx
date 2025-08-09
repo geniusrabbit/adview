@@ -1,10 +1,4 @@
-import {
-  AdViewProvider,
-  AdViewUnitBanner,
-  AdViewUnitClient,
-  AdViewUnitNative,
-  AdViewUnitProxy
-} from '@adview/react';
+import * as AdView from '@adview/react';
 import React from 'react';
 
 interface TestComponentProps {
@@ -73,20 +67,20 @@ export default function AdViewTestComponents() {
       
       <TestComponent title="AdViewProvider Test">
         <p>Testing the AdViewProvider wrapper component:</p>
-        <AdViewProvider 
+        <AdView.Provider 
           srcURL="https://api.example.com/ads/{<id>}"
         >
           <div style={{ padding: '1rem', backgroundColor: '#e7f3ff', borderRadius: '4px' }}>
             <p>✅ AdViewProvider is working! This content is wrapped by the provider.</p>
             <p><small>Provider configured with: srcURL=&quot;https://api.example.com/ads/&#123;id&#125;&quot;</small></p>
           </div>
-        </AdViewProvider>
+        </AdView.Provider>
       </TestComponent>
 
       <TestComponent title="AdViewUnitBanner Component Rendering">
         <p>Testing banner ad unit component with mock data:</p>
         <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
-          <AdViewUnitBanner
+          <AdView.Banner
             {...mockBannerData}
             classNames={{
               container: 'test-banner-container'
@@ -99,7 +93,7 @@ export default function AdViewTestComponents() {
       <TestComponent title="AdViewUnitNative Component Rendering">
         <p>Testing native ad unit component with mock data:</p>
         <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
-          <AdViewUnitNative
+          <AdView.Native
             {...mockNativeData}
             classNames={{
               container: 'test-native-container',
@@ -120,7 +114,7 @@ export default function AdViewTestComponents() {
       <TestComponent title="AdViewUnitClient with Children Function">
         <p>Testing client-side ad unit component with render prop:</p>
         <div style={{ border: '2px dashed #ccc', padding: '1rem' }}>
-          <AdViewUnitClient
+          <AdView.Unit
             unitId="test-client-unit"
             format="banner"
             srcURL="https://api.example.com/ads/{<id>}"
@@ -155,7 +149,7 @@ export default function AdViewTestComponents() {
                 {error && <p style={{ color: 'red' }}>💥 Error: {error.message}</p>}
               </div>
             )}
-          </AdViewUnitClient>
+          </AdView.Unit>
         </div>
       </TestComponent>
 
@@ -168,11 +162,11 @@ export default function AdViewTestComponents() {
         }}>
           <p><strong>✅ Successfully imported components:</strong></p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
-            <div>• AdViewProvider: <code>{typeof AdViewProvider}</code></div>
-            <div>• AdViewUnitBanner: <code>{typeof AdViewUnitBanner}</code></div>
-            <div>• AdViewUnitNative: <code>{typeof AdViewUnitNative}</code></div>
-            <div>• AdViewUnitClient: <code>{typeof AdViewUnitClient}</code></div>
-            <div>• AdViewUnitProxy: <code>{typeof AdViewUnitProxy}</code></div>
+            <div>• AdView.Provider: <code>{typeof AdView.Provider}</code></div>
+            <div>• AdView.Banner: <code>{typeof AdView.Banner}</code></div>
+            <div>• AdView.Native: <code>{typeof AdView.Native}</code></div>
+            <div>• AdView.Unit: <code>{typeof AdView.Unit}</code></div>
+            <div>• AdView.Proxy: <code>{typeof AdView.Proxy}</code></div>
           </div>
           <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#d4edda', borderRadius: '4px' }}>
             <strong>🎉 All components imported successfully from @adview/react!</strong>
