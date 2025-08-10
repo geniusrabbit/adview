@@ -1,11 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 
 /**
- * Supported advertisement formats in the AdView system.
- */
-export type AdViewAdFormat = 'banner' | 'native' | 'proxy';
-
-/**
  * CSS class name tokens for styling native ad components.
  * Provides granular control over individual elements within native ads.
  */
@@ -44,7 +39,7 @@ export type AdViewStyleTokensBanner = {
  * Provides type-safe styling options for different ad types.
  */
 export type AdViewStyleTokens = {
-  [K in AdViewAdFormat]?: K extends 'native'
+  [K in string]?: K extends 'native'
     ? AdViewStyleTokensNative
     : K extends 'banner'
       ? AdViewStyleTokensBanner
@@ -108,7 +103,7 @@ export interface AdViewGroupItem {
   /** Unique identifier for this ad item */
   id: string;
   /** Format type of the advertisement */
-  type: AdViewAdFormat;
+  type: string;
   /** Click-through URL for the advertisement */
   url?: string;
   /** Custom fields containing ad-specific data (title, description, etc.) */

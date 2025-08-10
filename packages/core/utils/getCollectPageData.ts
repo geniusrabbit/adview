@@ -105,7 +105,7 @@ function getDefaultSearchParams(format?: string) {
 export function getAdRequestUrl(
   config: AdViewConfig,
   unitId: string,
-  format?: string,
+  format?: string | string[],
 ) {
   const { srcURL } = config;
   
@@ -116,8 +116,9 @@ export function getAdRequestUrl(
   const scrapedData = getScrapedData(pageScrapers);
   
   // Generate default parameters
-  const defaultSearchParams = getDefaultSearchParams(format);
-  
+  const defaultSearchParams = getDefaultSearchParams(
+    typeof format === 'string' ? format : format?.join(',') || '');
+
   // Merge all parameters (scraped data overrides defaults)
   const searchParamsData = {
     ...defaultSearchParams,

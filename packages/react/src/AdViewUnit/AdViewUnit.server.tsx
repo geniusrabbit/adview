@@ -3,8 +3,8 @@ import React from 'react';
 import { AdViewGroupItem } from '@adview/core/typings';
 import { adViewFetcher, getAdRequestUrl, getResolveConfig } from '@adview/core/utils';
 import { AdViewUnitPropsBase, AdViewUnitServerChildren } from '../types';
+import { renderAnyTemplates } from './AdViewUnitTemplate';
 import AdViewUnitTracking from './AdViewUnitTracking';
-import AdViewUnitWrapperServer from './AdViewUnitWrapper.server';
 
 export type AdViewUnitServerProps = AdViewUnitPropsBase & {
   children?: AdViewUnitServerChildren;
@@ -14,7 +14,6 @@ async function AdViewUnitServer({
   unitId,
   format,
   children,
-  onDefault = () => null,
   ...config
 }: AdViewUnitServerProps) {
   const baseConfig = getResolveConfig(config);
@@ -31,9 +30,12 @@ async function AdViewUnitServer({
     return groupItems.map(({ tracker, ...data }: AdViewGroupItem) => {
       return (
         <AdViewUnitTracking key={data.id} {...tracker}>
-          <AdViewUnitWrapperServer data={data} onDefault={onDefault}>
-            {children}
-          </AdViewUnitWrapperServer>
+          {renderAnyTemplates(children, {data, type: data.type || 'default', error, state: {
+            isLoading: true,
+            isComplete: true,
+            isInitial: false,
+            isError: isLoadingError,
+          }})}
         </AdViewUnitTracking>
       );
     });
@@ -41,9 +43,12 @@ async function AdViewUnitServer({
 
   return (
     <AdViewUnitTracking {...customTracker}>
-      <AdViewUnitWrapperServer data={error} onDefault={onDefault}>
-        {children}
-      </AdViewUnitWrapperServer>
+      {renderAnyTemplates(children, {data: null, type: 'default', error, state: {
+        isLoading: true,
+        isComplete: true,
+        isInitial: false,
+        isError: isLoadingError,
+      }})}
     </AdViewUnitTracking>
   );
 }

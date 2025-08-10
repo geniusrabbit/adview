@@ -51,10 +51,10 @@ const mockNativeData = {
   assets: [
     {
       name: 'main',
-      path: 'https://img.freepik.com/premium-vector/blue-light-banner-template_1189-2753.jpg',
+      path: 'https://static.dc.com/2025-04/supermanday_hero_3x1_b.png?w=1200',
       type: 'image/png',
-      width: 400,
-      height: 300,
+      width: 1200,
+      height: 600,
       thumbs: []
     }
   ]
@@ -80,11 +80,10 @@ export default function AdViewTestComponents() {
       <TestComponent title="AdViewUnitBanner Component Rendering">
         <p>Testing banner ad unit component with mock data:</p>
         <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
-          <AdView.Banner
-            {...mockBannerData}
-            classNames={{
-              container: 'test-banner-container'
-            }}
+          <AdView.BannerTemplate
+            data={mockBannerData}
+            state={{ isComplete: true, isLoading: false, isError: false, isInitial: true }}
+            className="test-banner-container"
           />
         </div>
         <p><small>Banner component renders with mock asset data</small></p>
@@ -93,8 +92,9 @@ export default function AdViewTestComponents() {
       <TestComponent title="AdViewUnitNative Component Rendering">
         <p>Testing native ad unit component with mock data:</p>
         <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
-          <AdView.Native
-            {...mockNativeData}
+          <AdView.NativeTemplate
+            data={mockNativeData}
+            state={{ isComplete: true, isLoading: false, isError: false, isInitial: true }}
             classNames={{
               container: 'test-native-container',
               label: 'test-native-label',
@@ -118,17 +118,6 @@ export default function AdViewTestComponents() {
             unitId="test-client-unit"
             format="banner"
             srcURL="https://api.example.com/ads/{<id>}"
-            onDefault={() => (
-              <div style={{ 
-                padding: '2rem', 
-                textAlign: 'center', 
-                backgroundColor: '#fff3cd',
-                border: '1px solid #ffeaa7',
-                borderRadius: '4px'
-              }}>
-                🔄 Default fallback content for client component
-              </div>
-            )}
           >
             {({ data, state, error }) => (
               <div style={{ 
@@ -149,6 +138,11 @@ export default function AdViewTestComponents() {
                 {error && <p style={{ color: 'red' }}>💥 Error: {error.message}</p>}
               </div>
             )}
+            <AdView.DefaultTemplate>
+              <div style={{ padding: '2rem', textAlign: 'center' }}>
+                🔄 Default fallback content for client component
+              </div>
+            </AdView.DefaultTemplate>
           </AdView.Unit>
         </div>
       </TestComponent>
@@ -163,10 +157,10 @@ export default function AdViewTestComponents() {
           <p><strong>✅ Successfully imported components:</strong></p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
             <div>• AdView.Provider: <code>{typeof AdView.Provider}</code></div>
-            <div>• AdView.Banner: <code>{typeof AdView.Banner}</code></div>
-            <div>• AdView.Native: <code>{typeof AdView.Native}</code></div>
             <div>• AdView.Unit: <code>{typeof AdView.Unit}</code></div>
-            <div>• AdView.Proxy: <code>{typeof AdView.Proxy}</code></div>
+            <div>• AdView.BannerTemplate: <code>{typeof AdView.BannerTemplate}</code></div>
+            <div>• AdView.NativeTemplate: <code>{typeof AdView.NativeTemplate}</code></div>
+            <div>• AdView.ProxyTemplate: <code>{typeof AdView.ProxyTemplate}</code></div>
           </div>
           <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#d4edda', borderRadius: '4px' }}>
             <strong>🎉 All components imported successfully from @adview/react!</strong>

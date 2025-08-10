@@ -16,6 +16,7 @@ AdView is a modern, type-safe React library for displaying and managing advertis
 - 🎨 **Customizable Styling**: Flexible styling system for different ad formats
 - 🚀 **Performance Optimized**: Lazy loading and efficient bundle splitting
 - 🔧 **Extensible**: Plugin-based scraper system for data collection
+- ⚡ **Next.js App Router**: Full compatibility with Next.js 13+ App Router
 
 ## Packages
 
@@ -33,6 +34,7 @@ This monorepo contains the following packages:
 - [Configuration](#configuration)
 - [Tracking](#tracking)
 - [Server-Side Rendering](#server-side-rendering)
+- [Next.js App Router](#nextjs-app-router)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -56,11 +58,14 @@ AdView supports multiple import styles for different use cases:
 #### Package-level imports (recommended)
 
 ```typescript
-// React components
-import { AdViewUnit, AdViewProvider } from '@adview/react';
+// React components - namespace import
+import * as AdView from '@adview/react';
 
-// Server components
-import { AdViewUnitServer } from '@adview/react/server';
+// React components - named imports
+import { Provider, Unit, Template, DefaultTemplate } from '@adview/react';
+
+// Server components (for Next.js App Router)
+import { Unit as ServerUnit } from '@adview/react/server';
 ```
 
 #### Direct utility imports
@@ -85,11 +90,11 @@ Benefits:
 ### Basic Usage
 
 ```tsx
-import { AdViewUnit } from '@adview/react';
+import * as AdView from '@adview/react';
 
 function MyComponent() {
   return (
-    <AdViewUnit
+    <AdView.Unit
       unitId="your-ad-unit-id"
       srcURL="https://your-ad-server.com/ads/{<id>}"
       format="banner"
@@ -101,14 +106,14 @@ function MyComponent() {
 ### With Provider (Recommended)
 
 ```tsx
-import { AdViewProvider, AdViewUnit } from '@adview/react';
+import * as AdView from '@adview/react';
 
 function App() {
   return (
-    <AdViewProvider srcURL="https://your-ad-server.com/ads/{<id>}">
-      <AdViewUnit unitId="header-banner" format="banner" />
-      <AdViewUnit unitId="sidebar-native" format="native" />
-    </AdViewProvider>
+    <AdView.Provider srcURL="https://your-ad-server.com/ads/{<id>}">
+      <AdView.Unit unitId="header-banner" format="banner" />
+      <AdView.Unit unitId="sidebar-native" format="native" />
+    </AdView.Provider>
   );
 }
 ```
@@ -116,11 +121,11 @@ function App() {
 ### Custom Rendering
 
 ```tsx
-import { AdViewUnit } from '@adview/react';
+import * as AdView from '@adview/react';
 
 function CustomAd() {
   return (
-    <AdViewUnit unitId="custom-ad" format="native">
+    <AdView.Unit unitId="custom-ad" format="native">
       {({ data, state, error, onDefault }) => {
         if (state.isLoading) return <div>Loading ad...</div>;
         if (state.isError) return <div>Failed to load ad</div>;
@@ -133,14 +138,14 @@ function CustomAd() {
           </div>
         );
       }}
-    </AdViewUnit>
+    </AdView.Unit>
   );
 }
 ```
 
 ## API Reference
 
-### AdViewUnit
+### AdView.Unit
 
 Main component for displaying advertisements.
 
@@ -167,7 +172,7 @@ type AdLoadState = {
 };
 ```
 
-### AdViewProvider
+### AdView.Provider
 
 Context provider for global configuration.
 
@@ -178,6 +183,31 @@ Context provider for global configuration.
 | `srcURL` | `string` | Default ad server URL template |
 | `children` | `ReactNode` | Child components |
 
+### AdView.Template
+
+Template component for custom ad rendering with specific ad types.
+
+#### Template Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `type` | `'banner' \| 'native' \| 'proxy'` | Ad type for template matching |
+| `children` | `function` | Render function receiving ad data and state |
+
+### AdView.DefaultTemplate
+
+Default fallback template when no ad data is available.
+
+#### Usage
+
+```tsx
+<AdView.Unit unitId="example">
+  <AdView.DefaultTemplate>
+    <code>My custom fallback content or advertisement script ...</code>
+  </AdView.DefaultTemplate>
+</AdView.Unit>
+```
+
 ## Ad Formats
 
 ### Banner Ads
@@ -185,7 +215,7 @@ Context provider for global configuration.
 Simple image-based advertisements:
 
 ```tsx
-<AdViewUnit unitId="banner-300x250" format="banner" />
+<AdView.Unit unitId="banner-300x250" format="banner" />
 ```
 
 ### Native Ads
@@ -193,7 +223,7 @@ Simple image-based advertisements:
 Content-style ads with structured data:
 
 ```tsx
-<AdViewUnit unitId="native-article" format="native" />
+<AdView.Unit unitId="native-article" format="native" />
 ```
 
 ### Proxy Ads
@@ -201,7 +231,7 @@ Content-style ads with structured data:
 Delegated rendering to external systems:
 
 ```tsx
-<AdViewUnit unitId="proxy-widget" format="proxy" />
+<AdView.Unit unitId="proxy-widget" format="proxy" />
 ```
 
 ## Configuration
@@ -269,18 +299,78 @@ import { AdViewUnitTracking } from '@adview/react';
 For SSR applications, use the server-specific components:
 
 ```tsx
-import { AdViewUnitServer } from '@adview/react/server';
+import { Unit as ServerUnit } from '@adview/react/server';
 
 // In your server component
 function ServerPage() {
   return (
-    <AdViewUnitServer
+    <ServerUnit
       unitId="ssr-banner"
       srcURL="https://ads.example.com/serve/{<id>}"
     />
   );
 }
 ```
+
+## Next.js App Router
+
+### Client Components
+
+For interactive ads with loading states and user interactions, mark your component as a client component:
+
+```tsx
+'use client';
+
+import * as AdView from '@adview/react';
+
+export default function ClientAdComponent() {
+  return (
+    <AdView.Provider srcURL="https://ads.example.com/serve/{<id>}">
+      <AdView.Unit unitId="interactive-ad" format="native">
+        {({ data, state, error }) => {
+          if (state.isLoading) return <div>Loading...</div>;
+          if (error) return <div>Error: {error.message}</div>;
+          if (!data) return null;
+          
+          return (
+            <div className="ad-content">
+              <h3>{data.fields?.title}</h3>
+              <p>{data.fields?.description}</p>
+            </div>
+          );
+        }}
+      </AdView.Unit>
+    </AdView.Provider>
+  );
+}
+```
+
+### Server Components
+
+For static ads that don't require client-side interactivity:
+
+```tsx
+import { Unit as ServerUnit } from '@adview/react/server';
+
+export default function ServerAdComponent() {
+  return (
+    <ServerUnit
+      unitId="static-banner"
+      srcURL="https://ads.example.com/serve/{<id>}"
+      format="banner"
+    />
+  );
+}
+```
+
+### Common Issues
+
+#### Error: "Functions are not valid as a child of Client Components"
+
+This occurs when using render functions in Server Components. Solution:
+
+1. Add `'use client'` directive to your component
+2. Or use server-specific components from `@adview/react/server`
 
 ## Development
 

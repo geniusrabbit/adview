@@ -1,16 +1,25 @@
 import AdViewProvider from './AdViewUnit/AdViewProvider';
 import AdViewUnitClient from './AdViewUnit/AdViewUnit.client';
-import AdViewUnitBanner from './AdViewUnit/AdViewUnitBanner';
-import AdViewUnitNative from './AdViewUnit/AdViewUnitNative';
-import AdViewUnitProxy from './AdViewUnit/AdViewUnitProxy';
-import AdViewUnitTypeSwitch from './AdViewUnit/AdViewUnitTypeSwitch';
+import AdViewUnitBannerTemplate from './AdViewUnit/AdViewUnitBannerTemplate';
+import AdViewUnitDefaultTemplate from './AdViewUnit/AdViewUnitDefaultTemplate';
+import AdViewUnitNativeTemplate from './AdViewUnit/AdViewUnitNativeTemplate';
+import AdViewUnitProxyTemplate from './AdViewUnit/AdViewUnitProxyTemplate';
+import AdViewUnitTemplate from './AdViewUnit/AdViewUnitTemplate';
 
 export {
-  AdViewUnitBanner as Banner,
-  AdViewUnitNative as Native,
+  AdViewProvider,
+  AdViewUnitBannerTemplate,
+  AdViewUnitClient,
+  AdViewUnitDefaultTemplate,
+  AdViewUnitNativeTemplate,
+  AdViewUnitProxyTemplate,
+  AdViewUnitTemplate,
+
+  AdViewUnitBannerTemplate as BannerTemplate,
+  AdViewUnitDefaultTemplate as DefaultTemplate,
+  AdViewUnitNativeTemplate as NativeTemplate,
   AdViewProvider as Provider,
-  AdViewUnitProxy as Proxy,
-  AdViewUnitTypeSwitch as TypeSwitch,
+  AdViewUnitProxyTemplate as ProxyTemplate,
+  AdViewUnitTemplate as Template,
   AdViewUnitClient as Unit
 };
-

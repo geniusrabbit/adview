@@ -1,5 +1,5 @@
-import { AdViewAdFormat, AdViewConfig, AdViewGroupItem } from '@adview/core/typings';
-import { ReactElement, ReactNode } from 'react';
+import { AdViewConfig, AdViewGroupItem } from '@adview/core/typings';
+import { JSX, ReactElement, ReactNode } from 'react';
 
 /**
  * CSS class name tokens for styling native ad components.
@@ -40,7 +40,7 @@ export type AdViewStyleTokensBanner = {
  * Provides type-safe styling options for different ad types.
  */
 export type AdViewStyleTokens = {
-  [K in AdViewAdFormat]?: K extends 'native'
+  [K in string]?: K extends 'native'
     ? AdViewStyleTokensNative
     : K extends 'banner'
       ? AdViewStyleTokensBanner
@@ -66,8 +66,32 @@ export type AdViewUnitClientChildrenProps = {
   state: AdLoadState;
   /** Error object if ad loading failed */
   error: Error | null;
-  /** Optional fallback content function */
-  onDefault?: AdViewUnitDefault;
+};
+
+/**
+ * AdViewOptionalDataProps is the type for the optional data props of the AdViewUnitTemplate component
+ */
+export type AdViewOptionalDataProps = {
+  /** Ad data from the server, or null if not loaded */
+  data?: AdViewDataClient | null;
+  /** Detailed loading state object with boolean flags */
+  state?: AdLoadState;
+  /** Error object if ad loading failed */
+  error?: Error | null;
+};
+
+/**
+ * AdViewUnitTemplateTypeProps is the type for the props of the AdViewUnitTemplate component
+ */
+export type AdViewUnitTemplateTypeProps = AdViewOptionalDataProps & {
+  type: string;
+};
+
+/**
+ * AdViewUnitTemplateProps is the type for the props of the AdViewUnitTemplate component
+ */
+export type AdViewUnitTemplateProps = AdViewUnitTemplateTypeProps & {
+  children?: (data: AdViewUnitClientChildrenProps) => (React.ReactNode | JSX.Element | null);
 };
 
 /**
@@ -75,8 +99,11 @@ export type AdViewUnitClientChildrenProps = {
  * Allows complete control over ad display and loading states.
  */
 export type AdViewUnitClientChildren =
-  | ((props: AdViewUnitClientChildrenProps) => ReactNode)
-  | ReactElement<AdViewUnitClientChildrenProps>;
+  | ((props: AdViewUnitClientChildrenProps) => ReactNode | JSX.Element)
+  // | ReactElement<AdViewUnitClientChildrenProps>
+  | ReactElement<AdViewUnitTemplateTypeProps>
+  | ReactElement<AdViewUnitTemplateTypeProps>[]
+  | any[];
 
 /**
  * Props passed to server-side custom render functions.
@@ -94,7 +121,7 @@ export type AdViewUnitServerChildrenProps = {
  * Used in SSR contexts where loading states are not applicable.
  */
 export type AdViewUnitServerChildren =
-  | ((props: AdViewUnitServerChildrenProps) => ReactNode)
+  | ((props: AdViewUnitServerChildrenProps) => ReactNode | JSX.Element)
   | ReactElement<AdViewUnitServerChildrenProps>;
 
 /**
@@ -111,9 +138,7 @@ export type AdViewUnitPropsBase = {
   /** Unique identifier for the ad unit */
   unitId: string;
   /** Optional ad format specification */
-  format?: AdViewAdFormat;
-  /** Optional fallback content when no ads available */
-  onDefault?: AdViewUnitDefault;
+  format?: string | string[];
 } & AdViewConfig;
 
 /**

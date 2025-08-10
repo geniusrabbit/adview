@@ -1,17 +1,17 @@
 import { getAssetByName, getPrepareURL, getSrcSetCSSThumbs } from '@adview/core/utils';
 import React from 'react';
-import { AdViewDataClient, AdViewStyleTokensNative } from '../types';
+import { AdViewStyleTokensNative, AdViewUnitTemplateTypeProps } from '../types';
 
-type AdViewUnitNativeProps = AdViewDataClient & {
+type AdViewUnitNativeTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> & {
+  type?: 'native';
   classNames?: AdViewStyleTokensNative;
 };
 
-function AdViewUnitNative({
-  assets,
-  fields,
-  url,
-  classNames,
-}: AdViewUnitNativeProps) {
+function AdViewUnitNativeTemplate({classNames, data, state}: AdViewUnitNativeTemplateProps) {
+  if (!data || !data.assets || !data.assets.length || !state?.isComplete) {
+    return null;
+  }
+  const { assets, url, fields } = data;
   const asset = getAssetByName('main', assets);
 
   if (!url) {
@@ -98,4 +98,4 @@ function AdViewUnitNative({
   );
 }
 
-export default AdViewUnitNative;
+export default AdViewUnitNativeTemplate;

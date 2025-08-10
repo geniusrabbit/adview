@@ -93,9 +93,9 @@ export default function AdViewTestStatus() {
     }
   }
 
-  return <>
+  return <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <h1 style={{ marginBottom: '2rem', color: '#333' }}>📦 Package Import Status</h1>
     <div className="test-section">
-      <h2>📦 Package Import Status</h2>
       {testResults.import ? (
         <div>
           <span className={getStatusClass(testResults.import.status)}>
@@ -148,34 +148,161 @@ export default function AdViewTestStatus() {
             <h3>Banner Ad (728x90)</h3>
             <div className='ad-container'>
               <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6f" format="banner">
-                {({ data, state, error }) => (
-                  <div
-                    className="ad-cl-banner"
-                    style={{
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    boxSizing: 'border-box',
-                    }}
-                  >
-                    {state.isLoading && <span>Loading...</span>}
-                    {error && <span className="error">Error: {error.message}</span>}
-                    {data && (
+                <AdView.Template type="banner">
+                  {({ data, state, error }) => (
                     <div
-                      className="ad-banner-inner"
+                      className="ad-cl-banner"
                       style={{
-                        width: '100%',
-                        maxWidth: `${data.fields?.width || 728}px`,
-                        height: `${data.fields?.height || 90}px`,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        boxSizing: 'border-box',
-                        position: 'relative',
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      boxSizing: 'border-box',
                       }}
                     >
+                      {state?.isLoading && <span>Loading...</span>}
+                      {error && <span className="error">Error: {error.message}</span>}
+                      {data && (
+                      <div
+                        className="ad-banner-inner"
+                        style={{
+                          width: '100%',
+                          maxWidth: `${data.fields?.width || 728}px`,
+                          height: `${data.fields?.height || 90}px`,
+                          overflow: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          boxSizing: 'border-box',
+                          position: 'relative',
+                        }}
+                      >
+                        <img
+                          src={data.fields?.imageUrl}
+                          alt={data.fields?.title}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            maxWidth: '100%',
+                            display: 'block',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: '#fff',
+                              fontWeight: 'bold',
+                              fontSize: '1.1rem',
+                              textAlign: 'center',
+                              textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.7)',
+                              lineHeight: 1.2,
+                              background: 'none',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '0.25rem',
+                              zIndex: 2,
+                            }}
+                          >
+                            {data.fields?.title}
+                          </span>
+                        </div>
+                      </div>
+                      )}
+                    </div>
+                  )}
+                </AdView.Template>
+              </AdView.Unit>
+            </div>
+          </div>
+          
+          <div className="test-card">
+            <h3>Square Ad (250x250) Default</h3>
+            <div className='ad-container'>
+              <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
+                <AdView.DefaultTemplate>
+                  <div
+                    className="ad-cl-square"
+                    style={{
+                      width: '100%',
+                      maxWidth: '250px',
+                      height: '250px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      boxSizing: 'border-box',
+                      position: 'relative',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: '#fff',
+                          fontWeight: 'bold',
+                          fontSize: '1.1rem',
+                          textAlign: 'center',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.7)',
+                          lineHeight: 1.2,
+                          background: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '0.25rem',
+                          zIndex: 2,
+                        }}
+                      >
+                        <h1>Default ad</h1>
+                      </span>
+                    </div>
+                  </div>
+                </AdView.DefaultTemplate>
+              </AdView.Unit>
+            </div>
+          </div>
+          
+          <div className="test-card">
+            <h3>Square Ad (250x250)</h3>
+            <div className='ad-container'>
+              <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
+                {({ data, state, error }) => (
+                  <div
+                    className="ad-cl-square"
+                    style={{
+                      width: '100%',
+                      maxWidth: '250px',
+                      height: '250px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      boxSizing: 'border-box',
+                      position: 'relative',
+                    }}
+                  >
+                    {state?.isLoading && <span>Loading...</span>}
+                    {error && <span className="error">Error: {error.message}</span>}
+                    {data && (
+                    <>
                       <img
                         src={data.fields?.imageUrl}
                         alt={data.fields?.title}
@@ -217,77 +344,6 @@ export default function AdViewTestStatus() {
                           {data.fields?.title}
                         </span>
                       </div>
-                    </div>
-                    )}
-                  </div>
-                )}
-              </AdView.Unit>
-            </div>
-          </div>
-          
-          <div className="test-card">
-            <h3>Square Ad (250x250)</h3>
-            <div className='ad-container'>
-              <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
-                {({ data, state, error }) => (
-                  <div
-                    className="ad-cl-square"
-                    style={{
-                    width: '100%',
-                    maxWidth: '250px',
-                    height: '250px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    boxSizing: 'border-box',
-                    position: 'relative',
-                    }}
-                  >
-                    {state.isLoading && <span>Loading...</span>}
-                    {error && <span className="error">Error: {error.message}</span>}
-                    {data && (
-                    <>
-                      <img
-                      src={data.fields?.imageUrl}
-                      alt={data.fields?.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        maxWidth: '100%',
-                        display: 'block',
-                        objectFit: 'cover',
-                      }}
-                      />
-                      <div
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'none',
-                      }}
-                      >
-                      <span
-                        style={{
-                        color: '#fff',
-                        fontWeight: 'bold',
-                        fontSize: '1.1rem',
-                        textAlign: 'center',
-                        textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.7)',
-                        lineHeight: 1.2,
-                        background: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '0.25rem',
-                        zIndex: 2,
-                        }}
-                      >
-                        {data.fields?.title}
-                      </span>
-                      </div>
                     </>
                     )}
                   </div>
@@ -308,5 +364,5 @@ export default function AdViewTestStatus() {
         <div><strong>Last Updated:</strong> {new Date().toLocaleString()}</div>
       </div>
     </div>
-  </>;
+  </div>;
 };
