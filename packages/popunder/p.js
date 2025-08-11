@@ -1,50 +1,9 @@
 (function (window) {
   'use strict';
 
-  var version = '0.1.9',
-    build_version = '201',
-    detectAdBlock = false,
-    detectPrivacyMode = false;
+  var detectAdBlock = false;
+  var detectPrivacyMode = false;
   var dataPopUnder = window.dataPopUnder;
-
-  /**
-   * Polyfill: indexOf
-   */
-  if (typeof Array.prototype.indexOf == 'undefined') {
-    Array.prototype.indexOf = function (obj, start) {
-      for (var i = start || 0, j = this.length; i < j; i++) {
-        if (this[i] === obj) {
-          return i;
-        }
-      }
-      return -1;
-    };
-  }
-
-  /**
-   * Polyfill: bind
-   */
-  if (!Function.prototype.bind) {
-    Function.prototype.bind = function (oThis) {
-      if (typeof this !== 'function') {
-        throw new TypeError(
-          'Function.prototype.bind - what is trying to be bound is not callable',
-        );
-      }
-      var aArgs = Array.prototype.slice.call(arguments, 1),
-        fToBind = this,
-        Fnop = function () {},
-        fBound = function () {
-          return fToBind.apply(
-            this instanceof Fnop && oThis ? this : oThis,
-            aArgs.concat(Array.prototype.slice.call(arguments)),
-          );
-        };
-      Fnop.prototype = this.prototype;
-      fBound.prototype = new Fnop();
-      return fBound;
-    };
-  }
 
   /**
    * Check AdBlock
@@ -379,20 +338,9 @@
 
   PopUnder.prototype = {
     cookieExpires: 6,
-    filterParams: [
-      'param1',
-      'param2',
-      'param3',
-      'subid',
-      'subid_1',
-      'subid_2',
-      'subid_3',
-      'subid_4',
-      'subid_5',
-      'xhid',
-    ],
+    filterParams: ['param1', 'param2', 'param3'],
     setting: {
-      'cookie-name': 'ts_popunder',
+      'cookie-name': 'popunder_event',
       params: ['domain=' + location.host || '', 'rnd=' + Math.random()],
     },
     mainWindow:
@@ -403,41 +351,9 @@
     height: 768,
     top: 0,
     left: 0,
-
-    /**
-     * Methods: Window setting
-     */
-    screenX: function () {
-      return this.getWindowLeft() + this.getWindowWidth() / 2 - this.width / 2;
-    },
-    screenY: function () {
-      return this.getWindowTop() + this.getWindowHeight() / 2 - this.height / 2;
-    },
-    widthWindow: function () {
-      return this.width - this.magicNumbers().x;
-    },
-    heightWindow: function () {
-      return this.height - this.magicNumbers().y;
-    },
-    windowSetting: function () {
-      var setting =
-        'toolbar=no,scrollbars=yes,location=yes,statusbar=yes,menubar=no,resizable=1' +
-        ',width=' +
-        this.widthWindow() +
-        ',height=' +
-        this.heightWindow() +
-        ',screenX=' +
-        this.screenX() +
-        ',screenY=' +
-        this.screenY();
-
-      return setting;
-    },
-    // End Window setting
-
     init: function () {
-      var banner = dataPopUnder || this.eachScript();
-      var mouseEvent = this.checkWinChrome60() ? 'mousedown' : 'click';
+      var currentScript = document.currentScript;
+      var banner = dataPopUnder || currentScript;
 
       if (banner) {
         if (!dataPopUnder) {
@@ -446,14 +362,13 @@
           this.copySetting();
         }
         this.formatSetBannerSettings();
-        this.addEvent(mouseEvent, document, this.showPopUnder.bind(this));
+        this.addEvent('click', document, this.showPopUnder.bind(this));
       }
     },
     showPopUnder: function (event) {
       this.clickEvent = event || window.event;
       var element = this.clickEvent.target || this.clickEvent.srcElement;
       var href = element.href && this.getStringFormat(element.href.split('/'));
-      var versionBrowser = parseInt(this.userAgent.version, 10);
 
       if (this.doNotShow(element) || this.popUnderRunning) {
         return;
@@ -461,50 +376,7 @@
 
       this.setUrl(href);
 
-      if (
-        // For Opera
-        this.userAgent.ios &&
-        this.userAgent.safari &&
-        this.userAgent.mobile &&
-        versionBrowser > 1000
-      ) {
-        this.openWindow(event);
-        this.mainWindow.location = element.getAttribute('href');
-      } else if (
-        !detectAdBlock &&
-        !this.userAgent.mobile &&
-        !this.userAgent.android &&
-        !this.userAgent.ios
-      ) {
-        if (
-          (!this.userAgent.edge &&
-            this.userAgent.macosx &&
-            ((this.userAgent.chrome && versionBrowser >= 61) ||
-              (this.userAgent.safari && versionBrowser >= 11))) ||
-          (!this.userAgent.edge &&
-            this.userAgent.windows &&
-            versionBrowser >= 62)
-        ) {
-          this.openTab();
-        } else if (
-          !this.userAgent.opera &&
-          !this.userAgent.edge &&
-          this.userAgent.chrome &&
-          versionBrowser > 41
-        ) {
-          this.popUnderPDFInit(event, element);
-        } else if (
-          this.userAgent.edge ||
-          (this.userAgent.windows && this.userAgent.opera) ||
-          this.userAgent.yaBrowser
-        ) {
-          this.openTab();
-        } else {
-          this.openWindow(event);
-        }
-      } else {
-        this.openTab();
-      }
+      this.openTab();
     },
 
     /**
@@ -512,7 +384,7 @@
      */
     openTab: function () {
       var event = this.clickEvent;
-      var target = event.target || event.srcElement;
+      var target = event.target;
       var COUNT_PARENT = 4;
       var depth = 0;
 
@@ -593,101 +465,6 @@
     // End Open Tab
 
     /**
-     * Methods: Open Window
-     */
-    openWindow: function (event) {
-      var cookieName = this.setting['cookie-name'];
-      this.popUp = window.open(this.url, '_blank', this.windowSetting());
-
-      if (this.popUp) {
-        this.setCookie(cookieName, 1, this.cookieExpires);
-
-        if (
-          this.userAgent.ios &&
-          event.target.tagName.toLowerCase() === 'img'
-        ) {
-          event.preventDefault();
-        }
-        if (this.userAgent.msie) {
-          document.onclick = null;
-          this.popUp.blur();
-          window.focus();
-        } else {
-          this.catchEvent();
-        }
-      }
-    },
-    catchEvent: function () {
-      try {
-        this.popUp.blur();
-        this.popUp.opener.window.focus();
-        window.self.window.blur();
-        window.self.window.focus();
-        window.focus();
-
-        if (
-          this.userAgent.safari &&
-          parseInt(this.userAgent.version, 10) >= 9
-        ) {
-          this.fakeTab();
-          return;
-        }
-
-        this.userAgent.firefox && this.fakeTab();
-        this.userAgent.webkit && this.webkitEvent();
-      } catch (e) {}
-    },
-    fakeTab: function () {
-      var blank = window.open('about:blank');
-      blank.focus();
-      blank.close();
-    },
-    webkitEvent: function () {
-      var a = document.createElement('a'),
-        e = document.createEvent('MouseEvents');
-      a.href =
-        'data:text/html;charset=utf-8,%3Cscript%3Ewindow.close()%3C/script%3E';
-      document.getElementsByTagName('body')[0].appendChild(a);
-      e.initMouseEvent(
-        'click',
-        !1,
-        !0,
-        window,
-        0,
-        0,
-        0,
-        0,
-        0,
-        !0,
-        !1,
-        !1,
-        !0,
-        0,
-        null,
-      );
-      a.dispatchEvent(e);
-      a.parentNode.removeChild(a);
-    },
-    // End Open Window
-
-    /**
-     * Methods: Catch popunder
-     */
-    replacementCampaign: function (params) {
-      if ('campaignid' in params) {
-        this.setting['redirect'] = this.getDomain() + 'campaign/{spot}';
-        this.setting['spot'] = params['campaignid'];
-
-        if ('bannerid' in params) {
-          this.setting['redirect'] += '/' + params['bannerid'];
-        }
-
-        this.setting['redirect'] += '/test';
-      }
-    },
-    // End catch popunder
-
-    /**
      * Methods: Helper Methods
      */
     copySetting: function () {
@@ -695,7 +472,7 @@
 
       for (var prop in dataPopUnder) {
         value = dataPopUnder[prop];
-        if (this.filterParams.indexOf(prop) != -1) {
+        if (this.filterParams.indexOf(prop) !== -1) {
           this.setting.params.push(prop + '=' + value);
           continue;
         }
@@ -725,7 +502,7 @@
         return true;
       }
 
-      if (which && which != ID_FIRST_MOUSE_BUTTON) {
+      if (which && which !== ID_FIRST_MOUSE_BUTTON) {
         return true;
       }
 
@@ -740,25 +517,6 @@
         return this.ignoreFilter(element);
       }
     },
-    eachScript: function () {
-      var currentScript = document.currentScript;
-      var banner, spot, width, height, redirect;
-
-      if (currentScript) {
-        spot =
-          this.getAttr(arr[i], 'data-ts-spot') ||
-          this.getAttr(arr[i], 'data-id');
-        width = this.getAttr(arr[i], 'data-ts-width');
-        height = this.getAttr(arr[i], 'data-ts-height');
-        redirect = this.getAttr(arr[i], 'data-ts-redirect');
-
-        if ((!!spot || !!redirect) && !width && !height) {
-          banner = arr[i];
-        }
-      }
-
-      return banner;
-    },
     setBannerSettings: function (elm) {
       var attributes = elm.attributes;
       var settingsName, value;
@@ -769,8 +527,8 @@
 
         if (
           settingsName &&
-          (settingsName.indexOf('data-ts') != -1 ||
-            settingsName.indexOf('data-id') != -1)
+          (settingsName.indexOf('data-ts') !== -1 ||
+            settingsName.indexOf('data-id') !== -1)
         ) {
           settingsName = settingsName.replace('data-ts-', '');
 
@@ -780,7 +538,7 @@
 
           value = attributes[key].value;
 
-          if (this.filterParams.indexOf(settingsName) != -1) {
+          if (this.filterParams.indexOf(settingsName) !== -1) {
             this.setting.params.push(settingsName + '=' + value);
             continue;
           }
@@ -812,8 +570,6 @@
       if (this.setting['cookie-expires']) {
         this.cookieExpires = parseInt(this.setting['cookie-expires'], 10);
       }
-
-      this.replacementCampaign(this.setting);
     },
     formatRedirectURL: function (redirectUrl) {
       if (!/^(f|ht)tps?:\/\//i.test(redirectUrl)) {
@@ -906,20 +662,6 @@
 
       return false;
     },
-    getAttr: function (ele, attr) {
-      var result = (ele.getAttribute && ele.getAttribute(attr)) || null;
-
-      if (!result && typeof ele !== 'function') {
-        var attrs = ele.attributes;
-        var length = attrs.length;
-        for (var i = 0; i < length; i++) {
-          if (attrs[i].nodeName === attr) {
-            result = attrs[i].nodeValue;
-          }
-        }
-      }
-      return result;
-    },
     getMetaWords: function () {
       var meta = document.getElementsByTagName('meta');
       var metaCount = meta.length;
@@ -1011,10 +753,9 @@
       }
     },
     ignoreFilter: function (elm, parentFilter) {
-      var i = 0,
-        selectorsList = elm.className.split(' '),
-        elementTag = elm.tagName.toLowerCase(),
-        count;
+      var i = 0;
+      var selectorsList = elm.className.split(' ');
+      var count;
 
       elm.id && selectorsList.push(elm.id);
 
@@ -1051,283 +792,6 @@
       return false;
     },
     // End Methods: Ignore Filter
-
-    /**
-     * Methods: PDF Show
-     */
-    checkWinChrome60: function () {
-      return (
-        !this.userAgent.edge &&
-        this.userAgent.windows &&
-        !this.userAgent.windowsXP &&
-        this.userAgent.chrome &&
-        parseInt(this.userAgent.version, 10) >= 59
-      );
-    },
-    PDFFile: '//cdn.tsyndicate.com/sdk/v1/p_pdf.pdf',
-    popUnderPDF: null,
-    popUnderRunning: false,
-    popUnderPostCalled: false,
-    randomString: Math.floor(Math.random() * 1000 + 1).toString(),
-    // blankPdf: 'data:application/pdf;base64, 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',
-    hiddenWindowSetting:
-      'directories=0,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=1,height=1,screenX=19999,screenY=19999',
-    popUnderPDFInit: function (event, element) {
-      if (this.popUnderRunning) return false;
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      event.stopPropagation();
-
-      this.popUnderRunning = true;
-
-      if (this.checkWinChrome60()) {
-        this.popUnderWindowsPDF(element);
-        return false;
-      }
-
-      this.catchFocusIFrame();
-
-      this.createPDFObjectHandle = this.createPDFObject();
-      // addNotification  (Chrome > 57)
-      if (parseInt(this.userAgent.version, 10) > 57) {
-        this.addNotification();
-      }
-
-      this.catchFocusEvent(event);
-    },
-    catchFocusIFrame: function () {
-      try {
-        var popFrame = window.document.createElement('iframe');
-        var windowBody =
-          '<html><head><script>window.a={};window.a.b=function(){window.resizeTo(1,0);window.moveTo(19999,19999);};window.a.b();window.open("", "_self");</script></head><body></body></html>';
-
-        popFrame.setAttribute('style', 'display:none');
-
-        window.document.body.appendChild(popFrame);
-
-        var popFrameScript =
-          popFrame.contentWindow.document.createElement('script');
-
-        popFrameScript.innerHTML =
-          '(' +
-          function () {
-            var frameWindow = eval('window');
-            frameWindow.init = function (rnd, options) {
-              return frameWindow.open('about:blank', rnd, options);
-            };
-          }.toString() +
-          ')();';
-
-        popFrame.contentWindow.document.body.appendChild(popFrameScript);
-
-        this.popUnderPDF = popFrame.contentWindow.init(
-          this.randomString,
-          this.hiddenWindowSetting,
-        );
-
-        window.document.body.removeChild(popFrame);
-
-        this.popUnderPDF.document.write(windowBody);
-      } catch (c) {}
-    },
-    catchFocusEvent: function (event) {
-      var element = event.target || event.srcElement;
-      var self = this;
-      var checkTimer = null;
-
-      if (!this.userAgent.macosx) {
-        checkTimer = setInterval(function () {
-          if (document.hasFocus()) {
-            catchFocus();
-            return false;
-          }
-        }, 20);
-      }
-
-      this.addEvent('focus', window, catchFocus);
-      setTimeout(catchFocus, 3000);
-
-      function catchFocus() {
-        if (!self.userAgent.macosx) {
-          clearInterval(checkTimer);
-        }
-        self.focusAchieved(element);
-      }
-    },
-    focusAchieved: function (element) {
-      if (!this.popUnderPostCalled) {
-        this.popUnderPostCalled = true;
-        this.postWindowPop(element);
-      }
-    },
-    postWindowPop: function (element) {
-      var self = this;
-      var cookieName = this.setting['cookie-name'];
-
-      if (parseInt(this.userAgent.version, 10) > 57) {
-        // removeNotification (Chrome > 57)
-        this.removeNotification();
-        // addNotification (Chrome > 57)
-        this.addNotification();
-      }
-
-      setTimeout(function () {
-        self.createPDFObjectHandle.parentNode.parentNode.removeChild(
-          self.createPDFObjectHandle.parentNode,
-        );
-      }, 20);
-
-      try {
-        this.popUnderPDF.moveTo(this.screenX(), this.screenY());
-        this.popUnderPDF.resizeBy(this.widthWindow(), this.heightWindow());
-        setTimeout(function () {
-          // removeNotification (Chrome > 57)
-          if (parseInt(self.userAgent.version, 10) > 57)
-            self.removeNotification();
-        }, 200);
-        self.popUnderPDF.location = self.url;
-      } catch (e) {}
-
-      this.triggerClick(element);
-
-      this.popUnderRunning = false;
-
-      this.setCookie(cookieName, 1, this.cookieExpires);
-    },
-    createPDFObject: function () {
-      var wrapper = document.createElement('div');
-      var wrapperStyle =
-        'visibility:hidden;width:0px;height:0px;opacity:0;position:absolute;top:100%;left:0;pointer-events:none;overflow:hidden;';
-      var object = document.createElement('object');
-
-      wrapper.setAttribute('style', wrapperStyle);
-      wrapper.setAttribute('inf', 'inf');
-
-      object.setAttribute('data', this.PDFFile);
-
-      wrapper.appendChild(object);
-
-      document.body.appendChild(wrapper);
-
-      return object;
-    },
-    triggerClick: function (element) {
-      try {
-        var mouseEvent = document.createEvent('MouseEvents');
-
-        mouseEvent.initMouseEvent(
-          'click',
-          true,
-          true,
-          window,
-          1,
-          0,
-          0,
-          0,
-          0,
-          false,
-          false,
-          false,
-          false,
-          0,
-          null,
-        );
-        element.dispatchEvent(mouseEvent);
-
-        this.popUnderRunning = false;
-      } catch (e) {}
-    },
-    addNotification: function () {
-      var iframeNotification = (this.iframeNotification =
-        document.createElement('iframe'));
-
-      iframeNotification.width = 0;
-      iframeNotification.height = 0;
-      iframeNotification.style.width = '0';
-      iframeNotification.style.height = '0';
-      iframeNotification.srcdoc =
-        '<script>try {Notification.requestPermission(function () {});navigator.requestMIDIAccess({ sysex: true });} catch (e) {}</script>';
-
-      document.body.appendChild(iframeNotification);
-    },
-    removeNotification: function () {
-      if (this.iframeNotification) {
-        this.iframeNotification.parentNode.removeChild(this.iframeNotification);
-      }
-    },
-    popUnderWindowsPDF: function (element) {
-      var newTab = window.open('about:blank', '_blank');
-      var clickEvent = this.clickEvent;
-      var mouseEvent = newTab.document.createEvent('MouseEvents');
-      var self = this;
-      var windowBody =
-        '<html><head><title></title>' +
-        '<meta name="Referrer" content="unsafe-url"><script>' +
-        '(function() {' +
-        'var winName = "TrafficStars";' +
-        'var winParams =' +
-        this.hiddenWindowSetting +
-        ';' + //''"status=1,menubar=0,toolbar=0,height=0,width=0,top=0,location=0,scrollbars=1,resizable=1,left=0";' +
-        'window.addEventListener("mouseup", function() {' +
-        'if (window.w) return;' +
-        'window.w = window.open("about:blank", winName, winParams);' +
-        'w.resizeTo(1, 0);' +
-        'w.moveTo(9e5, 9e5);' +
-        '});' +
-        '})();' +
-        '</script></head><body></body></html>';
-
-      newTab.document.write(windowBody);
-      mouseEvent.initMouseEvent(
-        'click',
-        true,
-        true,
-        newTab,
-        1,
-        clickEvent.screenX,
-        clickEvent.screenY,
-        clickEvent.clientX,
-        clickEvent.clientY,
-        false,
-        false,
-        false,
-        false,
-        0,
-        null,
-      );
-      newTab.dispatchEvent(mouseEvent);
-
-      var checkTimer = setInterval(function () {
-        if (newTab.w) {
-          clearInterval(checkTimer);
-          self.createPDFObjectHandle = self.createPDFObject();
-          self.addEvent('focus', window, catchPDFFocus);
-          newTab.close();
-        }
-      }, 20);
-
-      function catchPDFFocus() {
-        var cookieName = self.setting['cookie-name'];
-        self.createPDFObjectHandle.parentNode.parentNode &&
-          self.createPDFObjectHandle.parentNode.parentNode.removeChild(
-            self.createPDFObjectHandle.parentNode,
-          );
-
-        if (newTab.w) {
-          newTab.w.resizeTo(self.heightWindow(), self.heightWindow());
-          newTab.w.moveTo(self.screenX(), self.screenY());
-          newTab.w.location.replace('http://' + self.url);
-
-          window.removeEventListener('focus', catchPDFFocus, false);
-          self.setCookie(cookieName, 1, self.cookieExpires);
-          self.triggerClick(element);
-        }
-      }
-
-      this.popUnderRunning = false;
-    },
-    // End Methods: PDF Show
 
     /**
      * Methods: LocalStorage
@@ -1378,62 +842,6 @@
       return null;
     },
     // End Methods Cookie
-
-    /**
-     * Methods: window settings
-     */
-    getWindowWidth: function () {
-      var width = 0;
-      if (typeof window.innerWidth == 'number') {
-        width = window.innerWidth;
-      } else {
-        if (document.documentElement && document.documentElement.clientWidth) {
-          width = document.documentElement.clientWidth;
-        } else {
-          if (document.body && document.body.clientWidth) {
-            width = document.body.clientWidth;
-          }
-        }
-      }
-      return width;
-    },
-    getWindowHeight: function () {
-      var height = 0;
-      if (typeof window.innerHeight == 'number') {
-        height = window.innerHeight;
-      } else {
-        if (document.documentElement && document.documentElement.clientHeight) {
-          height = document.documentElement.clientHeight;
-        } else {
-          if (document.body && document.body.clientHeight) {
-            height = document.body.clientHeight;
-          }
-        }
-      }
-      return height;
-    },
-    getWindowLeft: function () {
-      return window.screenLeft !== undefined
-        ? window.screenLeft
-        : window.screenX;
-    },
-    getWindowTop: function () {
-      return window.screenTop !== undefined ? window.screenTop : window.screenY;
-    },
-    magicNumbers: function () {
-      if (this.userAgent.macosx) {
-        if (this.userAgent.chrome) return { x: 100, y: 71 };
-        if (this.userAgent.opera) return { x: 100, y: 86 };
-      }
-
-      if (this.userAgent.windows) {
-        if (this.userAgent.chrome) return { x: 122, y: 34 };
-        if (this.userAgent.opera) return { x: 270, y: 129 };
-      }
-
-      return { x: 0, y: 0 };
-    },
-    // End Methods: window settings
 
     /**
      * Methods: User Agent
