@@ -1,15 +1,15 @@
 (function (window) {
   'use strict';
 
-  var detectAdBlock = false;
-  var detectPrivacyMode = false;
-  var dataPopUnder = window.dataPopUnder;
+  let detectAdBlock = false;
+  let detectPrivacyMode = false;
+  let dataPopUnder = window.dataPopUnder;
 
   /**
    * Check AdBlock
    */
-  var CheckAdBlock = function () {
-    var userAgent = window.navigator.userAgent;
+  const CheckAdBlock = function () {
+    const userAgent = window.navigator.userAgent;
 
     this._options = {
       checkOnLoad: true,
@@ -20,7 +20,7 @@
       baitStyle:
         'width: 1px !important; height: 1px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;',
     };
-    this._var = {
+    this._const = {
       bait: null,
       checking: false,
       loop: null,
@@ -29,8 +29,8 @@
       ie7: userAgent.match(/MSIE\s7\./g),
     };
 
-    var self = this;
-    var eventCallback = function () {
+    const self = this;
+    const eventCallback = function () {
       setTimeout(function () {
         if (self._options.checkOnLoad === true) {
           if (self._var.bait === null) {
@@ -54,7 +54,7 @@
     _var: null,
     _bait: null,
     _creatBait: function () {
-      var bait = document.createElement('div');
+      const bait = document.createElement('div');
       bait.setAttribute('class', this._options.baitClass);
       bait.setAttribute('style', this._options.baitStyle);
       this._var.bait = window.document.body.appendChild(bait);
@@ -84,7 +84,7 @@
         this._creatBait();
       }
 
-      var self = this;
+      const self = this;
       this._var.loopNumber = 0;
       if (loop === true) {
         this._var.loop = setInterval(function () {
@@ -98,7 +98,7 @@
       return true;
     },
     _checkBait: function (loop) {
-      var detected = false;
+      let detected = false;
 
       if (this._var.bait === null) {
         this._creatBait();
@@ -117,7 +117,7 @@
         detected = true;
       }
       if (window.getComputedStyle !== undefined) {
-        var baitTemp = window.getComputedStyle(this._var.bait, null);
+        const baitTemp = window.getComputedStyle(this._var.bait, null);
         if (
           baitTemp.getPropertyValue('display') == 'none' ||
           baitTemp.getPropertyValue('visibility') == 'hidden'
@@ -173,7 +173,7 @@
 
   PrivacyModeDetector.prototype = {
     _detectIE: function () {
-      var msie = this.ua.indexOf('msie ');
+      const msie = this.ua.indexOf('msie ');
       if (msie > 0) {
         return parseInt(
           this.ua.substring(msie + 5, this.ua.indexOf('.', msie)),
@@ -181,16 +181,16 @@
         );
       }
 
-      var trident = this.ua.indexOf('trident/');
+      const trident = this.ua.indexOf('trident/');
       if (trident > 0) {
-        var rv = this.ua.indexOf('rv:');
+        const rv = this.ua.indexOf('rv:');
         return parseInt(
           this.ua.substring(rv + 3, this.ua.indexOf('.', rv)),
           10,
         );
       }
 
-      var edge = this.ua.indexOf('edge/');
+      const edge = this.ua.indexOf('edge/');
       if (edge > 0) {
         return parseInt(
           this.ua.substring(edge + 5, this.ua.indexOf('.', edge)),
@@ -236,7 +236,7 @@
     },
 
     _getBrowser: function () {
-      var browsers = {
+      const browsers = {
         isIE: this._detectIE(),
         isSafari: this._detectSafari(),
         isChrome: this._detectChrome(),
@@ -297,7 +297,7 @@
     },
 
     _detectFFPrivacy: function () {
-      var DBConnection;
+      let DBConnection;
       try {
         DBConnection = window['indexedDB'].open('test');
         DBConnection['onerror'] = function () {
@@ -352,8 +352,8 @@
     top: 0,
     left: 0,
     init: function () {
-      var currentScript = document.currentScript;
-      var banner = dataPopUnder || currentScript;
+      const currentScript = document.currentScript;
+      const banner = dataPopUnder || currentScript;
 
       if (banner) {
         if (!dataPopUnder) {
@@ -367,8 +367,9 @@
     },
     showPopUnder: function (event) {
       this.clickEvent = event || window.event;
-      var element = this.clickEvent.target || this.clickEvent.srcElement;
-      var href = element.href && this.getStringFormat(element.href.split('/'));
+      const element = this.clickEvent.target || this.clickEvent.srcElement;
+      const href =
+        element.href && this.getStringFormat(element.href.split('/'));
 
       if (this.doNotShow(element) || this.popUnderRunning) {
         return;
@@ -383,10 +384,10 @@
      * Methods: Open Tab
      */
     openTab: function () {
-      var event = this.clickEvent;
-      var target = event.target;
-      var COUNT_PARENT = 4;
-      var depth = 0;
+      const event = this.clickEvent;
+      const COUNT_PARENT = 4;
+      let depth = 0;
+      let target = event.target;
 
       event.preventDefault();
 
@@ -412,8 +413,8 @@
       this.mainWindow.location = this.url;
     },
     mobileTab: function (target) {
-      var hyperlink = document.createElement('a');
-      var event;
+      const hyperlink = document.createElement('a');
+      let event;
 
       hyperlink.href = target.href || this.mainWindow.location;
 
@@ -449,11 +450,11 @@
       hyperlink.dispatchEvent(event);
     },
     desktopTab: function (target) {
-      var newTab = window.open(
+      const newTab = window.open(
         target.href || this.mainWindow.location,
         '_blank',
       );
-      var cookieName = this.setting['cookie-name'];
+      const cookieName = this.setting['cookie-name'];
 
       if (newTab) {
         newTab.focus();
@@ -468,9 +469,9 @@
      * Methods: Helper Methods
      */
     copySetting: function () {
-      var value;
+      let value;
 
-      for (var prop in dataPopUnder) {
+      for (const prop in dataPopUnder) {
         value = dataPopUnder[prop];
         if (this.filterParams.indexOf(prop) !== -1) {
           this.setting.params.push(prop + '=' + value);
@@ -480,12 +481,12 @@
       }
     },
     doNotShow: function (element) {
-      var ID_FIRST_MOUSE_BUTTON = 1;
-      var which = this.clickEvent && this.clickEvent.which;
-      var isATag = this.isSelectiveTarget(element);
-      var userAgentVersion = parseInt(this.userAgent.version, 10);
-      var cookieName = this.setting['cookie-name'];
-      var showPopUnder =
+      const ID_FIRST_MOUSE_BUTTON = 1;
+      const which = this.clickEvent && this.clickEvent.which;
+      const isATag = this.isSelectiveTarget(element);
+      const userAgentVersion = parseInt(this.userAgent.version, 10);
+      const cookieName = this.setting['cookie-name'];
+      const showPopUnder =
         this.getCookie(cookieName) !== null ||
         this.checkIgnoreFilter(element) ||
         ('selective' === this.setting.mode && !isATag) ||
@@ -509,7 +510,7 @@
       return showPopUnder;
     },
     checkIgnoreFilter: function (element) {
-      var includeFilter = this.setting['include-filter'];
+      const includeFilter = this.setting['include-filter'];
 
       if (includeFilter) {
         return !this.ignoreFilter(element);
@@ -518,10 +519,10 @@
       }
     },
     setBannerSettings: function (elm) {
-      var attributes = elm.attributes;
-      var settingsName, value;
+      const attributes = elm.attributes;
+      let settingsName, value;
 
-      for (var key in attributes) {
+      for (const key in attributes) {
         settingsName =
           typeof attributes[key] === 'object' && attributes[key].name;
 
@@ -581,7 +582,7 @@
       return redirectUrl;
     },
     setUrl: function (href) {
-      var url =
+      const url =
         this.getRedirectUrl() +
         '?' +
         this.setting.params.join('&') +
@@ -598,11 +599,11 @@
       this.url = url;
     },
     getScreenSize: function () {
-      var screenSize = '';
-      var devicePixelRatio = window['devicePixelRatio'] || 1;
-      var screen = window['screen'] || {};
-      var width = screen['width'];
-      var height = screen['height'];
+      let screenSize = '';
+      const devicePixelRatio = window['devicePixelRatio'] || 1;
+      const screen = window['screen'] || {};
+      const width = screen['width'];
+      const height = screen['height'];
 
       if (width && height) {
         screenSize =
@@ -615,12 +616,12 @@
       return screenSize;
     },
     timeZone: function () {
-      var tz = new Date().getTimezoneOffset();
-      var param = '&tz=' + tz;
+      const tz = new Date().getTimezoneOffset();
+      const param = '&tz=' + tz;
       return param.replace('-', '%2D');
     },
     getCategories: function (href) {
-      var categories = this.setting.categories;
+      let categories = this.setting.categories;
 
       if (!categories && href) {
         categories = href;
@@ -638,9 +639,9 @@
       return '';
     },
     getRedirectUrl: function () {
-      var redirectUrlHasSpot =
+      const redirectUrlHasSpot =
         this.setting.redirect && this.setting.redirect.indexOf('{spot}') >= 0;
-      var redirectReplaceUrl =
+      const redirectReplaceUrl =
         redirectUrlHasSpot &&
         this.setting.redirect.replace('{spot}', this.setting.spot);
 
@@ -651,7 +652,7 @@
       return (this.setting.redirect || this.getDomain()) + this.setting.spot;
     },
     isSelectiveTarget: function (elm) {
-      var tag = elm.tagName.toLowerCase();
+      let tag = elm.tagName.toLowerCase();
 
       while (tag && 'body' !== tag) {
         if ('a' === tag) return true;
@@ -663,10 +664,10 @@
       return false;
     },
     getMetaWords: function () {
-      var meta = document.getElementsByTagName('meta');
-      var metaCount = meta.length;
-      var i = 0;
-      var getWords = '';
+      const meta = document.getElementsByTagName('meta');
+      const metaCount = meta.length;
+      let getWords = '';
+      let i = 0;
 
       while (i < metaCount) {
         if (
@@ -691,9 +692,9 @@
         .replace(/\s+/gi, ',');
     },
     getStringFormat: function (arr) {
-      var lastItem = arr && arr[arr.length - 1].split(/[?#]/)[0];
+      const lastItem = arr && arr[arr.length - 1].split(/[?#]/)[0];
 
-      var formatText =
+      let formatText =
         !!lastItem &&
         lastItem.replace(/(x?html?)$/gi, '').match(/([a-zA-Z]+)/g);
 
@@ -707,26 +708,26 @@
       if (elem.addEventListener) {
         elem.addEventListener(event, func, false);
       } else if (elem.attachEvent) {
-        var r = elem.attachEvent('on' + event, func);
+        const r = elem.attachEvent('on' + event, func);
         return r;
       }
     },
     getDomain: function () {
-      var domain = '//tsyndicate.com';
-      var pathname = '/api/v1/direct/';
+      const domain = '//tsyndicate.com';
+      const pathname = '/api/v1/direct/';
 
       return domain + pathname;
     },
     getPositionCursor: function () {
-      var documentElement = document.documentElement;
-      var event = this.clickEvent;
-      var x =
+      const documentElement = document.documentElement;
+      const event = this.clickEvent;
+      const x =
         event.pageX ||
         event.clientX +
           (documentElement.scrollLeft
             ? documentElement.scrollLeft
             : document.body.scrollLeft);
-      var y =
+      const y =
         event.pageY ||
         event.clientY +
           (documentElement.scrollTop
@@ -741,8 +742,8 @@
      * Methods: Ignore Filter
      */
     parentFilter: function (e) {
-      var parentElm = e.parentNode;
-      var isHtml =
+      const parentElm = e.parentNode;
+      const isHtml =
         e.nodeName === 'HTML' || (parentElm && parentElm.nodeName === 'HTML');
 
       if (parentElm && !isHtml) {
@@ -753,9 +754,9 @@
       }
     },
     ignoreFilter: function (elm, parentFilter) {
-      var i = 0;
-      var selectorsList = elm.className.split(' ');
-      var count;
+      const selectorsList = elm.className.split(' ');
+      let i = 0;
+      let count;
 
       elm.id && selectorsList.push(elm.id);
 
@@ -780,9 +781,9 @@
       }
     },
     checkIgnore: function (elClass) {
-      var i = 0;
-      var ignoreList = this.setting['ignore-filter'];
-      var count = ignoreList.length;
+      const ignoreList = this.setting['ignore-filter'];
+      const count = ignoreList.length;
+      let i = 0;
 
       for (; i < count; i++) {
         if (ignoreList[i] === elClass) {
@@ -816,10 +817,10 @@
      * Methods: Cookie
      */
     setCookie: function (cookieName, cookieState, cookieLifetime) {
-      var expires = new Date(
+      const expires = new Date(
         new Date().getTime() + cookieLifetime * 3600000,
       ).toGMTString();
-      var domain = this.setting['cookie-domain']
+      const domain = this.setting['cookie-domain']
         ? '; domain=' + this.setting['cookie-domain']
         : '';
 
@@ -833,7 +834,7 @@
         '; path=/';
     },
     getCookie: function (cookieName) {
-      var resultCookie = document.cookie.match(
+      const resultCookie = document.cookie.match(
         '(^|;) ?' + cookieName + '=([^;]*)(;|$)',
       );
 
@@ -847,7 +848,7 @@
      * Methods: User Agent
      */
     userAgent: (function () {
-      var n = navigator.userAgent.toLowerCase(),
+      const n = navigator.userAgent.toLowerCase(),
         b = {
           chromeOs: /CrOS/gi.test(n),
           webkit: /webkit/gi.test(n),
