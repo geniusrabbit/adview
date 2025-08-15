@@ -85,6 +85,14 @@ export type AdViewOptionalDataProps = {
  */
 export type AdViewUnitTemplateTypeProps = AdViewOptionalDataProps & {
   type: string;
+  /** True when component is in initial state before any loading */
+  isInitial?: boolean;
+  /** True when actively fetching ad data */
+  isLoading?: boolean;
+  /** True when an error occurred during loading */
+  isError?: boolean;
+  /** True when loading is complete (success or failure) */
+  isComplete?: boolean;
 };
 
 /**
@@ -147,13 +155,13 @@ export type AdViewUnitPropsBase = {
  */
 export type AdLoadState = {
   /** True when component is in initial state before any loading */
-  isInitial: boolean;
+  isInitial?: boolean;
   /** True when actively fetching ad data */
-  isLoading: boolean;
+  isLoading?: boolean;
   /** True when an error occurred during loading */
-  isError: boolean;
+  isError?: boolean;
   /** True when loading is complete (success or failure) */
-  isComplete: boolean;
+  isComplete?: boolean;
 };
 
 // Re-export core types for React package compatibility

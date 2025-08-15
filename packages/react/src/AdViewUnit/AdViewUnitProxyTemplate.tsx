@@ -1,5 +1,6 @@
 import React from 'react';
-import { AdViewUnitTemplateTypeProps } from '../types';
+import { AdLoadState, AdViewUnitTemplateTypeProps } from '../types';
+import { matchExpectedState } from './utils';
 
 type AdViewUnitProxyTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> & {
   type?: 'proxy';
@@ -7,10 +8,24 @@ type AdViewUnitProxyTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> & 
   style?: React.CSSProperties;
 };
 
-function AdViewUnitProxyTemplate({className, style, data, state}: AdViewUnitProxyTemplateProps) {
-  if (!data || !state?.isComplete) {
+function AdViewUnitProxyTemplate({className, style, data, state, ...props}: AdViewUnitProxyTemplateProps) {
+  if (!data) {
     return null;
   }
+
+  const expectState: AdLoadState =
+    (props?.isInitial || props?.isLoading || props?.isError || props?.isComplete) ? {
+      isInitial: props?.isInitial,
+      isLoading: props?.isLoading,
+      isError: props?.isError,
+      isComplete: props?.isComplete
+    } : {isComplete: true};
+
+  // Check if the expected state matches the current state
+  if (!matchExpectedState(expectState, state)) {
+    return null;
+  }
+
   const { url, fields } = data;
   const iframeSrc = fields?.url || url;
 
@@ -34,5 +49,9 @@ function AdViewUnitProxyTemplate({className, style, data, state}: AdViewUnitProx
     ></iframe>
   );
 }
+
+AdViewUnitProxyTemplate.defaults = {
+  type: 'proxy',
+};
 
 export default AdViewUnitProxyTemplate;

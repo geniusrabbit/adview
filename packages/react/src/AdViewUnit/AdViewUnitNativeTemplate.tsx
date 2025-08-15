@@ -1,16 +1,31 @@
 import { getAssetByName, getPrepareURL, getSrcSetCSSThumbs } from '@adview/core/utils';
 import React from 'react';
-import { AdViewStyleTokensNative, AdViewUnitTemplateTypeProps } from '../types';
+import { AdLoadState, AdViewStyleTokensNative, AdViewUnitTemplateTypeProps } from '../types';
+import { matchExpectedState } from './utils';
 
 type AdViewUnitNativeTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> & {
   type?: 'native';
   classNames?: AdViewStyleTokensNative;
 };
 
-function AdViewUnitNativeTemplate({classNames, data, state}: AdViewUnitNativeTemplateProps) {
-  if (!data || !data.assets || !data.assets.length || !state?.isComplete) {
+function AdViewUnitNativeTemplate({classNames, data, state, ...props}: AdViewUnitNativeTemplateProps) {
+  if (!data || !data.assets || !data.assets.length) {
     return null;
   }
+
+  const expectState: AdLoadState =
+    (props?.isInitial || props?.isLoading || props?.isError || props?.isComplete) ? {
+      isInitial: props?.isInitial,
+      isLoading: props?.isLoading,
+      isError: props?.isError,
+      isComplete: props?.isComplete
+    } : {isComplete: true};
+
+  // Check if the expected state matches the current state
+  if (!matchExpectedState(expectState, state)) {
+    return null;
+  }
+
   const { assets, url, fields } = data;
   const asset = getAssetByName('main', assets);
 
@@ -97,5 +112,9 @@ function AdViewUnitNativeTemplate({classNames, data, state}: AdViewUnitNativeTem
     </div>
   );
 }
+
+AdViewUnitNativeTemplate.defaults = {
+  type: 'native',
+};
 
 export default AdViewUnitNativeTemplate;

@@ -8,7 +8,8 @@
 //
 
 import React, { JSX } from 'react';
-import { AdViewUnitClientChildrenProps, AdViewUnitTemplateProps, AdViewUnitTemplateTypeProps } from '../types';
+import { AdLoadState, AdViewUnitClientChildrenProps, AdViewUnitTemplateProps, AdViewUnitTemplateTypeProps } from '../types';
+import { matchExpectedState } from './utils';
 
 // TemplateListRender is a function that takes a list of TemplateType and returns a React element
 export type TemplateListRender = (tmpls: TemplateElement[]) => React.ReactElement | JSX.Element;
@@ -48,8 +49,10 @@ export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, dat
 
   if (isReactElement) {
     // Extract type and children from the React element
-    const { type, children } = (tmpl as TemplateElement).props;
-    console.log('=====>\nrenderTemplate: React element detected, type:', type, 'data:', data.type, data.type !== type);
+    let { type, children } = tmpl.props;
+    if (!type && typeof tmpl.type !== 'string') {
+      type = (tmpl.type as any)?.defaults?.type;
+    }
     // If the type does not match, return null
     if (data.type !== type) {
       return null;
@@ -58,7 +61,6 @@ export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, dat
     if (typeof children === 'function') {
       return children(data as AdViewUnitClientChildrenProps);
     }
-    console.log('CLONE ELEMENT', tmpl);
     // If children is a React element, clone it with the new props
     return React.cloneElement((tmpl as TemplateElement), {
       ...data,
@@ -103,11 +105,25 @@ export const renderAnyTemplates = (tmpls: any, data: AdViewUnitTemplateTypeProps
 // <AdView.Unit>
 //   <AdView.Template type="banner" data={{...}}>
 // </AdView.Unit>
-const AdViewUnitTemplate = ({ type, children, ...data }: AdViewUnitTemplateProps) => {
+const AdViewUnitTemplate = ({ type, state, children, ...props }: AdViewUnitTemplateProps) => {
   const tmplProps: AdViewUnitTemplateTypeProps = {
     type,
-    ...data,
+    state,
+    ...props,
   };
+  
+  const expectState: AdLoadState =
+    (props?.isInitial || props?.isLoading || props?.isError || props?.isComplete) ? {
+      isInitial: props?.isInitial,
+      isLoading: props?.isLoading,
+      isError: props?.isError,
+      isComplete: props?.isComplete
+    } : {isComplete: true};
+
+  // Check if the expected state matches the current state
+  if (!matchExpectedState(expectState, state)) {
+    return null;
+  }
 
   // If children is a function, call it with the data
   if (typeof children === 'function') {

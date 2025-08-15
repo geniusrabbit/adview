@@ -230,7 +230,7 @@ export default function AdViewTestStatus() {
           <div className="test-card">
             <h3>Square Ad (250x250) Default</h3>
             <div className='ad-container'>
-              <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6g" format="native">
+              <AdView.Unit unitId="2ow6OsRrQDts2X5jiyZ2mhWQF6x" format="nothing">
                 <AdView.DefaultTemplate>
                   <div
                     className="ad-cl-square"

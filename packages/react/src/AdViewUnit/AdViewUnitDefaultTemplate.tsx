@@ -1,5 +1,6 @@
 import React from "react";
-import { AdViewOptionalDataProps, AdViewUnitTemplateTypeProps } from "../types";
+import { AdLoadState, AdViewOptionalDataProps, AdViewUnitTemplateTypeProps } from "../types";
+import { matchExpectedState } from "./utils";
 
 type AdViewUnitDefaultTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> & {
   type?: 'default';
@@ -7,6 +8,23 @@ type AdViewUnitDefaultTemplateProps = Omit<AdViewUnitTemplateTypeProps, 'type'> 
 };
 
 function AdViewUnitDefaultTemplate({ type='default', data, state, children, ...props }: AdViewUnitDefaultTemplateProps) {
+  if (data) {
+    return null;
+  }
+
+  const expectState: AdLoadState =
+    (props?.isInitial || props?.isLoading || props?.isError || props?.isComplete) ? {
+      isInitial: props?.isInitial,
+      isLoading: props?.isLoading,
+      isError: props?.isError,
+      isComplete: props?.isComplete
+    } : {isComplete: true};
+
+  // Check if the expected state matches the current state
+  if (!matchExpectedState(expectState, state)) {
+    return null;
+  }
+
   if (typeof children === 'function') {
     return <>{children({ data, state, ...props })}</>;
   }
@@ -22,9 +40,8 @@ function AdViewUnitDefaultTemplate({ type='default', data, state, children, ...p
   );
 }
 
-AdViewUnitDefaultTemplate.defaultProps = {
+AdViewUnitDefaultTemplate.defaults = {
   type: 'default',
-  children: null,
 };
 
 export default AdViewUnitDefaultTemplate;

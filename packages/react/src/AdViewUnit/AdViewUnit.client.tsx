@@ -1,7 +1,11 @@
 'use client';
 
+import { AdViewGroupItem } from '@adview/core';
 import React from 'react';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
+import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
+import AdViewUnitNativeTemplate from './AdViewUnitNativeTemplate';
+import AdViewUnitProxyTemplate from './AdViewUnitProxyTemplate';
 import { renderAnyTemplates } from './AdViewUnitTemplate';
 import AdViewUnitTracking from './AdViewUnitTracking';
 import useAdViewController from './useAdViewController';
@@ -34,17 +38,38 @@ function AdViewUnitClient({
   children,
   ...config
 }: AdViewUnitClientProps) {
+  const checkFormat = (f: string) => {
+    if (!format) { return true; }
+    return Array.isArray(format) ? format.includes(f) : f === format;
+  };
+
   const [response, error, loadState] = useAdViewController(
     config,
     unitId,
     format,
   );
-  const responseGroup = error ? null : response?.groups?.[0];
-  const customTracker = responseGroup?.custom_tracker ?? {};
-  const groupItems = responseGroup?.items;
+
+  const { responseGroup: _, customTracker, groupItems } = error ? {responseGroup: null, customTracker: {}, groupItems: []} : (() => {
+    for (let responseGroup of response?.groups || []) {
+      const customTracker = responseGroup?.custom_tracker ?? {};
+      const groupItems = responseGroup?.items.map(it => checkFormat(it.type) ? it : null).filter(Boolean);
+      if (groupItems && groupItems.length > 0) {
+        return {responseGroup, customTracker, groupItems};
+      }
+    }
+    return {responseGroup: null, customTracker: {}, groupItems: []};
+  })();
+
+  if (!children) {
+    children = [
+      <AdViewUnitBannerTemplate />,
+      <AdViewUnitNativeTemplate />,
+      <AdViewUnitProxyTemplate />
+    ];
+  }
 
   if (groupItems && groupItems?.length > 0) {
-    return groupItems.map(({ tracker, ...data }) => {
+    return (groupItems as AdViewGroupItem[]).map(({ tracker, ...data }) => {
       return (
         <AdViewUnitTracking key={data.id} {...tracker}>
           {renderAnyTemplates(children, {data, type: data.type || 'default', error, state: loadState})}
