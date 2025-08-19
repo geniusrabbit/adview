@@ -2,7 +2,7 @@ interface PopUnderData {
   [key: string]: any;
   'cookie-name'?: string;
   'cookie-domain'?: string;
-  'cookie-expires'?: string;
+  every?: string;
   'ignore-filter'?: string;
   target?: string;
   categories?: string;
@@ -55,7 +55,7 @@ interface UserAgent {
 interface PopUnderSettings {
   'cookie-name': string;
   'cookie-domain'?: string;
-  'cookie-expires'?: string;
+  every?: string;
   'ignore-filter'?: string[];
   target?: string;
   categories?: string;
@@ -398,7 +398,7 @@ declare global {
     doNotShow: function (this: any, element: HTMLElement): boolean {
       const ID_FIRST_MOUSE_BUTTON: number = 1;
       const which: number = this.clickEvent && (this.clickEvent as any).which;
-      const isATag: boolean = this.isSelectiveTarget(element);
+      const isATag: boolean = false; //this.isSelectiveTarget(element);
       const userAgentVersion: number = parseInt(
         this.userAgent.version || '0',
         10,
@@ -428,13 +428,21 @@ declare global {
       return showPopUnder;
     },
     checkIgnoreFilter: function (this: any, element: HTMLElement): boolean {
-      const includeFilter: string | undefined = this.setting.target;
+      const targetSelectors: string[] | undefined = this.setting.target;
 
-      if (includeFilter) {
-        return !this.ignoreFilter(element);
-      } else {
-        return this.ignoreFilter(element);
+      if (targetSelectors) {
+        const selectors: string[] = targetSelectors.map(selector =>
+          selector.trim(),
+        );
+
+        for (const selector of selectors) {
+          if (selector && element.matches(selector)) {
+            return false;
+          }
+        }
       }
+
+      return true;
     },
     setBannerSettings: function (this: any, elm: HTMLElement): void {
       const attributes: NamedNodeMap = elm.attributes;
@@ -486,9 +494,26 @@ declare global {
       if (this.setting.template) {
         this.setting.template = this.formatRedirectURL(this.setting.template);
       }
-      if (this.setting['cookie-expires']) {
-        this.cookieExpires = parseInt(this.setting['cookie-expires'], 10);
+      if (this.setting.every) {
+        this.cookieExpires = this.parseEveryValue(this.setting.every);
       }
+    },
+    parseEveryValue: function (everyValue: string): number {
+      const defaultHours = 6;
+
+      if (!everyValue) {
+        return defaultHours;
+      }
+
+      const cleanValue = everyValue.toLowerCase().replace(/\s+/g, '');
+      const hoursMatch = cleanValue.match(/(\d+)h/)?.[1];
+      const minutesMatch = cleanValue.match(/(\d+)m/)?.[1];
+
+      const hours = hoursMatch ? parseInt(hoursMatch, 10) : 0;
+      const minutes = minutesMatch ? parseInt(minutesMatch, 10) : 0;
+      const totalHours = hours + minutes / 60;
+
+      return totalHours || defaultHours;
     },
     formatRedirectURL: function (this: any, redirectUrl: string): string {
       if (!/^(f|ht)tps?:\/\//i.test(redirectUrl)) {
