@@ -89,6 +89,22 @@
           <button id="triggerClick">Trigger Click Event</button>
           <button id="triggerTouch">Simulate Touch Event</button>
         </div>
+
+        <div class="test-section">
+          <h3>Parameter Tests</h3>
+          <button id="testScreenSize">Get Screen Size Info</button>
+          <button id="testCustomParams">Show Custom Parameters</button>
+          <button id="testUrlGeneration">Generate Test URL</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Current Configuration</h2>
+        <div id="config-info">
+          <p><strong>Screen Size:</strong> <span id="screen-info">Loading...</span></p>
+          <p><strong>Device Pixel Ratio:</strong> <span id="dpr-info">Loading...</span></p>
+          <p><strong>Custom Params:</strong> <span id="custom-params-info">Not set</span></p>
+        </div>
       </div>
 
       <div class="panel">
@@ -106,6 +122,9 @@
       data-ad-every="1m"
       data-ad-every-direct="4"
       data-ad-categories="category1,category2,..."
+      data-ad-param1="test_affiliate_123"
+      data-ad-param2="campaign_demo_2024"
+      data-ad-param3="source_test_page"
       async
       defer
     ></script>
