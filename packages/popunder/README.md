@@ -55,6 +55,9 @@ Configure the PopUnder script using `data-ad-*` attributes on the script tag:
 | `data-ad-cookie-name` | string | `ad_popunder` | Custom cookie name | `my_popup_cookie` |
 | `data-ad-cookie-domain` | string | - | Cookie domain | `.example.com` |
 | `data-ad-mode` | string | - | Operating mode | `selective` |
+| `data-ad-param1` | string | - | Custom parameter 1 | `custom_value_1` |
+| `data-ad-param2` | string | - | Custom parameter 2 | `custom_value_2` |
+| `data-ad-param3` | string | - | Custom parameter 3 | `custom_value_3` |
 
 ## Time Format
 
@@ -93,6 +96,9 @@ The `data-ad-every` attribute supports flexible time formats:
   data-ad-categories="gaming,entertainment"
   data-ad-cookie-name="gaming_popunder"
   data-ad-cookie-domain=".gaming-site.com"
+  data-ad-param1="source_website"
+  data-ad-param2="campaign_id_123"
+  data-ad-param3="affiliate_code"
   async
   defer
 ></script>
@@ -178,10 +184,40 @@ The script automatically includes various parameters in the redirect URL:
 - `domain` - Current domain
 - `rnd` - Random number
 - `x`, `y` - Click coordinates
-- `w`, `h` - Screen dimensions
+- `w`, `h` - Screen dimensions (with device pixel ratio applied)
 - `tz` - Timezone offset
 - `adb` - AdBlock detection status
 - `categories` - Page categories
+- `param1`, `param2`, `param3` - Custom configurable parameters
+
+### Screen Size Parameters
+
+The `w` and `h` parameters are calculated using:
+- Screen width/height from `window.screen`
+- Multiplied by `devicePixelRatio` for high-DPI displays
+- Converted to integers
+
+Example URL parameters:
+```
+https://ads.example.com/spot_123?domain=example.com&rnd=0.123456&x=150&y=300&w=1920&h=1080&tz=180&adb=0&categories=gaming,tech&param1=custom_value_1&param2=custom_value_2&param3=custom_value_3
+```
+
+### Custom Parameters
+
+Use `data-ad-param1`, `data-ad-param2`, and `data-ad-param3` to pass custom values:
+
+```html
+<script
+  src="./dist/popunder.js"
+  data-ad-template="https://ads.example.com/{unitid}"
+  data-ad-unitid="spot_001"
+  data-ad-param1="affiliate_123"
+  data-ad-param2="campaign_winter_2024"
+  data-ad-param3="source_blog"
+></script>
+```
+
+This will add `&param1=affiliate_123&param2=campaign_winter_2024&param3=source_blog` to the redirect URL.
 
 ## Development
 
