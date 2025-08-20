@@ -3,6 +3,7 @@ interface PopUnderData {
   'cookie-name'?: string;
   'cookie-domain'?: string;
   every?: string;
+  'every-direct'?: number;
   'ignore-filter'?: string;
   target?: string;
   categories?: string;
@@ -56,6 +57,7 @@ interface PopUnderSettings {
   'cookie-name': string;
   'cookie-domain'?: string;
   every?: string;
+  'every-direct'?: number;
   'ignore-filter'?: string[];
   target?: string;
   categories?: string;
@@ -255,6 +257,7 @@ declare global {
     filterParams: ['param1', 'param2', 'param3'] as string[],
     setting: {
       'cookie-name': 'ad_popunder',
+      'every-direct': 1,
       params: ['domain=' + (location.host || ''), 'rnd=' + Math.random()],
     } as PopUnderSettings,
     mainWindow: (top != self &&
@@ -398,18 +401,20 @@ declare global {
     doNotShow: function (this: any, element: HTMLElement): boolean {
       const ID_FIRST_MOUSE_BUTTON: number = 1;
       const which: number = this.clickEvent && (this.clickEvent as any).which;
-      const isATag: boolean = false; //this.isSelectiveTarget(element);
+      const isATag: boolean = this.isSelectiveTarget(element);
       const userAgentVersion: number = parseInt(
         this.userAgent.version || '0',
         10,
       );
       const cookieName: string = this.setting['cookie-name'];
+      const shouldSkipByClickCount: boolean = !this.checkEveryDirectCount();
       const showPopUnder: boolean =
         this.getCookie(cookieName) !== null ||
         this.checkIgnoreFilter(element) ||
         ('selective' === this.setting.mode && !isATag) ||
         (detectAdBlock && !isATag) ||
         !!element.getAttribute('target') ||
+        shouldSkipByClickCount ||
         (this.userAgent.chrome &&
           !this.userAgent.edge &&
           !this.userAgent.opera &&
@@ -426,6 +431,22 @@ declare global {
       }
 
       return showPopUnder;
+    },
+    checkEveryDirectCount: function (this: any): boolean {
+      const settingEveryDirect = Number(this.setting['every-direct']);
+      const everyDirectCount: number = isNaN(settingEveryDirect)
+        ? 1
+        : settingEveryDirect;
+      const storageKey = 'ad_popunder_click_count';
+      const currentCount = parseInt(
+        this.getLocalStorage(storageKey) || '0',
+        10,
+      );
+      const newCount = currentCount + 1;
+
+      this.setLocalStorage(storageKey, newCount.toString());
+
+      return newCount % everyDirectCount === 0;
     },
     checkIgnoreFilter: function (this: any, element: HTMLElement): boolean {
       const targetSelectors: string[] | undefined = this.setting.target;
