@@ -24,6 +24,7 @@ This monorepo contains the following packages:
 
 - `@adview/core`: Core utilities, types, and shared functionality
 - `@adview/react`: React components and hooks for AdView
+* `@adview/popunder`: The popunder advertising package.
 
 ## Table of Contents
 
@@ -61,6 +62,7 @@ AdView supports multiple import styles for different use cases:
 // React components - namespace import
 import * as AdView from '@adview/react';
 
+Build all packages
 // React components - named imports
 import { Provider, Unit, Template, DefaultTemplate } from '@adview/react';
 
@@ -130,7 +132,7 @@ function CustomAd() {
         if (state.isLoading) return <div>Loading ad...</div>;
         if (state.isError) return <div>Failed to load ad</div>;
         if (!data) return onDefault?.() || null;
-        
+
         return (
           <div className="custom-ad">
             <h3>{data.fields?.title}</h3>
@@ -331,7 +333,7 @@ export default function ClientAdComponent() {
           if (state.isLoading) return <div>Loading...</div>;
           if (error) return <div>Error: {error.message}</div>;
           if (!data) return null;
-          
+
           return (
             <div className="ad-content">
               <h3>{data.fields?.title}</h3>
@@ -396,6 +398,22 @@ npm run build
 npm run dev
 ```
 
+Build specific packages
+```bash
+  npm run popunder:build
+```
+
+Development mode for popunder package
+```bash
+  npm run popunder:dev
+```
+
+Clean popunder package build files
+```bash
+  npm run popunder:clean
+```
+
+Publish the package
 ### Scripts
 
 ```bash
