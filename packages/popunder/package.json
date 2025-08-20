@@ -1,0 +1,24 @@
+{
+  "name": "@adview/popunder",
+  "version": "1.0.0",
+  "description": "PopUnder script with TypeScript support",
+  "main": "dist/popunder.js",
+  "types": "dist/popunder.d.ts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "dotenv": "^16.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
+
