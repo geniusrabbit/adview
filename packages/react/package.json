@@ -1,6 +1,6 @@
 {
   "name": "@adview/react",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "AdView React",
   "scripts": {
     "build": "tsup",
