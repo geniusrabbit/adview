@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PopUnder.js Test Environment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .panel {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      button {
+        padding: 8px 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #log {
+        height: 300px;
+        overflow-y: auto;
+        background-color: #f5f5f5;
+        padding: 10px;
+        border: 1px solid #ddd;
+        font-family: monospace;
+        white-space: pre-wrap;
+      }
+      .test-section {
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>PopUnder.js Test Environment</h1>
+      <h1>https://docs.trafficstars.com/sdk/#/_popunder</h1>
+
+      <div class="panel">
+        <h2 class="click">Test Controls</h2>
+        <a href="https://www.google.com/" target="_blank">
+          target="_blank" https://www.google.com/
+        </a>
+        <br />
+        <a href="https://www.google.com/">
+         https://www.google.com/
+        </a>
+        <br />
+        <br />
+        <a href="/test.html">
+          /test.html - internal redirect
+        </a>
+        <div class="test-section">
+          <h3>Basic Tests</h3>
+          <button id="testCreate">Test PopUnder.create()</button>
+          <button id="testConfig">Test PopUnder.config()</button>
+          <button id="testBrowser">Get Browser Info</button>
+        </div>
+
+        <div class="test-section">
+          <h3>Storage Tests</h3>
+          <button id="testCookie">Test Cookie Storage</button>
+          <button id="testLocalStorage">Test Local Storage</button>
+          <button id="testSessionStorage">Test Session Storage</button>
+        </div>
+
+        <div class="test-section">
+          <h3>Event Tests</h3>
+          <button id="triggerClick">Trigger Click Event</button>
+          <button id="triggerTouch">Simulate Touch Event</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Console Output</h2>
+        <div id="log"></div>
+      </div>
+    </div>
+
+    <script
+      type="text/javascript"
+      src="./dist/popunder.js"
+      data-ad-template="https://localhost:2222/{unitid}/path"
+      data-ad-unitid="spot_xxx"
+      data-ad-target="a"
+      data-ad-every="1m"
+      data-ad-every-direct="4"
+      data-ad-categories="category1,category2,..."
+      async
+      defer
+    ></script>
+  </body>
+</html>
