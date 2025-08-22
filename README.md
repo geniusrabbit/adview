@@ -146,6 +146,75 @@ function CustomAd() {
 }
 ```
 
+### Advanced Usage with Multiple Formats
+
+```tsx
+import * as AdView from '@adview/react';
+
+function AdvancedAd() {
+  return (
+    <AdView.Unit unitId="multi-format-ad" format={['native', 'banner', 'proxy']}>
+      {/* Loading state for all formats */}
+      <AdView.Template type="*" isLoading={true}>
+        <div className="loading-placeholder">
+          Loading ad...
+        </div>
+      </AdView.Template>
+      
+      {/* Banner ad template */}
+      <AdView.Template type="banner">
+        {({ data }) => {
+          const mainAsset = data?.assets?.find(asset => asset.name === 'main');
+          return (
+            <div className="banner-ad">
+              <a href={data?.url} target="_blank" rel="noopener">
+                <img
+                  src={mainAsset?.path}
+                  alt={data?.fields?.title}
+                  style={{ width: '100%', height: 'auto' }}
+                />
+              </a>
+            </div>
+          );
+        }}
+      </AdView.Template>
+      
+      {/* Native ad template */}
+      <AdView.Template type="native">
+        {({ data }) => {
+          const mainAsset = data?.assets?.find(asset => asset.name === 'main');
+          return (
+            <div className="native-ad">
+              <a href={data?.fields?.url} target="_blank" rel="noopener">
+                <img src={mainAsset?.path} alt={data?.fields?.title} />
+                <h3>{data?.fields?.title}</h3>
+                <p>{data?.fields?.description}</p>
+                <span>{data?.fields?.brandname}</span>
+              </a>
+            </div>
+          );
+        }}
+      </AdView.Template>
+      
+      {/* Proxy template for iframe-based ads */}
+      <AdView.ProxyTemplate className="proxy-ad-container" />
+      
+      {/* Fallback template */}
+      <AdView.DefaultTemplate>
+        <div className="fallback-ad">
+          <iframe
+            src="https://your-fallback-ad.com"
+            width="100%"
+            height="240"
+            frameBorder="0"
+          />
+        </div>
+      </AdView.DefaultTemplate>
+    </AdView.Unit>
+  );
+}
+```
+
 ## API Reference
 
 ### AdView.Unit
@@ -157,7 +226,7 @@ Main component for displaying advertisements.
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `unitId` | `string` | ✓ | Unique identifier for the ad unit |
-| `format` | `'banner' \| 'native' \| 'proxy'` | ✗ | Ad format type |
+| `format` | `'banner' \| 'native' \| 'proxy' \| string[]` | ✗ | Ad format type or array of formats |
 | `srcURL` | `string` | ✗ | Ad server URL template |
 | `onDefault` | `() => ReactNode \| ReactNode` | ✗ | Fallback content when no ad is available |
 | `children` | `function \| ReactElement` | ✗ | Custom render function or component |
@@ -194,19 +263,41 @@ Template component for custom ad rendering with specific ad types.
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `type` | `'banner' \| 'native' \| 'proxy'` | Ad type for template matching |
+| `type` | `'banner' \| 'native' \| 'proxy' \| '*'` | Ad type for template matching. Use `'*'` for all types |
+| `isLoading` | `boolean` | Only render when in loading state |
+| `isError` | `boolean` | Only render when in error state |
+| `isComplete` | `boolean` | Only render when loading is complete |
 | `children` | `function` | Render function receiving ad data and state |
+
+### AdView.ProxyTemplate
+
+Pre-built template for proxy (iframe-based) ads.
+
+#### ProxyTemplate Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | CSS class for the iframe container |
+| `style` | `React.CSSProperties` | Inline styles for the iframe |
+
+#### ProxyTemplate Usage
+
+```tsx
+<AdView.Unit unitId="proxy-ad">
+  <AdView.ProxyTemplate className="ad-iframe" />
+</AdView.Unit>
+```
 
 ### AdView.DefaultTemplate
 
 Default fallback template when no ad data is available.
 
-#### Usage
+#### DefaultTemplate Usage
 
 ```tsx
 <AdView.Unit unitId="example">
   <AdView.DefaultTemplate>
-    <code>My custom fallback content or advertisement script ...</code>
+    <div>No ad available</div>
   </AdView.DefaultTemplate>
 </AdView.Unit>
 ```

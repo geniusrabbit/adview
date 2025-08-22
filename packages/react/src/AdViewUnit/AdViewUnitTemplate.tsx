@@ -54,7 +54,7 @@ export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, dat
       type = (tmpl.type as any)?.defaults?.type;
     }
     // If the type does not match, return null
-    if (data.type !== type) {
+    if (!!type && type !== '*' && data.type !== type) {
       return null;
     }
     // If children is a function, call it with the data

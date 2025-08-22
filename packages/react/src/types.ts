@@ -99,7 +99,7 @@ export type AdViewUnitTemplateTypeProps = AdViewOptionalDataProps & {
  * AdViewUnitTemplateProps is the type for the props of the AdViewUnitTemplate component
  */
 export type AdViewUnitTemplateProps = AdViewUnitTemplateTypeProps & {
-  children?: (data: AdViewUnitClientChildrenProps) => (React.ReactNode | JSX.Element | null);
+  children?: ((data: AdViewUnitClientChildrenProps) => (React.ReactNode | JSX.Element | null)) | React.ReactElement<AdViewUnitTemplateTypeProps> | undefined;
 };
 
 /**
@@ -107,10 +107,11 @@ export type AdViewUnitTemplateProps = AdViewUnitTemplateTypeProps & {
  * Allows complete control over ad display and loading states.
  */
 export type AdViewUnitClientChildren =
-  | ((props: AdViewUnitClientChildrenProps) => ReactNode | JSX.Element)
-  // | ReactElement<AdViewUnitClientChildrenProps>
+  | ((props: AdViewUnitClientChildrenProps) => ReactNode | JSX.Element | null)
   | ReactElement<AdViewUnitTemplateTypeProps>
   | ReactElement<AdViewUnitTemplateTypeProps>[]
+  | ReactElement
+  | undefined
   | any[];
 
 /**

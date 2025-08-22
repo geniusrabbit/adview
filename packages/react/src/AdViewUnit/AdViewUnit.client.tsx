@@ -52,7 +52,7 @@ function AdViewUnitClient({
   const { responseGroup: _, customTracker, groupItems } = error ? {responseGroup: null, customTracker: {}, groupItems: []} : (() => {
     for (let responseGroup of response?.groups || []) {
       const customTracker = responseGroup?.custom_tracker ?? {};
-      const groupItems = responseGroup?.items.map(it => checkFormat(it.type) ? it : null).filter(Boolean);
+      const groupItems = (responseGroup?.items || []).map(it => checkFormat(it.type) ? it : null).filter(Boolean);
       if (groupItems && groupItems.length > 0) {
         return {responseGroup, customTracker, groupItems};
       }
