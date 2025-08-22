@@ -29,30 +29,6 @@ interface CheckAdBlockVar {
   ie7: RegExpMatchArray | null;
 }
 
-interface UserAgent {
-  chromeOs: boolean;
-  webkit: boolean;
-  mozilla: boolean;
-  chrome: boolean;
-  maxthon: boolean;
-  samsung: boolean;
-  msie: boolean;
-  firefox: boolean;
-  safari: boolean;
-  opera: boolean;
-  macosx: boolean;
-  windowsXP: boolean;
-  windows: boolean;
-  ios: boolean;
-  crios: boolean;
-  android: boolean;
-  mobile: boolean;
-  winphone: boolean;
-  edge: boolean;
-  yaBrowser: boolean;
-  version: string;
-}
-
 interface PopUnderSettings {
   'cookie-name': string;
   'cookie-domain'?: string;
@@ -324,51 +300,9 @@ declare global {
         }
       }
 
-      if (this.userAgent.winphone) {
-        this.mobileTab(target);
-      } else {
-        this.desktopTab(target);
-      }
+      this.desktopTab(target);
 
       this.mainWindow.location.href = this.url;
-    },
-    mobileTab: function (this: any, target: HTMLElement): void {
-      const hyperlink: HTMLAnchorElement = document.createElement('a');
-      let event: MouseEvent;
-
-      hyperlink.href =
-        (target as HTMLAnchorElement).href || this.mainWindow.location.href;
-
-      hyperlink.setAttribute('target', '_blank');
-
-      try {
-        event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        });
-      } catch (e) {
-        event = document.createEvent('MouseEvents') as MouseEvent;
-        (event as any).initMouseEvent(
-          'click',
-          true,
-          true,
-          window,
-          0,
-          0,
-          0,
-          0,
-          0,
-          true,
-          false,
-          false,
-          false,
-          0,
-          null,
-        );
-      }
-
-      hyperlink.dispatchEvent(event);
     },
     desktopTab: function (this: any, target: HTMLElement): void {
       const newTab: Window | null = window.open(
@@ -402,10 +336,6 @@ declare global {
       const ID_FIRST_MOUSE_BUTTON: number = 1;
       const which: number = this.clickEvent && (this.clickEvent as any).which;
       const isATag: boolean = this.isSelectiveTarget(element);
-      const userAgentVersion: number = parseInt(
-        this.userAgent.version || '0',
-        10,
-      );
       const cookieName: string = this.setting['cookie-name'];
       const shouldSkipByClickCount: boolean = !this.checkEveryDirectCount();
       const showPopUnder: boolean =
@@ -414,17 +344,7 @@ declare global {
         ('selective' === this.setting.mode && !isATag) ||
         (detectAdBlock && !isATag) ||
         !!element.getAttribute('target') ||
-        shouldSkipByClickCount ||
-        (this.userAgent.chrome &&
-          !this.userAgent.edge &&
-          !this.userAgent.opera &&
-          userAgentVersion > 41 &&
-          userAgentVersion < 49 &&
-          !isATag);
-
-      if (this.userAgent.chromeOs) {
-        return true;
-      }
+        shouldSkipByClickCount;
 
       if (which && which !== ID_FIRST_MOUSE_BUTTON) {
         return true;
@@ -826,37 +746,6 @@ declare global {
 
       return null;
     },
-
-    userAgent: (function (): UserAgent {
-      const n: string = navigator.userAgent.toLowerCase();
-      const b: UserAgent = {
-        chromeOs: /CrOS/gi.test(n),
-        webkit: /webkit/gi.test(n),
-        mozilla: /mozilla/gi.test(n) && !/(compatible|webkit)/.test(n),
-        chrome: /chrome/gi.test(n),
-        maxthon: /maxthon/gi.test(n),
-        samsung: /samsungbrowser/gi.test(n),
-        msie: /msie/gi.test(n) && !/opera/.test(n),
-        firefox: /firefox/gi.test(n),
-        safari: /safari/gi.test(n) && !/chrome/.test(n),
-        opera: /opera|opr/gi.test(n),
-        macosx: /mac os x/gi.test(n),
-        windowsXP: /Windows NT 5/gi.test(n),
-        windows: /Windows NT/gi.test(n),
-        ios: /iphone|ipad/gi.test(n),
-        crios: /crios/gi.test(n),
-        android: /android/gi.test(n),
-        mobile: /mobile/gi.test(n) || /tablet/gi.test(n),
-        winphone: /windows phone/gi.test(n),
-        edge: /Edge/gi.test(n),
-        yaBrowser: /YaBrowser/gi.test(n),
-        version: '',
-      };
-      b.version = b.safari
-        ? (n.match(/.+?(?:on|ri)[\/: ]([\d.]+)/) || [])[1] || ''
-        : (n.match(/.+(?:ox|me|ra|ie|opr)[\/: ]([\d.]+)/) || [])[1] || '';
-      return b;
-    })(),
   };
 
   new (PopUnder as any)();
