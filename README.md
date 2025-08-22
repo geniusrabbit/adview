@@ -24,6 +24,7 @@ This monorepo contains the following packages:
 
 - `@adview/core`: Core utilities, types, and shared functionality
 - `@adview/react`: React components and hooks for AdView
+- `@adview/popunder`: Lightweight JavaScript library for popunder advertisements
 
 ## Table of Contents
 
@@ -35,6 +36,7 @@ This monorepo contains the following packages:
 - [Tracking](#tracking)
 - [Server-Side Rendering](#server-side-rendering)
 - [Next.js App Router](#nextjs-app-router)
+- [PopUnder Package](#popunder-package)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
@@ -61,6 +63,7 @@ AdView supports multiple import styles for different use cases:
 // React components - namespace import
 import * as AdView from '@adview/react';
 
+Build all packages
 // React components - named imports
 import { Provider, Unit, Template, DefaultTemplate } from '@adview/react';
 
@@ -130,7 +133,7 @@ function CustomAd() {
         if (state.isLoading) return <div>Loading ad...</div>;
         if (state.isError) return <div>Failed to load ad</div>;
         if (!data) return onDefault?.() || null;
-        
+
         return (
           <div className="custom-ad">
             <h3>{data.fields?.title}</h3>
@@ -422,7 +425,7 @@ export default function ClientAdComponent() {
           if (state.isLoading) return <div>Loading...</div>;
           if (error) return <div>Error: {error.message}</div>;
           if (!data) return null;
-          
+
           return (
             <div className="ad-content">
               <h3>{data.fields?.title}</h3>
@@ -463,6 +466,38 @@ This occurs when using render functions in Server Components. Solution:
 1. Add `'use client'` directive to your component
 2. Or use server-specific components from `@adview/react/server`
 
+## PopUnder Package
+
+The `@adview/popunder` package provides a standalone JavaScript library for creating popunder advertisements. It's designed to be lightweight and work independently of the React components.
+
+### PopUnder Features
+
+- ✅ Cross-browser compatibility (Chrome, Firefox, Safari, Edge, Opera)
+- ✅ Mobile device support (iOS, Android, Windows Phone)
+- ✅ AdBlock detection
+- ✅ Cookie-based and click-based frequency control
+- ✅ Flexible CSS selector targeting
+- ✅ Customizable parameters and templates
+- ✅ Built-in analytics and tracking
+
+### PopUnder Quick Start
+
+```html
+<script
+  type="text/javascript"
+  src="./dist/popunder.js"
+  data-ad-template="https://ads.example.com/{unitid}/redirect"
+  data-ad-unitid="your_unit_id"
+  data-ad-target="a"
+  data-ad-every="1h30m"
+  data-ad-every-direct="3"
+  async
+  defer
+></script>
+```
+
+For detailed PopUnder documentation, see [packages/popunder/README.md](./packages/popunder/README.md).
+
 ## Development
 
 ### Prerequisites
@@ -487,113 +522,98 @@ npm run build
 npm run dev
 ```
 
+### Package-specific Commands
+
+#### PopUnder Package
+
+```bash
+# Development mode for popunder
+npm run popunder:dev
+
+# Build popunder package
+npm run popunder:build
+
+# Clean popunder build files
+npm run popunder:clean
+```
+
+#### Core React Package
+
+```bash
+# Build all packages
+npm run build
+
+# Run linting
+npm run lint
+
+# Run tests
+npm run test
+```
+
+### Testing PopUnder
+
+To test the PopUnder functionality:
+
+```bash
+# Navigate to popunder package
+cd packages/popunder
+
+# Serve test files locally
+npx http-server . -p 8080
+
+# Open browser and navigate to:
+# http://localhost:8080/test.html
+```
+
 ### Scripts
 
 ```bash
-npm run build     # Build all packages
-npm run lint      # Run ESLint
-npm run test      # Run tests
-npm run version   # Version packages
-npm run release   # Publish packages
+npm run build          # Build all packages
+npm run lint           # Run ESLint
+npm run test           # Run tests
+npm run version        # Version packages
+npm run release        # Publish packages
+npm run popunder:dev   # Development mode for popunder
+npm run popunder:build # Build popunder package
+npm run popunder:clean # Clean popunder build files
 ```
-
-### Project Structure
-
-```text
-adview/
-├── packages/
-│   ├── react/              # React components and hooks
-│   │   ├── src/
-│   │   │   ├── AdViewUnit/ # Core components
-│   │   │   ├── types.ts    # TypeScript definitions
-│   │   │   ├── index.ts    # Client exports
-│   │   │   └── server.ts   # Server exports
-│   │   └── package.json
-│   └── (future packages: vue, angular, etc.)
-├── utils/                  # Shared utilities (@adview/core)
-├── typings/               # Global type definitions (@adview/core)
-└── package.json          # Core package (@adview/core)
-```
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript best practices
-- Add tests for new features
-- Update documentation for API changes
-- Run linting before submitting PRs
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-- 📧 **Email**: [support@geniusrabbit.com](mailto:support@geniusrabbit.com)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/geniusrabbit/adview/issues)
-- 📖 **Documentation**: [GitHub Wiki](https://github.com/geniusrabbit/adview/wiki)
 
 ## Publishing to npm
 
 For detailed instructions on publishing packages to npm, see [PUBLISHING.md](./PUBLISHING.md).
 
-**Quick commands:**
+### Quick Publishing Commands
 
 ```bash
 # Check packages are ready for publishing
-make publish-check
-
-# Check current versions
-make version-check
+npm run build
+npm run lint
+npm run test
 
 # Login to npm (first time only)
 npm login
 
 # Publish all packages
 npm run publish
-```
 
-## Creating New Framework Packages
-
-To add support for new frameworks (Vue, Angular, etc.):
-
-```bash
-# Create new package structure
-make create-package name=vue framework=Vue language=typescript
-
-# Navigate and implement
-cd packages/vue
-# ... implement Vue components ...
-
-# Build and test
-npm run build
-npm publish --dry-run
-```
-
-## Publishing & CI/CD
-
-### Quick Publishing
-
-The monorepo supports automated publishing with version management:
-
-```bash
-# Method 1: Quick publish with changeset
-npx changeset add
-npx changeset version
-npm run publish
-
-# Method 2: Manual version bump and publish
-npm version patch  # or minor, major
+# Or publish specific package
+cd packages/popunder
 npm publish
+
+cd packages/react
+npm publish
+```
+
+### Version Management
+
+```bash
+# Check current versions
+npm run version-check
+
+# Bump versions
+npm version patch   # or minor, major
+npm version minor
+npm version major
 ```
 
 ### Automated Publishing with Tags
@@ -621,11 +641,37 @@ Three GitHub Actions workflows are configured:
 - **`publish.yml`**: Publishes packages when version tags are pushed
 - **`release.yml`**: Manages changeset-based releases on main branch
 
-See [PUBLISHING.md](./PUBLISHING.md) for detailed publishing instructions.
+## Creating New Framework Packages
+
+To add support for new frameworks (Vue, Angular, etc.):
+
+```bash
+# Create new package structure
+mkdir -p packages/vue
+cd packages/vue
+
+# Initialize package
+npm init -y
+
+# Install dependencies and implement
+# ... implement Vue components ...
+
+# Build and test
+npm run build
+npm publish --dry-run
+```
 
 ## Troubleshooting
 
-### Permission Errors
+### PopUnder Issues
+
+1. **PopUnder not showing**: Check browser popup blockers, verify required attributes
+2. **Frequency problems**: Clear cookies/localStorage, check time format
+3. **Mobile issues**: Test on actual devices, verify touch events
+
+### Publishing Issues
+
+#### Permission Errors
 
 ```bash
 npm ERR! code E403
@@ -634,7 +680,7 @@ npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/@adview%2freact
 
 **Solution**: Ensure you have publishing permissions for the `@adview` scope.
 
-### Authentication Errors
+#### Authentication Errors
 
 ```bash
 npm ERR! code E401
@@ -643,7 +689,7 @@ npm ERR! 401 Unauthorized
 
 **Solution**: Run `npm login` again.
 
-### Package Already Exists
+#### Package Already Exists
 
 ```bash
 npm ERR! code E409
