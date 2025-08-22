@@ -1,0 +1,43 @@
+{
+  "name": "@adview/react-popunder",
+  "version": "1.0.0",
+  "description": "React wrapper component for AdView PopUnder script",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "react",
+    "popunder",
+    "advertisement",
+    "adview",
+    "popup"
+  ],
+  "author": "AdView Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@adview/popunder": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geniusrabbit/adview.git",
+    "directory": "packages/react-popunder"
+  }
+}
+

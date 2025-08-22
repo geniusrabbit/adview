@@ -16,6 +16,9 @@
     "popunder:dev": "npm run dev --workspace=packages/popunder",
     "popunder:build": "npm run build --workspace=packages/popunder",
     "popunder:clean": "npm run clean --workspace=packages/popunder",
+    "react-popunder:dev": "npm run dev --workspace=packages/react-popunder",
+    "react-popunder:build": "npm run build --workspace=packages/react-popunder",
+    "react-popunder:clean": "npm run clean --workspace=packages/react-popunder",
     "publish": "npm run build && changeset version && changeset publish",
     "publish-check": "npm run build && npm run version-check && turbo run publish-check",
     "version-check": "node -e \"require('fs').readdirSync('./packages').forEach(p => { try { const pkg = require('./packages/' + p + '/package.json'); console.log(pkg.name + ':', pkg.version); } catch(e) {} })\""

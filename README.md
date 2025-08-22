@@ -25,6 +25,7 @@ This monorepo contains the following packages:
 - `@adview/core`: Core utilities, types, and shared functionality
 - `@adview/react`: React components and hooks for AdView
 - `@adview/popunder`: Lightweight JavaScript library for popunder advertisements
+- `@adview/react-popunder`: React wrapper component for the PopUnder script
 
 ## Table of Contents
 
@@ -535,6 +536,19 @@ npm run popunder:build
 
 # Clean popunder build files
 npm run popunder:clean
+```
+
+#### React PopUnder Package
+
+```bash
+# Development mode for react-popunder
+npm run react-popunder:dev
+
+# Build react-popunder package
+npm run react-popunder:build
+
+# Clean react-popunder build files
+npm run react-popunder:clean
 ```
 
 #### Core React Package
