@@ -27,7 +27,7 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@adview/popunder": "workspace:*"
+    "@adview/popunder": "*"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
