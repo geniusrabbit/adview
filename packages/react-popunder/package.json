@@ -2,14 +2,22 @@
   "name": "@adview/react-popunder",
   "version": "1.0.0",
   "description": "React wrapper component for AdView PopUnder script",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build"
   },
@@ -32,7 +40,8 @@
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "tsup": "^8.4.0"
   },
   "repository": {
     "type": "git",
@@ -40,4 +49,3 @@
     "directory": "packages/react-popunder"
   }
 }
-
