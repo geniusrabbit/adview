@@ -724,3 +724,50 @@ echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 npm run build
 npm run publish
 ```
+
+### React PopUnder Package
+
+The `@adview/react-popunder` package provides a React wrapper component for the PopUnder script, allowing seamless integration into React applications.
+
+#### React PopUnder Installation
+
+```bash
+npm install @adview/react-popunder
+```
+
+#### React PopUnder Usage
+
+```tsx
+import { AdPopunder } from '@adview/react-popunder';
+
+function MyComponent() {
+  return (
+    <AdPopunder
+      unitId="your_unit_id"
+      template="https://ads.example.com/{unitid}/redirect"
+      target="a"
+      every="1h30m"
+      every-direct={3}
+    />
+  );
+}
+```
+
+#### React PopUnder Build Configuration
+
+The React PopUnder package uses `tsup` for building both ES modules and CommonJS versions:
+
+- **ESM**: `dist/index.mjs` - for modern bundlers
+- **CJS**: `dist/index.cjs` - for Node.js and older bundlers
+- **Types**: `dist/index.d.ts` - TypeScript declarations
+
+```bash
+# Development mode for react-popunder
+npm run react-popunder:dev
+
+# Build react-popunder package
+npm run react-popunder:build
+
+# Clean react-popunder build files
+npm run react-popunder:clean
+```
