@@ -1,2 +1,3 @@
-export { default as AdPopunder } from './AdPopunder';
-export type { AdPopunderProps } from './types';
+export type { PopunderProps } from './types';
+export { default } from './Popunder';
+export { default as usePopunder } from './usePopunder';

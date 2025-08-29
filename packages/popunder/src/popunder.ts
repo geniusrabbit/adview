@@ -1,9 +1,11 @@
 import { PopUnderData, PopUnderSettings } from './types';
 
-let dataPopUnder: PopUnderData | undefined = window.dataPopUnder;
+const isWindowDefined: boolean = typeof window !== 'undefined';
 let detectAdBlock: boolean = false;
 
 function PopUnder(config?: PopUnderData): void {
+  console.log('xxx config', config);
+
   if (config) {
     window.dataPopUnder = Object.assign({}, window?.dataPopUnder ?? {}, config);
   }
@@ -16,14 +18,19 @@ PopUnder.prototype = {
   cookieExpires: 6,
   filterParams: ['param1', 'param2', 'param3'] as string[],
   setting: {
-    'cookie-name': 'ad_popunder',
-    'every-direct': 1,
-    params: ['domain=' + (location.host || ''), 'rnd=' + Math.random()],
+    cookieName: 'ad_popunder',
+    everyDirect: 1,
+    params: [
+      'domain=' + (isWindowDefined ? location.host || '' : ''),
+      'rnd=' + Math.random(),
+    ],
   } as PopUnderSettings,
-  mainWindow: (top != self &&
-  typeof (top as Window).document.location.toString() == 'string'
-    ? top
-    : self) as Window,
+  mainWindow: isWindowDefined
+    ? ((top != self &&
+      typeof (top as Window).document?.location?.toString() == 'string'
+        ? top
+        : self) as Window)
+    : null,
   url: '',
   clickEvent: null as Event | null,
   popUnderRunning: false,
@@ -31,6 +38,7 @@ PopUnder.prototype = {
   init: function (this: any): void {
     const currentScript: HTMLScriptElement | null =
       document.currentScript as HTMLScriptElement;
+    const dataPopUnder = window?.dataPopUnder;
     const banner: PopUnderData | HTMLScriptElement | undefined =
       dataPopUnder || currentScript;
 
@@ -93,7 +101,7 @@ PopUnder.prototype = {
       (target as HTMLAnchorElement).href || this.mainWindow.location.href,
       '_blank',
     );
-    const cookieName: string = this.setting['cookie-name'];
+    const cookieName: string = this.setting.cookieName;
 
     if (newTab) {
       newTab.focus();
@@ -105,6 +113,7 @@ PopUnder.prototype = {
   },
 
   copySetting: function (this: any): void {
+    const dataPopUnder = window?.dataPopUnder;
     let value: any;
 
     for (const prop in dataPopUnder!) {
@@ -120,11 +129,11 @@ PopUnder.prototype = {
     const ID_FIRST_MOUSE_BUTTON: number = 1;
     const which: number = this.clickEvent && (this.clickEvent as any).which;
     const isATag: boolean = this.isSelectiveTarget(element);
-    const cookieName: string = this.setting['cookie-name'];
+    const cookieName: string = this.setting.cookieName;
     const shouldSkipByClickCount: boolean = !this.checkEveryDirectCount();
     const showPopUnder: boolean =
       this.getCookie(cookieName) !== null ||
-      this.checkIgnoreFilter(element) ||
+      !this.checkTargetFilter(element) ||
       ('selective' === this.setting.mode && !isATag) ||
       (detectAdBlock && !isATag) ||
       !!element.getAttribute('target') ||
@@ -137,7 +146,7 @@ PopUnder.prototype = {
     return showPopUnder;
   },
   checkEveryDirectCount: function (this: any): boolean {
-    const settingEveryDirect = Number(this.setting['every-direct']);
+    const settingEveryDirect = Number(this.setting.everyDirect);
     const everyDirectCount: number = isNaN(settingEveryDirect)
       ? 1
       : settingEveryDirect;
@@ -149,7 +158,7 @@ PopUnder.prototype = {
 
     return newCount % everyDirectCount === 0;
   },
-  checkIgnoreFilter: function (this: any, element: HTMLElement): boolean {
+  checkTargetFilter: function (this: any, element: HTMLElement): boolean {
     const targetSelectors: string[] | undefined = this.setting.target;
 
     if (targetSelectors) {
@@ -159,20 +168,30 @@ PopUnder.prototype = {
 
       for (const selector of selectors) {
         if (selector && element.matches(selector)) {
-          return false;
+          return true;
         }
       }
     }
 
-    return true;
+    return false;
   },
   setBannerSettings: function (this: any, elm: HTMLElement): void {
     const attributes: NamedNodeMap = elm.attributes;
     let settingsName: string, value: string;
+    const attrNameMapper = {
+      'cookie-name': 'cookieName',
+      'cookie-domain': 'cookieDomain',
+      'every-direct': 'everyDirect',
+      'ignore-filter': 'ignoreFilter',
+    };
 
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i] as Attr;
-      settingsName = attr?.name;
+      const attributeName = attr?.name;
+
+      settingsName =
+        attrNameMapper[attributeName as keyof typeof attrNameMapper] ||
+        attributeName;
 
       if (
         settingsName &&
@@ -201,8 +220,8 @@ PopUnder.prototype = {
       this.getMetaWords(),
     ].join(',');
 
-    if (this.setting['ignore-filter']) {
-      this.setting['ignore-filter'] = (this.setting['ignore-filter'] as string)
+    if (this.setting.ignoreFilter) {
+      this.setting.ignoreFilter = (this.setting.ignoreFilter as string)
         .replace(/\s+/g, '')
         .split(',');
     }
@@ -438,7 +457,7 @@ PopUnder.prototype = {
       selectorsList.push(elm.id);
     }
 
-    if (this.setting['ignore-filter']) {
+    if (this.setting.ignoreFilter) {
       count = selectorsList.length;
 
       for (; i < count; i++) {
@@ -461,7 +480,7 @@ PopUnder.prototype = {
     return false;
   },
   checkIgnore: function (this: any, elClass: string): boolean {
-    const ignoreList: string[] = this.setting['ignore-filter'] as string[];
+    const ignoreList: string[] = this.setting.ignoreFilter as string[];
     const count: number = ignoreList?.length || 0;
     let i: number = 0;
 
@@ -499,8 +518,8 @@ PopUnder.prototype = {
     const expires: string = new Date(
       new Date().getTime() + cookieLifetime * 3600000,
     ).toUTCString();
-    const domain: string = this.setting['cookie-domain']
-      ? '; domain=' + this.setting['cookie-domain']
+    const domain: string = this.setting.cookieDomain
+      ? '; domain=' + this.setting.cookieDomain
       : '';
 
     document.cookie =

@@ -1,13 +1,14 @@
-export interface AdPopunderProps {
+export interface PopunderProps {
   [key: string]: any;
-  'cookie-name'?: string;
-  'cookie-domain'?: string;
+  cookieName?: string;
+  cookieDomain?: string;
   every?: string;
-  'every-direct'?: number;
-  'ignore-filter'?: string;
+  everyDirect?: number;
+  ignoreFilter?: string[];
   target?: string;
   categories?: string;
   template?: string;
   unitid?: string;
   mode?: string;
+  params?: string[];
 }
