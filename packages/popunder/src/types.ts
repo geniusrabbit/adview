@@ -1,10 +1,10 @@
 export interface PopUnderData {
   [key: string]: any;
-  'cookie-name'?: string;
-  'cookie-domain'?: string;
+  cookieName?: string;
+  cookieDomain?: string;
   every?: string;
-  'every-direct'?: number;
-  'ignore-filter'?: string;
+  everyDirect?: number;
+  ignoreFilter?: string[];
   target?: string;
   categories?: string;
   template?: string;
@@ -30,17 +30,17 @@ export interface CheckAdBlockVar {
 }
 
 export interface PopUnderSettings {
-  'cookie-name': string;
-  'cookie-domain'?: string;
+  cookieName?: string;
+  cookieDomain?: string;
   every?: string;
-  'every-direct'?: number;
-  'ignore-filter'?: string[];
+  everyDirect?: number;
+  ignoreFilter?: string[];
   target?: string;
   categories?: string;
   template?: string;
   unitid?: string;
   mode?: string;
-  params: string[];
+  params?: string[];
 }
 
 declare global {
