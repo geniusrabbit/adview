@@ -12,12 +12,12 @@ yarn add @adview/react-popunder
 
 ## Features
 
-- 🔧 **React Component**: Easy integration with React applications
-- 🎯 **TypeScript Support**: Full type safety with TypeScript definitions
-- 🪝 **Custom Hook**: Programmatic control with `usePopUnder` hook
-- 🔄 **Automatic Cleanup**: Proper script cleanup on component unmount
-- ⚡ **Performance**: Prevents duplicate script loading
-- 🛡️ **Error Handling**: Built-in error handling and loading states
+- React Component: Easy integration with React applications
+- TypeScript Support: Full type safety with TypeScript definitions
+- Custom Hook: Programmatic control with `usePopunder` hook
+- Automatic Cleanup: Proper script cleanup on component unmount
+- Performance: Prevents duplicate script loading
+- Error Handling: Built-in error handling and loading states
 
 ## Usage
 
@@ -25,29 +25,46 @@ yarn add @adview/react-popunder
 
 ```tsx
 import React from 'react';
-import { PopUnder } from '@adview/react-popunder';
+import Popunder from '@adview/react-popunder';
 
 function App() {
-  const config = {
-    template: 'https://ads.example.com/{unitid}/redirect',
-    unitid: 'spot_001',
-    target: 'a',
-    every: '1h30m',
-    everyDirect: 3
-  };
-
   return (
     <div>
       <h1>My Website</h1>
       <a href="https://example.com">Click me</a>
 
-      <PopUnder
-        config={config}
-        onLoad={() => console.log('PopUnder loaded')}
-        onError={(error) => console.error('PopUnder error:', error)}
+      <Popunder
+        unitid="123456"
+        every="1h"
+        target="h1"
+        template="https://localhost:6666/{unitid}/path"
       />
     </div>
   );
+}
+```
+
+### Hook Usage
+
+```tsx
+import React from 'react';
+import Popunder, { usePopunder } from '@adview/react-popunder';
+
+function HookExample() {
+  const popunder = usePopunder({
+    unitid: '123456',
+    every: '1h',
+    target: 'h1',
+    template: 'https://localhost:6666/{unitid}/path',
+    everyDirect: 3,
+  });
+
+  // Hook returns PopUnder instance when ready (client-side only)
+  if (popunder) {
+    console.log('PopUnder instance is ready');
+  }
+
+  return <div>My Component</div>;
 }
 ```
 
@@ -55,66 +72,26 @@ function App() {
 
 ```tsx
 import React from 'react';
-import { PopUnder, PopUnderConfig } from '@adview/react-popunder';
+import Popunder from '@adview/react-popunder';
 
 function AdvancedApp() {
-  const config: PopUnderConfig = {
-    template: 'https://ads.example.com/{unitid}/click',
-    unitid: 'gaming_banner_001',
-    target: 'a, .btn, .clickable',
-    every: '2h30m',
-    everyDirect: 5,
-    ignoreFilter: '.no-popup, #header',
-    categories: 'gaming,entertainment',
-    cookieName: 'gaming_popunder',
-    cookieDomain: '.gaming-site.com',
-    param1: 'source_react',
-    param2: 'campaign_123',
-    param3: 'affiliate_code'
-  };
-
   return (
     <div>
-      <PopUnder
-        config={config}
-        async={true}
-        defer={true}
-        onLoad={() => console.log('PopUnder script loaded successfully')}
-        onError={(error) => console.error('Failed to load PopUnder:', error)}
+      <Popunder
+        unitid="gaming_banner_001"
+        template="https://ads.example.com/{unitid}/click"
+        target="a, .btn, .clickable"
+        every="2h30m"
+        everyDirect={5}
+        ignoreFilter={['.no-popup', '#header']}
+        categories="gaming,entertainment"
+        cookieName="gaming_popunder"
+        cookieDomain=".gaming-site.com"
+        mode="production"
+        params={['source_react', 'campaign_123', 'affiliate_code']}
       />
     </div>
   );
-}
-```
-
-### Using the Hook
-
-```tsx
-import React, { useEffect } from 'react';
-import { usePopUnder } from '@adview/react-popunder';
-
-function HookExample() {
-  const { isLoaded, isLoading, error, loadScript, unloadScript } = usePopUnder();
-
-  useEffect(() => {
-    const config = {
-      template: 'https://ads.example.com/{unitid}',
-      unitid: 'hook_example_001',
-      target: 'a'
-    };
-
-    loadScript(config);
-
-    return () => {
-      unloadScript();
-    };
-  }, [loadScript, unloadScript]);
-
-  if (isLoading) return <div>Loading PopUnder...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  if (isLoaded) return <div>PopUnder loaded successfully!</div>;
-
-  return <div>PopUnder not loaded</div>;
 }
 ```
 
@@ -122,17 +99,11 @@ function HookExample() {
 
 ```tsx
 import React, { useState } from 'react';
-import { PopUnder } from '@adview/react-popunder';
+import Popunder from '@adview/react-popunder';
 
 function ConditionalApp() {
   const [enableAds, setEnableAds] = useState(true);
   const [userConsent, setUserConsent] = useState(false);
-
-  const config = {
-    template: 'https://ads.example.com/{unitid}',
-    unitid: 'conditional_001',
-    target: 'a'
-  };
 
   return (
     <div>
@@ -145,7 +116,11 @@ function ConditionalApp() {
       </button>
 
       {enableAds && userConsent && (
-        <PopUnder config={config} />
+        <Popunder
+          unitid="conditional_001"
+          template="https://ads.example.com/{unitid}"
+          target="a"
+        />
       )}
     </div>
   );
@@ -154,100 +129,116 @@ function ConditionalApp() {
 
 ## API Reference
 
-### PopUnder Component Props
+### Popunder Component Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `config` | `PopUnderConfig` | - | **Required.** PopUnder configuration object |
-| `src` | `string` | auto-detected | Custom script source URL |
-| `async` | `boolean` | `true` | Load script asynchronously |
-| `defer` | `boolean` | `true` | Defer script execution |
-| `onLoad` | `() => void` | - | Callback when script loads successfully |
-| `onError` | `(error: Error) => void` | - | Callback when script fails to load |
+All props from `PopunderProps` interface can be passed directly to the component:
 
-### PopUnderConfig Interface
+| Prop | Type | Description |
+|------|------|-------------|
+| `unitid` | `string` | Ad unit identifier |
+| `template` | `string` | URL template for the popunder |
+| `target` | `string` | CSS selectors for clickable elements |
+| `every` | `string` | Time between popunders (e.g., "1h30m", "2h") |
+| `everyDirect` | `number` | Show popunder after N direct clicks |
+| `ignoreFilter` | `string[]` | Array of CSS selectors to ignore |
+| `categories` | `string` | Custom categories |
+| `cookieName` | `string` | Custom cookie name |
+| `cookieDomain` | `string` | Cookie domain |
+| `mode` | `string` | Operating mode |
+| `params` | `string[]` | Array of custom parameters |
+
+### PopunderProps Interface
 
 ```typescript
-interface PopUnderConfig {
-  template: string;           // Required: URL template
-  unitid: string;            // Required: Ad unit ID
-  target?: string;           // CSS selectors for clickable elements
-  every?: string;            // Time between popunders (e.g., "1h30m")
-  everyDirect?: number;      // Show after N clicks
-  ignoreFilter?: string;     // CSS selectors to ignore
-  categories?: string;       // Custom categories
-  cookieName?: string;       // Custom cookie name
-  cookieDomain?: string;     // Cookie domain
-  mode?: string;             // Operating mode
-  param1?: string;           // Custom parameter 1
-  param2?: string;           // Custom parameter 2
-  param3?: string;           // Custom parameter 3
+interface PopunderProps {
+  [key: string]: any;
+  cookieName?: string;
+  cookieDomain?: string;
+  every?: string;
+  everyDirect?: number;
+  ignoreFilter?: string[];
+  target?: string;
+  categories?: string;
+  template?: string;
+  unitid?: string;
+  mode?: string;
+  params?: string[];
 }
 ```
 
-### usePopUnder Hook
+### usePopunder Hook
 
 ```typescript
-const {
-  isLoaded,      // boolean: Whether script is loaded
-  isLoading,     // boolean: Whether script is currently loading
-  error,         // Error | null: Any loading error
-  loadScript,    // (config: PopUnderConfig) => void: Load script
-  unloadScript   // () => void: Unload script
-} = usePopUnder(options);
+function usePopunder(config: PopunderProps): PopUnder | null
 ```
 
-#### Hook Options
+The hook accepts a configuration object and returns:
+- `PopUnder` instance when ready (client-side)
+- `null` during SSR or before initialization
 
-```typescript
-interface UsePopUnderOptions {
-  autoLoad?: boolean;  // Auto-load on mount (default: false)
-  src?: string;        // Custom script source URL
-}
-```
+#### Hook Features
+
+- SSR-safe: Returns `null` on server-side
+- Automatic initialization when `window` is available
+- Memoized instance creation
+- Works with Next.js and other SSR frameworks
 
 ## TypeScript Support
 
 This package includes full TypeScript definitions. Import types as needed:
 
 ```typescript
-import { PopUnderConfig, PopUnderProps } from '@adview/react-popunder';
+import Popunder, { PopunderProps } from '@adview/react-popunder';
 ```
 
-## Error Handling
+## Examples
+
+### Basic Implementation
 
 ```tsx
-import React from 'react';
-import { PopUnder } from '@adview/react-popunder';
+import Popunder from '@adview/react-popunder';
 
-function ErrorHandlingExample() {
-  const handleError = (error: Error) => {
-    // Log to your error tracking service
-    console.error('PopUnder failed to load:', error);
+<Popunder
+  unitid="123456"
+  every="1h"
+  target="h1"
+  template="https://localhost:6666/{unitid}/path"
+/>
+```
 
-    // Optionally show user-friendly message
-    // or fallback behavior
-  };
+### Hook Implementation
 
-  const config = {
-    template: 'https://ads.example.com/{unitid}',
-    unitid: 'error_example_001'
-  };
+```tsx
+import { usePopunder } from '@adview/react-popunder';
 
-  return (
-    <PopUnder
-      config={config}
-      onError={handleError}
-    />
-  );
-}
+const popunder = usePopunder({
+  unitid: '123456',
+  every: '1h',
+  target: 'h1',
+  template: 'https://localhost:6666/{unitid}/path',
+  everyDirect: 3,
+});
+```
+
+### With Multiple Parameters
+
+```tsx
+<Popunder
+  unitid="advanced_001"
+  template="https://ads.example.com/{unitid}/redirect"
+  target="a, button"
+  every="2h"
+  everyDirect={3}
+  categories="sports,news"
+  params={['ref_source', 'campaign_id', 'user_segment']}
+/>
 ```
 
 ## Best Practices
 
-1. **Single Instance**: Only use one PopUnder component per page
+1. **Single Instance**: Only use one Popunder component per page
 2. **Conditional Rendering**: Use conditional rendering for user consent
-3. **Error Handling**: Always provide onError callback for production apps
+3. **SSR Compatibility**: Use the hook for SSR frameworks like Next.js
 4. **Performance**: Component automatically prevents duplicate script loading
 5. **Cleanup**: Component handles cleanup automatically on unmount
 
@@ -255,19 +246,22 @@ function ErrorHandlingExample() {
 
 ### Script Not Loading
 - Check browser console for errors
-- Verify the script source URL is accessible
-- Ensure required config properties are provided
+- Verify the template URL is accessible
+- Ensure required props (unitid, template) are provided
 
-### PopUnder Not Showing
+### Popunder Not Showing
 - Check browser popup blocker settings
 - Verify target elements exist on the page
 - Check frequency settings (every, everyDirect)
 
+### Next.js SSR Issues
+- Use the `usePopunder` hook for SSR compatibility
+- Hook automatically handles window availability
+
 ### TypeScript Errors
 - Ensure you have @types/react installed
-- Check that config object matches PopUnderConfig interface
+- Check that props match PopunderProps interface
 
 ## License
 
 MIT
-
