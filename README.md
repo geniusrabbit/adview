@@ -24,6 +24,7 @@ This monorepo contains the following packages:
 
 - `@adview/core`: Core utilities, types, and shared functionality
 - `@adview/react`: React components and hooks for AdView
+- `@adview/native`: Vanilla JavaScript SDK for advertisement integration and rendering
 - `@adview/popunder`: Lightweight JavaScript library for popunder advertisements
 - `@adview/react-popunder`: React wrapper component for the PopUnder script
 
@@ -161,7 +162,7 @@ function AdvancedAd() {
           Loading ad...
         </div>
       </AdView.Template>
-      
+
       {/* Banner ad template */}
       <AdView.Template type="banner">
         {({ data }) => {
@@ -179,7 +180,7 @@ function AdvancedAd() {
           );
         }}
       </AdView.Template>
-      
+
       {/* Native ad template */}
       <AdView.Template type="native">
         {({ data }) => {
@@ -196,10 +197,10 @@ function AdvancedAd() {
           );
         }}
       </AdView.Template>
-      
+
       {/* Proxy template for iframe-based ads */}
       <AdView.ProxyTemplate className="proxy-ad-container" />
-      
+
       {/* Fallback template */}
       <AdView.DefaultTemplate>
         <div className="fallback-ad">
