@@ -1,0 +1,51 @@
+{
+  "name": "@adview/native",
+  "version": "1.0.0",
+  "description": "AdView Native",
+  "type": "module",
+  "main": "./dist/index.js",
+  "browser": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "browser": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf .turbo node_modules dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "adview",
+    "ad widget",
+    "native"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geniusrabbit/adview.git"
+  },
+  "homepage": "https://github.com/geniusrabbit/adview/tree/main/packages/native#readme",
+  "dependencies": {
+    "@adview/core": "^1.0.6"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "author": "AdView Team",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
