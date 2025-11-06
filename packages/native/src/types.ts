@@ -35,6 +35,10 @@ export interface AdTracker {
   views?: string[];
 }
 
+export interface AdMeta {
+  items: { title?: string; value?: string }[];
+}
+
 export interface AdItem {
   type: 'proxy' | 'native' | 'banner';
   url?: string;
@@ -44,6 +48,7 @@ export interface AdItem {
   assets?: AdAsset[];
   format?: AdFormat;
   tracker?: AdTracker;
+  meta?: AdMeta;
 }
 
 export interface AdGroup {
@@ -79,6 +84,7 @@ export interface MapperConfig {
   dataParams?: DataParams;
   on?: AdMapperCallbacks;
   render?: any;
+  renderTemplate?: 'default';
 }
 
 export interface AdMapper {

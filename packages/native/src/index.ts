@@ -44,7 +44,8 @@ AMG.amgConfigure((manager) => {
 
 // Import necessary classes from other modules
 import { EmbeddedAd } from './embedded'; // EmbeddedAd class for handling individual ads
-import { Manager } from './manager'; // Manager class for orchestrating multiple ad mappers
+import { Manager } from './manager';
+import StylizedRender from './renders/StylizedRender'; // Manager class for orchestrating multiple ad mappers
 
 /**
  * amgConfigure function initializes the ad management system.
@@ -70,5 +71,7 @@ function amgConfigure(customInit?: (manager: Manager) => void): void {
   mn.execute();
 }
 
+window['AdViewStylizedRender'] = StylizedRender;
+
 // Export the EmbeddedAd, Manager, and amgConfigure as default exports
-export default { EmbeddedAd, Manager, amgConfigure };
+export default { EmbeddedAd, Manager, amgConfigure, StylizedRender };

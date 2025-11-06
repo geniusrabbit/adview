@@ -62,11 +62,11 @@ ad.on('loading', (data) => {
 ad.render();
 */
 
-// Import necessary functions and classes from other modules
-import { renderTemplate as rt } from './libs/template'; // Function to render templates
-import { Render, assertByName } from './render';
-import { getPrepareURL } from '@adview/core/utils'; // Render class and utility function
+import { renderTemplate as rt } from './libs/template';
+import { Render } from './renders/render';
+import { getPrepareURL } from '@adview/core/utils';
 import type { Template, AdItem } from './types';
+import assertByName from './libs/assertByName';
 
 /**
  * CustomRender class extends the rendering capabilities by allowing
