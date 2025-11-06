@@ -44,7 +44,7 @@ import type {
 export * from './libs/polyfills';
 
 // Import the Render class from the render module
-import { Render } from './render';
+import { Render } from './renders/render';
 
 // Define the default configuration for the EmbeddedAd
 const defaultConfig: EmbeddedAdSettings = {

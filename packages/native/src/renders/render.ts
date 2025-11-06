@@ -1,64 +1,7 @@
-// Import necessary functions from utility libraries
-
 import { getPrepareURL } from '@adview/core/utils';
-import type { AdItem, AdAsset, AdThumbnail } from './types';
-
-/**
- * Generates a srcset string for <img> tags based on the provided thumbnails.
- * @param thumbs - Array of thumbnail objects containing 'path' and 'width'.
- * @returns A comma-separated srcset string.
- */
-function srcSetThumbs(thumbs: AdThumbnail[]): string {
-  if (!thumbs || thumbs.length <= 0) {
-    return '';
-  }
-  const sset: string[] = [];
-  for (const i in thumbs) {
-    const thumb = thumbs[i];
-    if (thumb.width > 0) {
-      sset.push(thumb.path + ' ' + thumb.width + 'w');
-    }
-  }
-  return sset.join(',');
-}
-
-/**
- * Generates a srcset string for CSS background images based on the provided thumbnails.
- * @param thumbs - Array of thumbnail objects containing 'path' and 'width'.
- * @returns A comma-separated srcset string formatted for CSS.
- */
-function srcSetCSSThumbs(thumbs: AdThumbnail[]): string {
-  if (!thumbs || thumbs.length <= 0) {
-    return '';
-  }
-  const sset: string[] = [];
-  for (const i in thumbs) {
-    const thumb = thumbs[i];
-    if (thumb.width > 0) {
-      sset.push("url('" + thumb.path + "') " + thumb.width + 'w');
-    }
-  }
-  return sset.join(',');
-}
-
-/**
- * Retrieves an asset by its name from the provided assets array.
- * @param name - The name of the asset to retrieve.
- * @param assets - Array of asset objects.
- * @returns The asset object if found; otherwise, null.
- */
-export function assertByName(name: string, assets: AdAsset[]): AdAsset | null {
-  if (!assets) {
-    return null;
-  }
-  for (const i in assets) {
-    const assert = assets[i];
-    if (assert.name == name) {
-      return assert;
-    }
-  }
-  return null;
-}
+import type { AdItem } from '../types';
+import assertByName from '../libs/assertByName';
+import srcSetThumbs from '../libs/srcSetThumbs';
 
 /**
  * Render class handles the rendering of different types of advertisements
