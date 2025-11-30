@@ -167,7 +167,7 @@ npm publish --dry-run
 
 New packages should follow this structure:
 
-```
+```sh
 packages/[framework]/
 ├── src/
 │   ├── index.ts                 # Main entry point
@@ -230,7 +230,7 @@ git push --tags
 
 #### 1. Permission Denied (E403)
 
-```
+```sh
 npm ERR! code E403
 npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/@adview%2freact
 ```
@@ -242,7 +242,7 @@ npm ERR! 403 Forbidden - PUT https://registry.npmjs.org/@adview%2freact
 
 #### 2. Authentication Error (E401)
 
-```
+```sh
 npm ERR! code E401
 npm ERR! 401 Unauthorized
 ```
@@ -255,7 +255,7 @@ npm ERR! 401 Unauthorized
 
 #### 3. Version Already Exists (E409)
 
-```
+```sh
 npm ERR! code E409
 npm ERR! Cannot publish over existing version
 ```
@@ -267,7 +267,7 @@ npm ERR! Cannot publish over existing version
 
 #### 4. Build Failures
 
-```
+```sh
 Build failed: tsup encountered errors
 ```
 
@@ -548,7 +548,7 @@ Add notification steps:
 
 1. **npm Token Invalid:**
 
-   ```
+   ```sh
    npm ERR! code E401
 
    npm ERR! 401 Unauthorized
@@ -558,7 +558,7 @@ Add notification steps:
 
 2. **Permission Denied:**
 
-   ```
+   ```sh
    npm ERR! code E403
    npm ERR! 403 Forbidden
 
@@ -568,7 +568,7 @@ Add notification steps:
 
 3. **Build Failures:**
 
-   ```
+   ```sh
    Error: Command failed: make build
    ```
 
@@ -576,8 +576,7 @@ Add notification steps:
 
 4. **Tag Already Exists:**
 
-   ```
-
+   ```sh
    fatal: tag 'v1.0.0' already exists
    ```
 
