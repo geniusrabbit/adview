@@ -1,19 +1,21 @@
-import { defineConfig } from 'tsup';
 import dotenv from 'dotenv';
+import { defineConfig } from 'tsup';
 
 dotenv.config();
 
 const popunderDefaultUrlName = 'POPUNDER_DEFAULT_URL';
 
-export default defineConfig(options => [
-  // IIFE версия для браузера (существующая функциональность)
+// IIFE version for direct usage in browsers
+export default defineConfig([
   {
-    entry: ['src/ad-popunder.ts'],
+    entry: {
+      ptl: 'src/ad-popunder.ts',
+    },
     format: ['iife'],
     target: 'es5',
     clean: true,
-    minify: !options.watch,
-    sourcemap: Boolean(options.watch),
+    minify: false,
+    sourcemap: false,
     outDir: 'dist',
     globalName: 'Popunder',
     outExtension: () => ({ js: '.js' }),
@@ -26,28 +28,28 @@ export default defineConfig(options => [
       js: '/* PopUnder Script - AdView Team */',
     },
   },
-  // ES Module и CommonJS версии для импорта в других пакетах
-  {
-    entry: ['src/index.ts'],
-    format: ['esm', 'cjs'],
-    target: 'es2018',
-    clean: false,
-    minify: !options.watch,
-    sourcemap: Boolean(options.watch),
-    outDir: 'dist',
-    dts: {
-      tsconfig: './tsconfig.json',
-    },
-    outExtension: ({ format }) => ({
-      js: format === 'cjs' ? '.cjs' : '.mjs',
-    }),
-    define: {
-      [`process.env.${popunderDefaultUrlName}`]: JSON.stringify(
-        process.env[popunderDefaultUrlName],
-      ),
-    },
-    banner: {
-      js: '/* PopUnder Module - AdView Team */',
-    },
-  },
+  // ES Module & CommonJS versions for bundlers
+  // {
+  //   entry: {
+  //     'ptl.pkg': 'src/index.ts',
+  //   },
+  //   format: ['esm', 'cjs'],
+  //   target: 'es2018',
+  //   clean: false,
+  //   minify: false,
+  //   sourcemap: false,
+  //   outDir: 'dist',
+  //   dts: true,
+  //   outExtension: ({ format }) => ({
+  //     js: format === 'cjs' ? '.cjs' : '.mjs',
+  //   }),
+  //   define: {
+  //     [`process.env.${popunderDefaultUrlName}`]: JSON.stringify(
+  //       process.env[popunderDefaultUrlName],
+  //     ),
+  //   },
+  //   banner: {
+  //     js: '/* PopUnder Module - AdView Team */',
+  //   },
+  // },
 ]);

@@ -1,18 +1,18 @@
-import { defineConfig } from 'tsup';
-import path from 'path';
+import dotenv from 'dotenv';
 import fsPromises from 'fs/promises';
+import { generateScopedName } from 'hash-css-selector';
+import path from 'path';
 import postcss from 'postcss';
 import postcssModules from 'postcss-modules';
-import { generateScopedName } from 'hash-css-selector';
-import dotenv from 'dotenv';
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: {
-    adViewNative: 'src/index.ts',
-    stylesStylizedRender: 'src/renders/StylizedRender.module.css',
+    ntl: 'src/index.ts',
+    'ntl.styles': 'src/renders/StylizedRender.module.css',
   },
   format: ['iife'],
-  globalName: 'AdViewNative',
+  globalName: 'ntl',
   dts: true,
   clean: true,
   sourcemap: false,
