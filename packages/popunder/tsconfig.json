@@ -1,26 +1,27 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2018",
     "module": "ESNext",
     "moduleResolution": "node",
+    "lib": ["ES6", "DOM"],
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"],
-    "lib": ["DOM", "ES2018"]
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "dist",
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }
-
