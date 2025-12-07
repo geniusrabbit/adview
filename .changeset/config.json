@@ -8,7 +8,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@adview/native",
-    "@adview/popunder"
+    "@adview/native"
   ]
 }
