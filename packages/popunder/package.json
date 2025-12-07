@@ -1,6 +1,6 @@
 {
   "name": "@adview/popunder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PopUnder script with TypeScript support",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
