@@ -32,5 +32,5 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "private": true
+  "private": false
 }
