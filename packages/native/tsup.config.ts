@@ -108,5 +108,18 @@ export default defineConfig({
     options.mainFields = ['browser', 'module', 'main'];
     options.packages = 'bundle';
   },
-  env: dotenv.config().parsed,
+  env: Object.fromEntries(
+    Object.entries({
+      ...process.env,
+      ...dotenv.config({
+        override: true,
+        processEnv: Object.fromEntries(
+          Object.entries(process.env).
+            filter(([, value]) => value !== undefined)
+        ) as { [k: string]: string }}
+      ).parsed
+    }).filter(
+      ([, value]) => value !== undefined
+    )
+  ) as { [k: string]: string },
 });
