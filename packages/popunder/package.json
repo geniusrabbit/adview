@@ -28,9 +28,5 @@
   },
   "files": [
     "dist"
-  ],
-  "publishConfig": {
-    "access": "restricted"
-  },
-  "private": false
+  ]
 }
