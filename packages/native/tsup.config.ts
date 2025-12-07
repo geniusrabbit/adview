@@ -9,7 +9,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     ntl: 'src/index.ts',
-    'ntl.styles': 'src/renders/StylizedRender.module.css',
+    'stylesStylizedRender': 'src/renders/StylizedRender.module.css',
   },
   format: ['iife'],
   globalName: 'ntl',

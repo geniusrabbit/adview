@@ -1,8 +1,8 @@
-import { Render } from './render';
-import type { AdItem } from '../types';
+import { getPrepareURL } from '@adview/core';
 import assertByName from '../libs/assertByName';
 import srcSetThumbs from '../libs/srcSetThumbs';
-import { getPrepareURL } from '@adview/core';
+import type { AdItem } from '../types';
+import { Render } from './render';
 import styles from './StylizedRender.module.css';
 
 class StylizedRender extends Render {

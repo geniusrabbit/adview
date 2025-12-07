@@ -14,7 +14,7 @@ export default defineConfig([
     format: ['iife'],
     target: 'es5',
     clean: true,
-    minify: false,
+    minify: true,
     sourcemap: false,
     outDir: 'dist',
     globalName: 'Popunder',
