@@ -190,4 +190,5 @@ class SmartDataLoader implements AdViewDataLoader {
   }
 }
 
+export type { LoaderItem };
 export default SmartDataLoader;
