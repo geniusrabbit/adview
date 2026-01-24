@@ -1,8 +1,12 @@
 import React from 'react';
 
-import { AdViewData } from '@adview/core';
+import { AdViewData, AdViewDataLoader } from '@adview/core';
 import { AdViewGroupItem } from '@adview/core/typings';
-import { adViewFetcher, getAdRequestUrl, getResolveConfig } from '@adview/core/utils';
+import {
+  getAdRequestUrl,
+  getDataLoaderFromConfig,
+  getResolveConfig
+} from '@adview/core/utils';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
 import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
 import AdViewUnitNativeTemplate from './AdViewUnitNativeTemplate';
@@ -21,13 +25,16 @@ async function AdViewUnitServer({
   ...config
 }: AdViewUnitServerProps) {
   const checkFormat = (f: string) => {
-    if (!format) { return true; }
+    if (!format) {
+      return true;
+    }
     return Array.isArray(format) ? format.includes(f) : f === format;
   };
 
   const baseConfig = getResolveConfig(config);
   const requestUrl = getAdRequestUrl(baseConfig, unitId, format);
-  const response = await adViewFetcher(requestUrl);
+  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig);
+  const response = await dataLoader.fetchAdData(unitId, 1, format);
   const isLoadingError = response instanceof Error;
   const error = isLoadingError ? response : undefined;
   const state = {
@@ -37,23 +44,30 @@ async function AdViewUnitServer({
     isError: isLoadingError,
   };
 
-  const { responseGroup: _, customTracker, groupItems } = error ? {responseGroup: null, customTracker: {}, groupItems: []} : (() => {
-    for (let responseGroup of (response as AdViewData)?.groups || []) {
-      const customTracker = responseGroup?.custom_tracker ?? {};
-      const groupItems = (responseGroup?.items || []).map(it => checkFormat(it.type) ? it : null).
-        filter(Boolean) as AdViewGroupItem[];
-      if (groupItems && groupItems.length > 0) {
-        return {responseGroup, customTracker, groupItems};
-      }
-    }
-    return {responseGroup: null, customTracker: {}, groupItems: []};
-  })();
-  
+  const {
+    responseGroup: _,
+    customTracker,
+    groupItems,
+  } = error
+    ? { responseGroup: null, customTracker: {}, groupItems: [] }
+    : (() => {
+        for (let responseGroup of (response as AdViewData)?.groups || []) {
+          const customTracker = responseGroup?.custom_tracker ?? {};
+          const groupItems = (responseGroup?.items || [])
+            .map(it => (checkFormat(it.type) ? it : null))
+            .filter(Boolean) as AdViewGroupItem[];
+          if (groupItems && groupItems.length > 0) {
+            return { responseGroup, customTracker, groupItems };
+          }
+        }
+        return { responseGroup: null, customTracker: {}, groupItems: [] };
+      })();
+
   if (!children) {
     children = [
       <AdViewUnitBannerTemplate />,
       <AdViewUnitNativeTemplate />,
-      <AdViewUnitProxyTemplate />
+      <AdViewUnitProxyTemplate />,
     ];
   }
 
@@ -61,7 +75,12 @@ async function AdViewUnitServer({
     return groupItems.map(({ tracker, ...data }: AdViewGroupItem) => {
       return (
         <AdViewUnitTracking key={data.id} {...tracker}>
-          {renderAnyTemplates(children, {data, type: data.type || 'default', error, state: state})}
+          {renderAnyTemplates(children, {
+            data,
+            type: data.type || 'default',
+            error,
+            state: state,
+          })}
         </AdViewUnitTracking>
       );
     });
@@ -69,7 +88,12 @@ async function AdViewUnitServer({
 
   return (
     <AdViewUnitTracking {...customTracker}>
-      {renderAnyTemplates(children, {data: null, type: 'default', error, state: state})}
+      {renderAnyTemplates(children, {
+        data: null,
+        type: 'default',
+        error,
+        state: state,
+      })}
     </AdViewUnitTracking>
   );
 }

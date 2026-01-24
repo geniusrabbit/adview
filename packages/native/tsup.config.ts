@@ -110,13 +110,7 @@ export default defineConfig({
   },
   env: Object.fromEntries(
     Object.entries({
-      ...dotenv.config({
-        override: true,
-        processEnv: Object.fromEntries(
-          Object.entries(process.env).
-            filter(([, value]) => value !== undefined)
-        ) as { [k: string]: string }}
-      ).parsed,
+      ...dotenv.config().parsed,
       ...process.env,
     }).filter(
       ([, value]) => value !== undefined

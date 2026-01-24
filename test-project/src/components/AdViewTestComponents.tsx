@@ -7,13 +7,16 @@ interface TestComponentProps {
 }
 
 const TestComponent: React.FC<TestComponentProps> = ({ title, children }) => (
-  <div className="test-card" style={{ 
-    border: '1px solid #ddd', 
-    padding: '1rem', 
-    margin: '1rem 0',
-    borderRadius: '8px',
-    backgroundColor: '#f9f9f9'
-  }}>
+  <div
+    className="test-card"
+    style={{
+      border: '1px solid #ddd',
+      padding: '1rem',
+      margin: '1rem 0',
+      borderRadius: '8px',
+      backgroundColor: '#f9f9f9',
+    }}
+  >
     <h3 style={{ marginTop: 0, color: '#333' }}>{title}</h3>
     {children}
   </div>
@@ -31,9 +34,9 @@ const mockBannerData = {
       type: 'image/png',
       width: 728,
       height: 90,
-      thumbs: []
-    }
-  ]
+      thumbs: [],
+    },
+  ],
 };
 
 const mockNativeData = {
@@ -55,46 +58,85 @@ const mockNativeData = {
       type: 'image/png',
       width: 1200,
       height: 600,
-      thumbs: []
-    }
-  ]
+      thumbs: [],
+    },
+  ],
 };
 
 export default function AdViewTestComponents() {
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '2rem', color: '#333' }}>🧪 AdView React Components Test</h1>
-      
+      <h1 style={{ marginBottom: '2rem', color: '#333' }}>
+        🧪 AdView React Components Test
+      </h1>
+
       <TestComponent title="AdViewProvider Test">
         <p>Testing the AdViewProvider wrapper component:</p>
-        <AdView.Provider 
-          srcURL="https://api.example.com/ads/{<id>}"
-        >
-          <div style={{ padding: '1rem', backgroundColor: '#e7f3ff', borderRadius: '4px' }}>
-            <p>✅ AdViewProvider is working! This content is wrapped by the provider.</p>
-            <p><small>Provider configured with: srcURL=&quot;https://api.example.com/ads/&#123;id&#125;&quot;</small></p>
+        <AdView.Provider srcURL="https://api.example.com/ads/{<id>}">
+          <div
+            style={{
+              padding: '1rem',
+              backgroundColor: '#e7f3ff',
+              borderRadius: '4px',
+            }}
+          >
+            <p>
+              ✅ AdViewProvider is working! This content is wrapped by the
+              provider.
+            </p>
+            <p>
+              <small>
+                Provider configured with:
+                srcURL=&quot;https://api.example.com/ads/&#123;id&#125;&quot;
+              </small>
+            </p>
           </div>
         </AdView.Provider>
       </TestComponent>
 
       <TestComponent title="AdViewUnitBanner Component Rendering">
         <p>Testing banner ad unit component with mock data:</p>
-        <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
+        <div
+          style={{
+            border: '2px dashed #ccc',
+            padding: '1rem',
+            backgroundColor: '#fafafa',
+            maxWidth: '100%',
+          }}
+        >
           <AdView.BannerTemplate
             data={mockBannerData}
-            state={{ isComplete: true, isLoading: false, isError: false, isInitial: true }}
+            state={{
+              isComplete: true,
+              isLoading: false,
+              isError: false,
+              isInitial: true,
+            }}
             className="test-banner-container"
           />
         </div>
-        <p><small>Banner component renders with mock asset data</small></p>
+        <p>
+          <small>Banner component renders with mock asset data</small>
+        </p>
       </TestComponent>
 
       <TestComponent title="AdViewUnitNative Component Rendering">
         <p>Testing native ad unit component with mock data:</p>
-        <div style={{ border: '2px dashed #ccc', padding: '1rem', backgroundColor: '#fafafa' }}>
+        <div
+          style={{
+            border: '2px dashed #ccc',
+            padding: '1rem',
+            backgroundColor: '#fafafa',
+          }}
+        >
           <AdView.NativeTemplate
             data={mockNativeData}
-            state={{ isComplete: true, isLoading: false, isError: false, isInitial: true }}
+            state={{
+              isComplete: true,
+              isLoading: false,
+              isError: false,
+              isInitial: true,
+            }}
             classNames={{
               container: 'test-native-container',
               label: 'test-native-label',
@@ -104,11 +146,13 @@ export default function AdViewTestComponents() {
               descriptionLink: 'test-native-description',
               brandNameLink: 'test-native-brand',
               phoneLink: 'test-native-phone',
-              urlLink: 'test-native-url'
+              urlLink: 'test-native-url',
             }}
           />
         </div>
-        <p><small>Native component renders with mock asset and text data</small></p>
+        <p>
+          <small>Native component renders with mock asset and text data</small>
+        </p>
       </TestComponent>
 
       <TestComponent title="AdViewUnitClient with Children Function">
@@ -120,22 +164,34 @@ export default function AdViewTestComponents() {
             srcURL="https://api.example.com/ads/{<id>}"
           >
             {({ data, state, error }) => (
-              <div style={{ 
-                padding: '1rem', 
-                backgroundColor: '#e8f4fd',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '0.9em'
-              }}>
-                <p><strong>📊 Client Component State:</strong></p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: '#e8f4fd',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                  fontSize: '0.9em',
+                }}
+              >
+                <p>
+                  <strong>📊 Client Component State:</strong>
+                </p>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '0.5rem',
+                  }}
+                >
                   <div>• Initial: {state.isInitial ? '✅' : '❌'}</div>
                   <div>• Loading: {state.isLoading ? '🔄' : '❌'}</div>
                   <div>• Error: {state.isError ? '❌' : '✅'}</div>
                   <div>• Complete: {state.isComplete ? '✅' : '⏳'}</div>
                 </div>
                 <p>• Data: {data ? '📦 Available' : '🚫 None'}</p>
-                {error && <p style={{ color: 'red' }}>💥 Error: {error.message}</p>}
+                {error && (
+                  <p style={{ color: 'red' }}>💥 Error: {error.message}</p>
+                )}
               </div>
             )}
             <AdView.DefaultTemplate>
@@ -148,39 +204,83 @@ export default function AdViewTestComponents() {
       </TestComponent>
 
       <TestComponent title="Import Test Results">
-        <div style={{ 
-          fontFamily: 'monospace', 
-          backgroundColor: '#f0f0f0', 
-          padding: '1rem',
-          borderRadius: '4px'
-        }}>
-          <p><strong>✅ Successfully imported components:</strong></p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '1rem' }}>
-            <div>• AdView.Provider: <code>{typeof AdView.Provider}</code></div>
-            <div>• AdView.Unit: <code>{typeof AdView.Unit}</code></div>
-            <div>• AdView.BannerTemplate: <code>{typeof AdView.BannerTemplate}</code></div>
-            <div>• AdView.NativeTemplate: <code>{typeof AdView.NativeTemplate}</code></div>
-            <div>• AdView.ProxyTemplate: <code>{typeof AdView.ProxyTemplate}</code></div>
+        <div
+          style={{
+            fontFamily: 'monospace',
+            backgroundColor: '#f0f0f0',
+            padding: '1rem',
+            borderRadius: '4px',
+          }}
+        >
+          <p>
+            <strong>✅ Successfully imported components:</strong>
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.5rem',
+              marginTop: '1rem',
+            }}
+          >
+            <div>
+              • AdView.Provider: <code>{typeof AdView.Provider}</code>
+            </div>
+            <div>
+              • AdView.Unit: <code>{typeof AdView.Unit}</code>
+            </div>
+            <div>
+              • AdView.BannerTemplate:{' '}
+              <code>{typeof AdView.BannerTemplate}</code>
+            </div>
+            <div>
+              • AdView.NativeTemplate:{' '}
+              <code>{typeof AdView.NativeTemplate}</code>
+            </div>
+            <div>
+              • AdView.ProxyTemplate: <code>{typeof AdView.ProxyTemplate}</code>
+            </div>
           </div>
-          <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#d4edda', borderRadius: '4px' }}>
-            <strong>🎉 All components imported successfully from @adview/react!</strong>
+          <div
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem',
+              backgroundColor: '#d4edda',
+              borderRadius: '4px',
+            }}
+          >
+            <strong>
+              🎉 All components imported successfully from @adview/react!
+            </strong>
           </div>
         </div>
       </TestComponent>
 
       <TestComponent title="Package Development Info">
-        <div style={{ 
-          backgroundColor: '#f8f9fa', 
-          padding: '1rem',
-          borderRadius: '4px',
-          fontFamily: 'monospace',
-          fontSize: '0.9em'
-        }}>
-          <div><strong>📦 Package:</strong> @adview/react</div>
-          <div><strong>🔗 Source:</strong> file:../packages/react</div>
-          <div><strong>🏗️ Build Status:</strong> ✅ Built successfully</div>
-          <div><strong>🌐 Dev Server:</strong> http://localhost:3002</div>
-          <div><strong>⏰ Last Updated:</strong> {new Date().toLocaleString()}</div>
+        <div
+          style={{
+            backgroundColor: '#f8f9fa',
+            padding: '1rem',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '0.9em',
+          }}
+        >
+          <div>
+            <strong>📦 Package:</strong> @adview/react
+          </div>
+          <div>
+            <strong>🔗 Source:</strong> file:../packages/react
+          </div>
+          <div>
+            <strong>🏗️ Build Status:</strong> ✅ Built successfully
+          </div>
+          <div>
+            <strong>🌐 Dev Server:</strong> http://localhost:3002
+          </div>
+          <div>
+            <strong>⏰ Last Updated:</strong> {new Date().toLocaleString()}
+          </div>
         </div>
       </TestComponent>
     </div>

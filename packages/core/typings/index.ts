@@ -191,6 +191,19 @@ export interface AdViewData {
 export type AdViewUnitDefault = (() => ReactNode) | ReactNode;
 
 /**
+ * Interface for custom ad data loaders.
+ * Allows integration with different data fetching strategies.
+ */
+export interface AdViewDataLoader {
+  /** Fetches ad data from the server */
+  fetchAdData: (
+    unitId: string,
+    limit: number,
+    format?: string | string[],
+  ) => Promise<AdViewData | Error>;
+}
+
+/**
  * Configuration options for AdView components.
  * Contains server URL and other global settings.
  */
@@ -198,5 +211,7 @@ export type AdViewConfig = {
   /** Ad server URL template with {<id>} placeholder */
   srcURL?: string;
   /** Default ad data */
-  defaultAdData?: AdViewData[];
+  defaultAdData?: AdViewGroupItem[];
+  /** Optional custom data loader for fetching ads */
+  sourceLoader?: AdViewDataLoader;
 };

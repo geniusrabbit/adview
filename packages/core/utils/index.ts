@@ -1,8 +1,13 @@
-// Core utility functions  
-export { default as adViewFetcher } from './adViewFetcher';
+// Core utility functions
 export { default as executeImpressionsTracking } from './executeImpressionsTracking';
 export { default as getAssetByName } from './getAssetByName';
-export { getAdRequestUrl, getScrapedData, getSearchParams, pageScrapers } from './getCollectPageData';
+export {
+  getAdRequestUrl,
+  getScrapedData,
+  getSearchParams,
+  pageScrapers
+} from './getCollectPageData';
+export { default as getDataLoaderFromConfig } from './getDataLoaderFromConfig';
 export { default as getPrepareURL } from './getPrepareURL';
 export { default as getRandomString } from './getRandomString';
 export { default as getResolveConfig } from './getResolveConfig';

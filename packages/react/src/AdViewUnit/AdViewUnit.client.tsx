@@ -34,53 +34,81 @@ export type AdViewUnitClientProps = AdViewUnitPropsBase & {
 // It uses the AdViewUnitTracking component to handle ad tracking and interactions.
 function AdViewUnitClient({
   unitId,
+  limit = 1,
   format,
   children,
   ...config
 }: AdViewUnitClientProps) {
   const checkFormat = (f: string) => {
-    if (!format) { return true; }
+    if (!format) {
+      return true;
+    }
     return Array.isArray(format) ? format.includes(f) : f === format;
   };
 
   const [response, error, loadState] = useAdViewController(
     config,
     unitId,
+    limit || 1,
     format,
   );
 
-  const { responseGroup: _, customTracker, groupItems } = error ? {responseGroup: null, customTracker: {}, groupItems: []} : (() => {
-    for (let responseGroup of response?.groups || []) {
-      const customTracker = responseGroup?.custom_tracker ?? {};
-      const groupItems = (responseGroup?.items || []).map(it => checkFormat(it.type) ? it : null).filter(Boolean);
-      if (groupItems && groupItems.length > 0) {
-        return {responseGroup, customTracker, groupItems};
-      }
-    }
-    return {responseGroup: null, customTracker: {}, groupItems: []};
-  })();
+  const {
+    responseGroup: _,
+    customTracker,
+    groupItems,
+  } = error
+    ? { responseGroup: null, customTracker: {}, groupItems: [] }
+    : (() => {
+        for (let responseGroup of response?.groups || []) {
+          const customTracker = responseGroup?.custom_tracker ?? {};
+          const groupItems = (responseGroup?.items || [])
+            .map(it => (checkFormat(it.type) ? it : null))
+            .filter(Boolean);
+          if (groupItems && groupItems.length > 0) {
+            return { responseGroup, customTracker, groupItems };
+          }
+        }
+        return { responseGroup: null, customTracker: {}, groupItems: [] };
+      })();
 
   if (!children) {
     children = [
       <AdViewUnitBannerTemplate />,
       <AdViewUnitNativeTemplate />,
-      <AdViewUnitProxyTemplate />
+      <AdViewUnitProxyTemplate />,
     ];
   }
 
   if (groupItems && groupItems?.length > 0) {
-    return (groupItems as AdViewGroupItem[]).map(({ tracker, ...data }) => {
-      return (
-        <AdViewUnitTracking key={data.id} {...tracker}>
-          {renderAnyTemplates(children, {data, type: data.type || 'default', error, state: loadState})}
-        </AdViewUnitTracking>
-      );
-    });
+    return (groupItems as AdViewGroupItem[]).map(
+      ({ tracker, ...data }, index) => {
+        return (
+          <AdViewUnitTracking key={data.id} {...tracker}>
+            {renderAnyTemplates(children, {
+              unitId,
+              index,
+              data,
+              type: data.type || 'default',
+              error,
+              state: loadState,
+            })}
+          </AdViewUnitTracking>
+        );
+      },
+    );
   }
 
   return (
     <AdViewUnitTracking {...customTracker}>
-      {renderAnyTemplates(children, {data: null, type: 'default', error, state: loadState})}
+      {renderAnyTemplates(children, {
+        unitId,
+        index: -1,
+        data: null,
+        type: 'default',
+        error,
+        state: loadState,
+      })}
     </AdViewUnitTracking>
   );
 }

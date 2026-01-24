@@ -1,10 +1,10 @@
-import { AdViewConfig } from '../typings';
+import { AdViewConfig, AdViewGroupItem } from '../typings';
 import getRandomString from './getRandomString';
 
 /**
  * Collects screen size information from the browser.
  * Used for ad targeting and responsive ad serving.
- * 
+ *
  * @returns Object with width and height as strings, or null on error
  */
 function getScreenSize() {
@@ -40,7 +40,7 @@ export const pageScrapers: PageScraper = [getScreenSize];
 
 /**
  * Executes all scrapers and merges their collected data.
- * 
+ *
  * @param scrapers - Array of scraper functions to execute
  * @returns Merged object containing all scraped data
  */
@@ -60,7 +60,7 @@ export function getScrapedData(scrapers: Scraper[]) {
 
 /**
  * Converts an object of parameters into a URL search string.
- * 
+ *
  * @param params - Key-value pairs to convert to search params
  * @returns URL-encoded search parameter string
  */
@@ -73,17 +73,18 @@ export function getSearchParams(params: Record<string, string> = {}) {
 /**
  * Generates default search parameters for ad requests.
  * Includes cache-busting and timestamp parameters.
- * 
+ *
  * @param format - Optional ad format type to include
  * @returns Object with default parameters
  */
 function getDefaultSearchParams(format?: string) {
   const requestTime = Date.now().toString(); // Use timestamp instead of day of month
   const randomString = getRandomString(7);
-  const defaultParams: Record<string, string> = { // Fixed type consistency
+  const defaultParams: Record<string, string> = {
+    // Fixed type consistency
     format: 'json',
     _cbf_: randomString, // Cache-busting parameter
-    t: requestTime,      // Timestamp parameter
+    t: requestTime, // Timestamp parameter
   };
 
   if (format) {
@@ -96,7 +97,7 @@ function getDefaultSearchParams(format?: string) {
 /**
  * Builds a complete ad request URL with collected page data and parameters.
  * Replaces template placeholders and adds query parameters.
- * 
+ *
  * @param config - AdView configuration containing srcURL template
  * @param unitId - Unique identifier for the ad unit
  * @param format - Optional ad format specification
@@ -108,28 +109,58 @@ export function getAdRequestUrl(
   format?: string | string[],
 ) {
   const { srcURL } = config;
-  
+
   // Replace {<id>} placeholder with actual unit ID
   const baseUrl = srcURL?.replace('{<id>}', unitId);
-  
+
   // Collect page data using registered scrapers
   const scrapedData = getScrapedData(pageScrapers);
-  
+
   // Generate default parameters
   const defaultSearchParams = getDefaultSearchParams(
-    typeof format === 'string' ? format : format?.join(',') || '');
+    typeof format === 'string' ? format : format?.join(',') || '',
+  );
 
   // Merge all parameters (scraped data overrides defaults)
   const searchParamsData = {
     ...defaultSearchParams,
     ...scrapedData,
   };
-  
+
   // Convert to URL search string
   const searchParams = getSearchParams(searchParamsData);
-  
+
   // Build final URL
   const adRequestUrl = `${baseUrl}?${searchParams}`;
 
   return adRequestUrl;
+}
+
+/**
+ * Selects random ad items from a list based on limit and format.
+ *
+ * @param list - Array of ad items to select from
+ * @param limit - Maximum number of items to return
+ * @param format - Ad format(s) to filter by
+ * @returns Array of randomly selected ad items
+ */
+export function RandomAdItems(
+  list: AdViewGroupItem[],
+  limit: number,
+  format: string | string[] | undefined,
+): AdViewGroupItem[] {
+  if (!list) {
+    return [];
+  }
+  if (!limit || limit <= 0) {
+    limit = 1;
+  }
+  const formats = Array.isArray(format) ? format : format ? [format] : null;
+  const adItems = list
+    .filter(item => !formats || formats?.includes(item.type))
+    .sort(() => 0.5 - Math.random());
+  if (adItems.length <= limit) {
+    return adItems;
+  }
+  return adItems.slice(0, limit);
 }

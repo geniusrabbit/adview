@@ -72,10 +72,14 @@ export type AdViewUnitClientChildrenProps = {
  * AdViewOptionalDataProps is the type for the optional data props of the AdViewUnitTemplate component
  */
 export type AdViewOptionalDataProps = {
+  /** Unique identifier for the ad unit */
+  unitId?: string;
   /** Ad data from the server, or null if not loaded */
   data?: AdViewDataClient | null;
   /** Detailed loading state object with boolean flags */
   state?: AdLoadState;
+  /** Index of the ad item in the list */
+  index?: number;
   /** Error object if ad loading failed */
   error?: Error | null;
 };
@@ -99,7 +103,12 @@ export type AdViewUnitTemplateTypeProps = AdViewOptionalDataProps & {
  * AdViewUnitTemplateProps is the type for the props of the AdViewUnitTemplate component
  */
 export type AdViewUnitTemplateProps = AdViewUnitTemplateTypeProps & {
-  children?: ((data: AdViewUnitClientChildrenProps) => (React.ReactNode | JSX.Element | null)) | React.ReactElement<AdViewUnitTemplateTypeProps> | undefined;
+  children?:
+    | ((
+        data: AdViewUnitClientChildrenProps,
+      ) => React.ReactNode | JSX.Element | null)
+    | React.ReactElement<AdViewUnitTemplateTypeProps>
+    | undefined;
 };
 
 /**
@@ -146,6 +155,8 @@ export type AdViewUnitDefault = (() => ReactNode) | ReactNode;
 export type AdViewUnitPropsBase = {
   /** Unique identifier for the ad unit */
   unitId: string;
+  /** Maximum number of ad items to request */
+  limit?: number;
   /** Optional ad format specification */
   format?: string | string[];
 } & AdViewConfig;
