@@ -2,11 +2,7 @@ import React from 'react';
 
 import { AdViewData, AdViewDataLoader } from '@adview/core';
 import { AdViewGroupItem } from '@adview/core/typings';
-import {
-  getAdRequestUrl,
-  getDataLoaderFromConfig,
-  getResolveConfig
-} from '@adview/core/utils';
+import { getDataLoaderFromConfig, getResolveConfig } from '@adview/core/utils';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
 import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
 import AdViewUnitNativeTemplate from './AdViewUnitNativeTemplate';
@@ -32,7 +28,6 @@ async function AdViewUnitServer({
   };
 
   const baseConfig = getResolveConfig(config);
-  const requestUrl = getAdRequestUrl(baseConfig, unitId, format);
   const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig);
   const response = await dataLoader.fetchAdData(unitId, 1, format);
   const isLoadingError = response instanceof Error;
@@ -72,23 +67,29 @@ async function AdViewUnitServer({
   }
 
   if (groupItems && groupItems.length) {
-    return groupItems.map(({ tracker, ...data }: AdViewGroupItem) => {
-      return (
-        <AdViewUnitTracking key={data.id} {...tracker}>
-          {renderAnyTemplates(children, {
-            data,
-            type: data.type || 'default',
-            error,
-            state: state,
-          })}
-        </AdViewUnitTracking>
-      );
-    });
+    return groupItems.map(
+      ({ tracker, ...data }: AdViewGroupItem, index: number) => {
+        return (
+          <AdViewUnitTracking key={data.id} {...tracker}>
+            {renderAnyTemplates(children, {
+              unitId,
+              index,
+              data,
+              type: data.type || 'default',
+              error,
+              state: state,
+            })}
+          </AdViewUnitTracking>
+        );
+      },
+    );
   }
 
   return (
     <AdViewUnitTracking {...customTracker}>
       {renderAnyTemplates(children, {
+        unitId,
+        index: -1,
         data: null,
         type: 'default',
         error,

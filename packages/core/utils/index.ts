@@ -16,6 +16,6 @@ export { default as getSrcSetThumbs } from './getSrcSetThumbs';
 
 export { default as DynamicFetcherDataLoader } from './dynamicFetcherDataLoader';
 export { default as HardDataLoader } from './hardDataLoader';
-export { default as SmartDataLoader } from './smartDataLoader';
-export type { LoaderItem } from './smartDataLoader';
+export { LoaderItem, default as SmartDataLoader } from './smartDataLoader';
+export type { LoaderItemIface } from './smartDataLoader';
 

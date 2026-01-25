@@ -203,6 +203,12 @@ export interface AdViewDataLoader {
   ) => Promise<AdViewData | Error>;
 }
 
+// Abstract type for data loader configurations.
+export type AdViewDataLoaderAbstractType =
+  | AdViewDataLoader
+  | string
+  | AdViewGroupItem[];
+
 /**
  * Configuration options for AdView components.
  * Contains server URL and other global settings.
@@ -213,5 +219,7 @@ export type AdViewConfig = {
   /** Default ad data */
   defaultAdData?: AdViewGroupItem[];
   /** Optional custom data loader for fetching ads */
-  sourceLoader?: AdViewDataLoader;
+  sourceLoader?: AdViewDataLoaderAbstractType | AdViewDataLoaderAbstractType[];
+  /** Optional smart data loader configuration */
+  source?: AdViewDataLoader;
 };

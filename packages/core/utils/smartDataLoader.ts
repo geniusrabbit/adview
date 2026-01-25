@@ -2,7 +2,13 @@ import { AdViewData, AdViewDataLoader } from 'typings';
 
 type alghoritmType = 'roundrobin' | 'random' | ((curIndex: number) => number);
 
-class LoaderItem {
+export interface LoaderItemIface {
+  unitIds?: string[];
+  formats?: string[];
+  loader: AdViewDataLoader;
+}
+
+export class LoaderItem implements LoaderItemIface {
   unitIds?: string[];
   formats?: string[];
   loader: AdViewDataLoader;
@@ -44,8 +50,19 @@ class SmartDataLoader implements AdViewDataLoader {
   private loaders: LoaderItem[] = [];
   private alghoritm: (curIndex: number) => number;
 
-  constructor(loaders: LoaderItem[], alghoritm: alghoritmType = 'roundrobin') {
-    this.loaders = loaders;
+  constructor(
+    loaders: (LoaderItemIface | AdViewDataLoader)[],
+    alghoritm: alghoritmType = 'roundrobin',
+  ) {
+    this.loaders = loaders.map(item => {
+      if (item instanceof LoaderItem) {
+        return item;
+      }
+      if ('loader' in item && typeof item.loader === 'object') {
+        return new LoaderItem(item.loader, item.unitIds, item.formats);
+      }
+      return new LoaderItem(item as AdViewDataLoader);
+    });
     switch (alghoritm) {
       case 'roundrobin':
         this.alghoritm = (curIndex: number) => {
@@ -190,5 +207,4 @@ class SmartDataLoader implements AdViewDataLoader {
   }
 }
 
-export type { LoaderItem };
 export default SmartDataLoader;
