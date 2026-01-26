@@ -12,6 +12,8 @@ import useAdViewController from './useAdViewController';
 
 export type AdViewUnitClientProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
+  wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
+  trackingWrapperClassName?: string;
 };
 
 // AdViewUnitClient is a client-side component that fetches ad data and renders it
@@ -37,6 +39,8 @@ function AdViewUnitClient({
   limit = 1,
   format,
   children,
+  wrapper,
+  trackingWrapperClassName,
   ...config
 }: AdViewUnitClientProps) {
   const checkFormat = (f: string) => {
@@ -80,11 +84,19 @@ function AdViewUnitClient({
     ];
   }
 
+  if (!wrapper) {
+    wrapper = (elms: React.ReactNode[]) => <>{elms}</>;
+  }
+
   if (groupItems && groupItems?.length > 0) {
-    return (groupItems as AdViewGroupItem[]).map(
-      ({ tracker, ...data }, index) => {
+    return wrapper(
+      (groupItems as AdViewGroupItem[]).map(({ tracker, ...data }, index) => {
         return (
-          <AdViewUnitTracking key={data.id} {...tracker}>
+          <AdViewUnitTracking
+            key={data.id}
+            {...tracker}
+            className={trackingWrapperClassName}
+          >
             {renderAnyTemplates(children, {
               unitId,
               index,
@@ -95,12 +107,12 @@ function AdViewUnitClient({
             })}
           </AdViewUnitTracking>
         );
-      },
+      }),
     );
   }
 
-  return (
-    <AdViewUnitTracking {...customTracker}>
+  return wrapper([
+    <AdViewUnitTracking {...customTracker} className={trackingWrapperClassName}>
       {renderAnyTemplates(children, {
         unitId,
         index: -1,
@@ -109,8 +121,8 @@ function AdViewUnitClient({
         error,
         state: loadState,
       })}
-    </AdViewUnitTracking>
-  );
+    </AdViewUnitTracking>,
+  ]);
 }
 
 export default AdViewUnitClient;

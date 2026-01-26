@@ -8,42 +8,66 @@
 //
 
 import React, { JSX } from 'react';
-import { AdLoadState, AdViewUnitClientChildrenProps, AdViewUnitTemplateProps, AdViewUnitTemplateTypeProps } from '../types';
+import {
+  AdLoadState,
+  AdViewUnitClientChildrenProps,
+  AdViewUnitTemplateProps,
+  AdViewUnitTemplateTypeProps,
+} from '../types';
 import { matchExpectedState } from './utils';
 
 // TemplateListRender is a function that takes a list of TemplateType and returns a React element
-export type TemplateListRender = (tmpls: TemplateElement[]) => React.ReactElement | JSX.Element;
+export type TemplateListRender = (
+  tmpls: TemplateElement[],
+) => React.ReactElement | JSX.Element;
 
 // TemplateType is a React component that can be used to render ad templates
 export type TemplateType = React.Component<AdViewUnitTemplateProps>;
 export type TemplateElement = React.ReactElement<AdViewUnitTemplateProps>;
 
 // TemplateTypeFunction is a function that takes AdViewUnitTemplateTypeProps and returns a React node or element
-export type TemplateTypeFunction = (props: AdViewUnitTemplateTypeProps) => React.ReactNode | React.ReactElement;
+export type TemplateTypeFunction = (
+  props: AdViewUnitTemplateTypeProps,
+) => React.ReactNode | React.ReactElement;
 
 // templateFromListRender is a function that takes a list of TemplateType and returns a React element
-export const templateFromListRender = (tmpls: TemplateElement[], data: AdViewUnitTemplateTypeProps, wrap?: (children: React.ReactNode) => React.ReactNode): JSX.Element | React.ReactElement => {
-  let renderedRemplates = tmpls.map((tmpl, index) => {
-    let tmp = renderTemplate(tmpl, data);
-    return !!tmp && React.isValidElement(tmp)
-      ? <React.Fragment key={index}>{!!wrap ? wrap(tmp) : tmp}</React.Fragment>
-      : null;
-  }).filter(it => !!it);
-
-  if (!renderedRemplates.length) {
-    renderedRemplates = tmpls.map((tmpl, index) => {
-      let tmp = renderTemplate(tmpl, {...data, type: 'default'});
-      return !!tmp && React.isValidElement(tmp)
-        ? <React.Fragment key={index}>{!!wrap ? wrap(tmp) : tmp}</React.Fragment>
-        : null;
-    }).filter(it => !!it);
+export const templateFromListRender = (
+  tmpls: TemplateElement[],
+  data: AdViewUnitTemplateTypeProps,
+  wrap?: (children: React.ReactNode) => React.ReactNode,
+): JSX.Element | React.ReactElement => {
+  if (!wrap) {
+    wrap = (children: React.ReactNode) => children;
   }
 
-  return (<>{renderedRemplates}</>);
+  let renderedTemplate = null;
+
+  for (let tpl of tmpls) {
+    let tmp = renderTemplate(tpl, data);
+    if (tmp && React.isValidElement(tmp)) {
+      renderedTemplate = wrap(tmp);
+      break;
+    }
+  }
+
+  if (!renderedTemplate) {
+    for (let tpl of tmpls) {
+      let tmp = renderTemplate(tpl, { ...data, type: 'default' });
+      if (tmp && React.isValidElement(tmp)) {
+        renderedTemplate = wrap(tmp);
+        break;
+      }
+    }
+  }
+
+  return <>{renderedTemplate}</>;
 };
 
 // renderTemplate is a function that takes a TemplateType or a function and returns a React node
-export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, data: AdViewUnitTemplateTypeProps): React.ReactNode => {
+export const renderTemplate = (
+  tmpl: TemplateElement | TemplateTypeFunction,
+  data: AdViewUnitTemplateTypeProps,
+): React.ReactNode => {
   const isFunction = typeof tmpl === 'function';
   const isReactElement = React.isValidElement(tmpl);
 
@@ -62,7 +86,7 @@ export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, dat
       return children(data as AdViewUnitClientChildrenProps);
     }
     // If children is a React element, clone it with the new props
-    return React.cloneElement((tmpl as TemplateElement), {
+    return React.cloneElement(tmpl as TemplateElement, {
       ...data,
       children: children,
     });
@@ -73,14 +97,22 @@ export const renderTemplate = (tmpl: TemplateElement | TemplateTypeFunction, dat
   }
 
   return null;
-}
+};
 
 // renderTemplates is a function that takes a list of TemplateType and returns a React element
-export const renderTemplates = (tmpls: TemplateElement[], data: AdViewUnitTemplateTypeProps, listRender?: TemplateListRender): React.ReactNode | React.ReactElement | JSX.Element => {
+export const renderTemplates = (
+  tmpls: TemplateElement[],
+  data: AdViewUnitTemplateTypeProps,
+  listRender?: TemplateListRender,
+): React.ReactNode | React.ReactElement | JSX.Element => {
   return listRender ? listRender(tmpls) : templateFromListRender(tmpls, data);
 };
 
-export const renderAnyTemplates = (tmpls: any, data: AdViewUnitTemplateTypeProps, listRender?: TemplateListRender): React.ReactNode | React.ReactElement | JSX.Element | null => {
+export const renderAnyTemplates = (
+  tmpls: any,
+  data: AdViewUnitTemplateTypeProps,
+  listRender?: TemplateListRender,
+): React.ReactNode | React.ReactElement | JSX.Element | null => {
   if (!tmpls) {
     return null;
   }
@@ -98,27 +130,34 @@ export const renderAnyTemplates = (tmpls: any, data: AdViewUnitTemplateTypeProps
   }
 
   return null;
-}
+};
 
 // Template is a React component that renders a template based on the type and data provided
 // Example usage:
 // <AdView.Unit>
 //   <AdView.Template type="banner" data={{...}}>
 // </AdView.Unit>
-const AdViewUnitTemplate = ({ type, state, children, ...props }: AdViewUnitTemplateProps) => {
+const AdViewUnitTemplate = ({
+  type,
+  state,
+  children,
+  ...props
+}: AdViewUnitTemplateProps) => {
   const tmplProps: AdViewUnitTemplateTypeProps = {
     type,
     state,
     ...props,
   };
-  
+
   const expectState: AdLoadState =
-    (props?.isInitial || props?.isLoading || props?.isError || props?.isComplete) ? {
-      isInitial: props?.isInitial,
-      isLoading: props?.isLoading,
-      isError: props?.isError,
-      isComplete: props?.isComplete
-    } : {isComplete: true};
+    props?.isInitial || props?.isLoading || props?.isError || props?.isComplete
+      ? {
+          isInitial: props?.isInitial,
+          isLoading: props?.isLoading,
+          isError: props?.isError,
+          isComplete: props?.isComplete,
+        }
+      : { isComplete: true };
 
   // Check if the expected state matches the current state
   if (!matchExpectedState(expectState, state)) {
@@ -127,7 +166,9 @@ const AdViewUnitTemplate = ({ type, state, children, ...props }: AdViewUnitTempl
 
   // If children is a function, call it with the data
   if (typeof children === 'function') {
-    return children(tmplProps as AdViewUnitClientChildrenProps) as React.ReactElement;
+    return children(
+      tmplProps as AdViewUnitClientChildrenProps,
+    ) as React.ReactElement;
   }
 
   // If children is a React element, clone it with the new props
@@ -137,6 +178,6 @@ const AdViewUnitTemplate = ({ type, state, children, ...props }: AdViewUnitTempl
 
   // If no children are provided, return an empty fragment
   return <></>;
-}
+};
 
 export default AdViewUnitTemplate;

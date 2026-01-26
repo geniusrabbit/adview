@@ -8,6 +8,7 @@ type AdViewUnitTrackingProps = {
   views?: string[];
   clicks?: string[];
   children: React.ReactNode;
+  className?: string;
 };
 
 function AdViewUnitTracking({
@@ -15,6 +16,7 @@ function AdViewUnitTracking({
   views,
   clicks,
   children,
+  className,
 }: AdViewUnitTrackingProps) {
   const isServer = typeof window === 'undefined';
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,11 @@ function AdViewUnitTracking({
     clickTrackerHandler,
   ]);
 
-  return <div ref={wrapperRef}>{children}</div>;
+  return (
+    <div ref={wrapperRef} className={className}>
+      {children}
+    </div>
+  );
 }
 
 export default AdViewUnitTracking;

@@ -60,12 +60,16 @@ export type AdViewDataClient = Omit<AdViewGroupItem, 'tracker'>;
  * Provides ad data, detailed loading state, and error information.
  */
 export type AdViewUnitClientChildrenProps = {
+  /** Unique identifier for the ad unit */
+  unitId?: string;
   /** Ad data from the server, or null if not loaded */
   data?: AdViewDataClient | null;
   /** Detailed loading state object with boolean flags */
   state: AdLoadState;
   /** Error object if ad loading failed */
   error: Error | null;
+  /** Index of the ad item in the list */
+  index?: number;
 };
 
 /**
