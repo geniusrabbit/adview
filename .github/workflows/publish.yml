@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'        # Triggers on version tags like v1.0.0, v1.2.3-beta.1
       - '*.*.*'     # Triggers on semantic version tags like 1.0.0
+  workflow_dispatch:  # Allow manual triggering from GitHub UI
 
 jobs:
   publish:
