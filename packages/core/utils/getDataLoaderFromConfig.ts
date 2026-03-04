@@ -5,6 +5,7 @@ import {
   AdViewGroupItem,
 } from 'typings';
 import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
+import FuncDataLoader, { FuncDataLoaderType } from './funcDataLoader';
 import HardDataLoader from './hardDataLoader';
 import SmartDataLoader from './smartDataLoader';
 
@@ -61,6 +62,9 @@ function createLoaderFromType(
   }
   if (Array.isArray(tp)) {
     return new HardDataLoader(tp);
+  }
+  if (typeof tp === 'function') {
+    return new FuncDataLoader(tp as FuncDataLoaderType);
   }
   return tp;
 }
