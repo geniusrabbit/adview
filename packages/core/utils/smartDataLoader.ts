@@ -113,15 +113,17 @@ class SmartDataLoader implements AdViewDataLoader {
         }
       } catch (e) {
         err = e as Error;
-        let res = this.nextLoader(
-          unitId,
-          formatArray,
-          currentIndex,
-          visitedLoaders,
-        );
-        loader = res.loader;
-        currentIndex = res.index;
       }
+
+      // Move to the next loader that hasn't been visited yet
+      let nextLoader = this.nextLoader(
+        unitId,
+        formatArray,
+        currentIndex,
+        visitedLoaders,
+      );
+      loader = nextLoader.loader;
+      currentIndex = nextLoader.index;
     }
     if (res) {
       return res;
