@@ -2,7 +2,6 @@ import {
   AdViewConfig,
   AdViewDataLoader,
   AdViewDataLoaderAbstractType,
-  AdViewGroupItem,
 } from 'typings';
 import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
 import FuncDataLoader, { FuncDataLoaderType } from './funcDataLoader';
@@ -17,46 +16,37 @@ function getDataLoaderFromConfig(config: AdViewConfig): AdViewDataLoader {
   if (!!config.source) {
     return config.source;
   }
+  // If no source loader is provided, create one based on srcURL or defaultAdData
   if (!config.sourceLoader) {
-    config.source = new DynamicFetcherDataLoader(
-      config.srcURL || '',
-      config.defaultAdData,
-    );
-  } else if (Array.isArray(config.sourceLoader)) {
-    if (config.sourceLoader.length === 0) {
-      config.source = new HardDataLoader([]);
-    } else if (
-      typeof config.sourceLoader[0] === 'object' &&
-      'loader' in config.sourceLoader[0]
-    ) {
-      // LoaderItemIface
-      config.source = new HardDataLoader(
-        config.sourceLoader as AdViewGroupItem[],
+    if (config.srcURL) {
+      config.source = new DynamicFetcherDataLoader(
+        config.srcURL || '',
+        config.defaultAdData,
       );
     } else {
-      if (config.sourceLoader.length === 1) {
-        config.source = createLoaderFromType(
-          config.sourceLoader[0] as AdViewDataLoaderAbstractType,
-        );
-      } else {
-        config.source = new SmartDataLoader(
-          config.sourceLoader.map(item => {
-            return createLoaderFromType(item as AdViewDataLoaderAbstractType);
-          }),
-        );
-      }
+      config.source = new HardDataLoader(config.defaultAdData);
     }
+  } else if (Array.isArray(config.sourceLoader)) {
+    config.source = wrapLoaders(
+      config.sourceLoader as AdViewDataLoaderAbstractType[],
+    );
   } else {
     config.source = createLoaderFromType(
       config.sourceLoader as AdViewDataLoaderAbstractType,
     );
+  }
+  if (!config.source) {
+    config.source = new HardDataLoader(config.defaultAdData);
   }
   return config.source;
 }
 
 function createLoaderFromType(
   tp: AdViewDataLoaderAbstractType,
-): AdViewDataLoader {
+): AdViewDataLoader | undefined {
+  if (!tp) {
+    return undefined;
+  }
   if (typeof tp === 'string') {
     return new DynamicFetcherDataLoader(tp);
   }
@@ -67,6 +57,24 @@ function createLoaderFromType(
     return new FuncDataLoader(tp as FuncDataLoaderType);
   }
   return tp;
+}
+
+function wrapLoaders(
+  loaders: AdViewDataLoaderAbstractType[],
+): AdViewDataLoader | undefined {
+  if (loaders.length === 0) {
+    return undefined;
+  }
+  let loaderObjects = loaders
+    .map(item => createLoaderFromType(item))
+    .filter(Boolean) as AdViewDataLoader[];
+  if (loaderObjects.length === 1 && loaderObjects[0]) {
+    return loaderObjects[0];
+  }
+  if (loaderObjects.length > 1) {
+    return new SmartDataLoader(loaderObjects);
+  }
+  return undefined;
 }
 
 export default getDataLoaderFromConfig;
