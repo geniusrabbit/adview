@@ -68,7 +68,7 @@ function wrapLoaders(
   let loaderObjects = loaders
     .map(item => createLoaderFromType(item))
     .filter(Boolean) as AdViewDataLoader[];
-  if (loaderObjects.length === 1 && loaderObjects[0]) {
+  if (loaderObjects.length === 1) {
     return loaderObjects[0];
   }
   if (loaderObjects.length > 1) {

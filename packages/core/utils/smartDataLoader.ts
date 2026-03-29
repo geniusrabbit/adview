@@ -1,4 +1,4 @@
-import { AdViewData, AdViewDataLoader } from 'typings';
+import { AdViewData, AdViewDataLoader, AdViewGroup } from 'typings';
 
 type alghoritmType = 'roundrobin' | 'random' | ((curIndex: number) => number);
 
@@ -34,9 +34,10 @@ export class LoaderItem implements LoaderItemIface {
   testFormat(format: string[]): boolean {
     return (
       !format ||
+      format.length === 0 ||
       !this.formats ||
       this.formats.length === 0 ||
-      format.some(f => this.formats?.includes(f))
+      format.some(f => this.formats!.includes(f))
     );
   }
 }
@@ -48,34 +49,38 @@ export class LoaderItem implements LoaderItemIface {
  */
 class SmartDataLoader implements AdViewDataLoader {
   private loaders: LoaderItem[] = [];
-  private alghoritm: (curIndex: number) => number;
+  private algorithm: (curIndex: number) => number;
 
   constructor(
     loaders: (LoaderItemIface | AdViewDataLoader)[],
-    alghoritm: alghoritmType = 'roundrobin',
+    algorithm: alghoritmType = 'roundrobin',
   ) {
     this.loaders = loaders.map(item => {
       if (item instanceof LoaderItem) {
         return item;
       }
-      if ('loader' in item && typeof item.loader === 'object') {
+      if (
+        'loader' in item &&
+        typeof item.loader === 'object' &&
+        typeof item.loader.fetchAdData === 'function'
+      ) {
         return new LoaderItem(item.loader, item.unitIds, item.formats);
       }
       return new LoaderItem(item as AdViewDataLoader);
     });
-    switch (alghoritm) {
+    switch (algorithm) {
       case 'roundrobin':
-        this.alghoritm = (curIndex: number) => {
+        this.algorithm = (curIndex: number) => {
           return curIndex + 1;
         };
         break;
       case 'random':
-        this.alghoritm = (_: number) => {
+        this.algorithm = (_: number) => {
           return Math.floor(Math.random() * this.loaders.length);
         };
         break;
       default:
-        this.alghoritm = alghoritm;
+        this.algorithm = algorithm;
         break;
     }
   }
@@ -88,21 +93,38 @@ class SmartDataLoader implements AdViewDataLoader {
     const formatArray = Array.isArray(format) ? format : format ? [format] : [];
     let err: Error | null = null;
     let res: AdViewData | null = null;
-    let visitedLoaders = new Set<AdViewDataLoader>();
-    let { loader, index: currentIndex } = this.nextLoader(
-      unitId,
-      formatArray,
-      -1,
-      visitedLoaders,
-    );
+    let visitedLoaders = new Set<number>();
+    let currentIndex = -1;
+
     /**
      * Iterate through loaders until we either fulfill the request
      * or exhaust all available loaders.
      */
-    while (loader) {
+    while (visitedLoaders.size < this.loaders.length) {
+      const nextLoader = this.nextLoader(
+        unitId,
+        formatArray,
+        currentIndex,
+        visitedLoaders,
+      );
+
+      if (!nextLoader.loader) {
+        break;
+      }
+
+      currentIndex = nextLoader.index;
+
       try {
-        const newLimit = limit - this.loadedInGroup(unitId, res);
-        const data = await loader.fetchAdData(unitId, newLimit, format);
+        const newLimit = Math.max(0, limit - this.loadedInGroup(unitId, res));
+        if (newLimit === 0 && res) {
+          return res;
+        }
+
+        const data = await nextLoader.loader.fetchAdData(
+          unitId,
+          newLimit,
+          format,
+        );
         if (data instanceof Error) {
           err = data;
         } else {
@@ -114,17 +136,8 @@ class SmartDataLoader implements AdViewDataLoader {
       } catch (e) {
         err = e as Error;
       }
-
-      // Move to the next loader that hasn't been visited yet
-      let nextLoader = this.nextLoader(
-        unitId,
-        formatArray,
-        currentIndex,
-        visitedLoaders,
-      );
-      loader = nextLoader.loader;
-      currentIndex = nextLoader.index;
     }
+
     if (res) {
       return res;
     }
@@ -137,22 +150,19 @@ class SmartDataLoader implements AdViewDataLoader {
     unitId: string,
     format: string[],
     currentIndex: number,
-    visited: Set<AdViewDataLoader>,
+    visited: Set<number>,
   ): { loader: AdViewDataLoader | null; index: number } {
     const total = this.loaders.length;
-    const startIndex = this.alghoritm(currentIndex) % total;
+    const startIndex = ((this.algorithm(currentIndex) % total) + total) % total;
     for (let i = 0; i < total; i++) {
-      const item = this.loaders[(i + startIndex) % total];
-      if (!item) {
+      const index = (i + startIndex) % total;
+      const item = this.loaders[index];
+      if (!item || visited.has(index)) {
         continue;
       }
-      if (
-        item.testUnitId(unitId) &&
-        item.testFormat(format) &&
-        !visited.has(item.loader)
-      ) {
-        visited.add(item.loader);
-        return { loader: item.loader, index: (i + startIndex) % total };
+      if (item.testUnitId(unitId) && item.testFormat(format)) {
+        visited.add(index);
+        return { loader: item.loader, index };
       }
     }
     return { loader: null, index: -1 };
@@ -175,7 +185,7 @@ class SmartDataLoader implements AdViewDataLoader {
     if (!base) {
       return addition;
     }
-    const mergedGroups: { [key: string]: any } = {};
+    const mergedGroups: { [key: string]: AdViewGroup } = {};
     for (const group of base.groups || []) {
       mergedGroups[group.id] = { ...group, items: [...(group.items || [])] };
     }
@@ -183,7 +193,8 @@ class SmartDataLoader implements AdViewDataLoader {
       if (!mergedGroups[group.id]) {
         mergedGroups[group.id] = { ...group, items: [...(group.items || [])] };
       } else {
-        mergedGroups[group.id].items.push(...(group.items || []));
+        // We know that group.items is defined because it was set in the previous step
+        mergedGroups[group.id]!.items!.push(...(group.items || []));
       }
     }
     if (mergedGroups[unitId] && mergedGroups[unitId].items.length > limit) {

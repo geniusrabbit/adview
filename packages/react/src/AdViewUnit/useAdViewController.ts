@@ -25,11 +25,7 @@ function useAdViewController(
     setAdLoadState('loading');
 
     try {
-      const response = await dataLoader.fetchAdData(
-        unitId,
-        limit,
-        format || '',
-      );
+      const response = await dataLoader.fetchAdData(unitId, limit || 1, format);
 
       if (response instanceof Error) {
         setAdLoadState('error');

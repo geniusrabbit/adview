@@ -18,6 +18,7 @@ async function AdViewUnitServer({
   unitId,
   format,
   children,
+  limit,
   ...config
 }: AdViewUnitServerProps) {
   const checkFormat = (f: string) => {
@@ -29,7 +30,7 @@ async function AdViewUnitServer({
 
   const baseConfig = getResolveConfig(config);
   const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig);
-  const response = await dataLoader.fetchAdData(unitId, 1, format);
+  const response = await dataLoader.fetchAdData(unitId, limit || 1, format);
   const isLoadingError = response instanceof Error;
   const error = isLoadingError ? response : undefined;
   const state = {
