@@ -4,8 +4,6 @@ const isWindowDefined: boolean = typeof window !== 'undefined';
 let detectAdBlock: boolean = false;
 
 function PopUnder(config?: PopUnderData): void {
-  console.log('xxx config', config);
-
   if (config) {
     window.dataPopUnder = Object.assign({}, window?.dataPopUnder ?? {}, config);
   }

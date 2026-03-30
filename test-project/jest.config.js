@@ -10,6 +10,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jsdom',
   moduleNameMapper: {
+    '^react$': '<rootDir>/node_modules/react',
+    '^react-dom$': '<rootDir>/node_modules/react-dom',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@adview/core$': '<rootDir>/../packages/core/src',
     '^@adview/react$': '<rootDir>/../packages/react/src',

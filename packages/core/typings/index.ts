@@ -55,10 +55,10 @@ export type AdViewStyleTokens = {
 export interface AdViewGroupItemTracker {
   /** Optional click tracking pixels */
   clicks?: string[];
-  /** Required impression tracking pixels */
-  impressions: string[];
-  /** View/visibility tracking pixels */
-  views: string[];
+  /** Optional impression tracking pixels */
+  impressions?: string[];
+  /** Optional view/visibility tracking pixels */
+  views?: string[];
 }
 
 /**
@@ -96,6 +96,29 @@ export interface AdViewItemAsset {
 }
 
 /**
+ * Information about the particular advertisement.
+ * Who bought it, what campaign it belongs to, etc.
+ * Useful for advanced use cases like reporting, debugging, or custom handling based on the ad source.
+ */
+export interface AdViewAdInfo {
+  /** Unique identifier for the ad */
+  id: string;
+  /** Optional source identifier for the ad (e.g., ad network, campaign) */
+  adsourceId?: string;
+  /** Optional description of the ad */
+  description?: string;
+  /** Optional additional metadata about the ad */
+  metadata?: { [key: string]: any };
+
+  actions?: {
+    type?: string;
+    title?: string;
+    description?: string;
+    url: string;
+  }[];
+}
+
+/**
  * Individual advertisement item within a group.
  * Contains all data needed to display and track a single ad.
  */
@@ -111,7 +134,34 @@ export interface AdViewGroupItem {
   /** Media assets (images, videos) associated with the ad */
   assets?: AdViewItemAsset[];
   /** Tracking pixels for measuring ad performance */
-  tracker: AdViewGroupItemTracker;
+  tracker?: AdViewGroupItemTracker;
+  /** Optional additional metadata about the ad item */
+  metadata?: { [key: string]: any };
+  /** Optional information about the ad source or campaign */
+  adInfo?: AdViewAdInfo;
+}
+
+/**
+ * Information about the source of an advertisement, such as the ad network or provider.
+ * Useful for advanced use cases like reporting, debugging, or custom handling based on the ad source.
+ */
+export interface AdViewAdSourceInfo {
+  /** Unique identifier for the ad source */
+  id: string;
+  /** Optional human-readable name for the ad source */
+  name?: string;
+  /** Optional description of the ad source */
+  description?: string;
+  /** Optional domain associated with the ad source (e.g., 'example.com') */
+  domain?: string;
+  /** Optional URL to the ad source's icon */
+  iconURL?: string;
+  /** Optional URL to the ad source's logo */
+  logoURL?: string;
+  /** Optional URL to the ad source's website or documentation */
+  url?: string;
+  /** Optional additional metadata about the ad source */
+  metadata?: { [key: string]: any };
 }
 
 /**
@@ -179,9 +229,11 @@ export interface AdViewData {
   /** Global tracking pixels applied to all ads */
   custom_tracker?: AdViewGroupItemTracker;
   /** API version for compatibility checking */
-  version: string;
+  version?: string;
   /** Array of ad groups returned by the server */
   groups?: AdViewGroup[];
+  /** Optional array of ad source information for advanced use cases */
+  adsources?: AdViewAdSourceInfo[];
 }
 
 /**

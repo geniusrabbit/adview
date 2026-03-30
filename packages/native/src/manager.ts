@@ -40,7 +40,7 @@ adManager.execute();
 // Import necessary classes from other modules
 import { CustomRender } from './custom_render'; // Custom rendering capabilities
 import { EmbeddedAd } from './embedded'; // EmbeddedAd class for handling ads
-import type { MapperConfig, AdMapper } from './types';
+import type { AdMapper, MapperConfig } from './types';
 
 // Define the default configuration for ad mappers
 const defaultConfig: MapperConfig = {
@@ -100,8 +100,6 @@ export class Manager {
     for (const it of this.admappers) {
       // Select all DOM elements that match the current mapper's pattern
       document.querySelectorAll(it.matchPattern).forEach((el: Element) => {
-        console.log('xxx it.config', it.matchPattern);
-
         // Extract ad-related attributes from the element
         const slot = el.getAttribute(
           it.config.dataParams?.slot || 'data-ad-slot',

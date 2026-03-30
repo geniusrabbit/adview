@@ -3,6 +3,7 @@ import {
   AdViewDataLoader,
   AdViewDataLoaderAbstractType,
 } from 'typings';
+import { findAndCreateDataLoaderForType } from './dataLoaderRegistry';
 import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
 import FuncDataLoader, { FuncDataLoaderType } from './funcDataLoader';
 import HardDataLoader from './hardDataLoader';
@@ -46,6 +47,10 @@ function createLoaderFromType(
 ): AdViewDataLoader | undefined {
   if (!tp) {
     return undefined;
+  }
+  let loader = findAndCreateDataLoaderForType(tp);
+  if (loader) {
+    return loader;
   }
   if (typeof tp === 'string') {
     return new DynamicFetcherDataLoader(tp);
