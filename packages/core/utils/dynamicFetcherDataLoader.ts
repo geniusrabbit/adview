@@ -37,11 +37,12 @@ class DynamicFetcherDataLoader implements AdViewDataLoader {
     unitId: string,
     limit: number = 1,
     format?: string | string[],
+    query?: { [key: string]: any },
   ): Promise<AdViewData | Error> {
     if (limit <= 0) {
       limit = 1;
     }
-    const targetURL = this.prepareURL(unitId, limit, format);
+    const targetURL = this.prepareURL(unitId, limit, format, query);
 
     try {
       // Fetch ad data from the server
@@ -106,7 +107,7 @@ class DynamicFetcherDataLoader implements AdViewDataLoader {
         } as AdViewData;
       }
       // Re-throw to allow caller to handle the error
-      throw error;
+      return error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -114,16 +115,28 @@ class DynamicFetcherDataLoader implements AdViewDataLoader {
     unitId: string,
     limit: number,
     format?: string | string[],
+    query?: { [key: string]: any },
   ): string {
     const fmt = !format
       ? ''
       : Array.isArray(format)
         ? format.join(',')
         : format;
-    return this.srcURL
+    let url = this.srcURL
       .replace('{<id>}', unitId)
       .replace('{<format>}', fmt)
-      .replace('{<limit>}', limit.toString());
+      .replace('{<limit>}', limit.toString())
+      .replace(`{<locale>}`, query?.locale || 'en');
+    if (query) {
+      for (const key in query) {
+        url = url.replace(`{<q.${key}>}`, encodeURIComponent(query[key] + ''));
+        url = url.replace(
+          `{<query.${key}>}`,
+          encodeURIComponent(query[key] + ''),
+        );
+      }
+    }
+    return url;
   }
 
   private defaultRandomAdItems(

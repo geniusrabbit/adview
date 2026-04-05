@@ -163,6 +163,8 @@ export type AdViewUnitPropsBase = {
   limit?: number;
   /** Optional ad format specification */
   format?: string | string[];
+  /** Additional query parameters for ad requests */
+  query?: { [key: string]: any };
 } & AdViewConfig;
 
 /**

@@ -89,6 +89,7 @@ class SmartDataLoader implements AdViewDataLoader {
     unitId: string,
     limit: number = 1,
     format?: string | string[],
+    query?: { [key: string]: any },
   ): Promise<AdViewData | Error> {
     const formatArray = Array.isArray(format) ? format : format ? [format] : [];
     let err: Error | null = null;
@@ -124,6 +125,7 @@ class SmartDataLoader implements AdViewDataLoader {
           unitId,
           newLimit,
           format,
+          query,
         );
         if (data instanceof Error) {
           err = data;
@@ -202,6 +204,9 @@ class SmartDataLoader implements AdViewDataLoader {
     }
     return {
       ...base,
+      adsources: [...(base.adsources || [])].concat(
+        ...(addition.adsources || []),
+      ),
       groups: Object.values(mergedGroups),
     };
   }

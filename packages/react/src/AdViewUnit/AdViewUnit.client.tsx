@@ -38,6 +38,7 @@ function AdViewUnitClient({
   unitId,
   limit = 1,
   format,
+  query,
   children,
   wrapper,
   trackingWrapperClassName,
@@ -55,6 +56,7 @@ function AdViewUnitClient({
     unitId,
     limit || 1,
     format,
+    query,
   );
 
   const {

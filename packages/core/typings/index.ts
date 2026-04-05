@@ -252,6 +252,7 @@ export interface AdViewDataLoader {
     unitId: string,
     limit: number,
     format?: string | string[],
+    query?: { [key: string]: any },
   ) => Promise<AdViewData | Error>;
 }
 

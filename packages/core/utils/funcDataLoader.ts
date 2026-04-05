@@ -4,6 +4,7 @@ export type FuncDataLoaderType = (
   unitId: string,
   limit: number,
   format?: string | string[],
+  query?: { [key: string]: any },
 ) => Promise<AdViewData | Error>;
 
 /**
@@ -22,11 +23,12 @@ class FuncDataLoader implements AdViewDataLoader {
     unitId: string,
     limit: number = 1,
     format?: string | string[],
+    query?: { [key: string]: any },
   ): Promise<AdViewData | Error> {
     if (limit <= 0) {
       limit = 1;
     }
-    return this.fetchAdDataFnk(unitId, limit, format);
+    return this.fetchAdDataFnk(unitId, limit, format, query);
   }
 }
 

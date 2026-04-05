@@ -60,15 +60,15 @@ export function getRegisteredDataLoaders(): AdViewDataLoaderItem[] {
 
 /**
  * Finds and instantiates a data loader for the given type
- * @param type - The type to match
+ * @param tp - The type to match
  * @returns A new data loader instance or undefined if no match found
  */
 export function findAndCreateDataLoaderForType(
-  type: AdViewDataLoaderAbstractType,
+  tp: AdViewDataLoaderAbstractType,
 ): AdViewDataLoader | undefined {
   for (const item of registryDataLoaders) {
-    if (item.checker(type)) {
-      return new item.loader(type);
+    if (item.checker(tp)) {
+      return new item.loader(tp);
     }
   }
   return undefined;

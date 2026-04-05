@@ -13,6 +13,7 @@ function useAdViewController(
   unitId: string,
   limit: number = 1,
   format?: string | string[],
+  query?: { [key: string]: any },
 ): UseAdViewControllerProps {
   const [adLoadState, setAdLoadState] = useState<string>('initial');
   const [adData, setAdData] = useState<AdViewData | null>(null);
@@ -25,7 +26,12 @@ function useAdViewController(
     setAdLoadState('loading');
 
     try {
-      const response = await dataLoader.fetchAdData(unitId, limit || 1, format);
+      const response = await dataLoader.fetchAdData(
+        unitId,
+        limit || 1,
+        format,
+        query,
+      );
 
       if (response instanceof Error) {
         setAdLoadState('error');

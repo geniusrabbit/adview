@@ -16,6 +16,7 @@ class HardDataLoader implements AdViewDataLoader {
     unitId: string,
     limit: number = 1,
     format?: string | string[],
+    _query?: { [key: string]: any },
   ): Promise<AdViewData | Error> {
     if (limit <= 0) {
       limit = 1;

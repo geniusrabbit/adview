@@ -33,7 +33,8 @@ describe('useAdViewController', () => {
     fetchAdData.mockResolvedValue(response);
 
     const { result } = renderHook(
-      () => useAdViewController({ srcURL: 'unit-src' }, 'unit-1', 2, 'banner'),
+      () =>
+        useAdViewController({ srcURL: 'unit-src' }, 'unit-1', 2, 'banner', {}),
       { wrapper },
     );
 
@@ -53,14 +54,14 @@ describe('useAdViewController', () => {
     fetchAdData.mockResolvedValue(responseError);
 
     const { result } = renderHook(() =>
-      useAdViewController({ srcURL: 'unit-src' }, 'unit-2'),
+      useAdViewController({ srcURL: 'unit-src' }, 'unit-2', 1, undefined, {}),
     );
 
     await waitFor(() => {
       expect(result.current[2].isComplete).toBe(true);
     });
 
-    expect(fetchAdData).toHaveBeenCalledWith('unit-2', 1, undefined);
+    expect(fetchAdData).toHaveBeenCalledWith('unit-2', 1, undefined, {});
     expect(result.current[0]).toBeNull();
     expect(result.current[1]).toBe(responseError);
   });
@@ -70,14 +71,14 @@ describe('useAdViewController', () => {
     fetchAdData.mockRejectedValue(thrownError);
 
     const { result } = renderHook(() =>
-      useAdViewController({ srcURL: 'unit-src' }, 'unit-3', 0, 'native'),
+      useAdViewController({ srcURL: 'unit-src' }, 'unit-3', 0, 'native', {}),
     );
 
     await waitFor(() => {
       expect(result.current[2].isComplete).toBe(true);
     });
 
-    expect(fetchAdData).toHaveBeenCalledWith('unit-3', 1, 'native');
+    expect(fetchAdData).toHaveBeenCalledWith('unit-3', 1, 'native', {});
     expect(result.current[0]).toBeNull();
     expect(result.current[1]).toBe(thrownError);
     expect(result.current[2].isError).toBe(false);
