@@ -13,27 +13,34 @@ import SmartDataLoader from './smartDataLoader';
  * Retrieves or creates an AdViewDataLoader based on the provided configuration.
  * Supports custom loaders, smart loaders, and default fetcher loaders.
  */
-function getDataLoaderFromConfig(config: AdViewConfig): AdViewDataLoader {
+function getDataLoaderFromConfig(
+  config: AdViewConfig,
+  sources: string[] | undefined = undefined,
+): AdViewDataLoader {
   if (!!config.source) {
     return config.source;
   }
   // If no source loader is provided, create one based on srcURL or defaultAdData
   if (!config.sourceLoader) {
-    if (config.srcURL) {
-      config.source = new DynamicFetcherDataLoader(
-        config.srcURL || '',
-        config.defaultAdData,
-      );
-    } else {
-      config.source = new HardDataLoader(config.defaultAdData);
+    if (testSource('default', sources)) {
+      if (config.srcURL) {
+        config.source = new DynamicFetcherDataLoader(
+          config.srcURL || '',
+          config.defaultAdData,
+        );
+      } else {
+        config.source = new HardDataLoader(config.defaultAdData);
+      }
     }
   } else if (Array.isArray(config.sourceLoader)) {
     config.source = wrapLoaders(
       config.sourceLoader as AdViewDataLoaderAbstractType[],
+      sources,
     );
   } else {
     config.source = createLoaderFromType(
       config.sourceLoader as AdViewDataLoaderAbstractType,
+      sources,
     );
   }
   if (!config.source) {
@@ -44,34 +51,45 @@ function getDataLoaderFromConfig(config: AdViewConfig): AdViewDataLoader {
 
 function createLoaderFromType(
   tp: AdViewDataLoaderAbstractType,
+  sources?: string[] | undefined,
 ): AdViewDataLoader | undefined {
   if (!tp) {
     return undefined;
   }
-  let loader = findAndCreateDataLoaderForType(tp);
+  let loader = findAndCreateDataLoaderForType(tp, sources);
   if (loader) {
     return loader;
   }
   if (typeof tp === 'string') {
-    return new DynamicFetcherDataLoader(tp);
+    if (testSource('dynamic', sources)) {
+      return new DynamicFetcherDataLoader(tp);
+    }
+    return undefined;
   }
   if (Array.isArray(tp)) {
-    return new HardDataLoader(tp);
+    if (testSource('static', sources)) {
+      return new HardDataLoader(tp);
+    }
+    return undefined;
   }
   if (typeof tp === 'function') {
-    return new FuncDataLoader(tp as FuncDataLoaderType);
+    if (testSource('function', sources)) {
+      return new FuncDataLoader(tp as FuncDataLoaderType);
+    }
+    return undefined;
   }
   return tp;
 }
 
 function wrapLoaders(
   loaders: AdViewDataLoaderAbstractType[],
+  sources?: string[] | undefined,
 ): AdViewDataLoader | undefined {
   if (loaders.length === 0) {
     return undefined;
   }
   let loaderObjects = loaders
-    .map(item => createLoaderFromType(item))
+    .map(item => createLoaderFromType(item, sources))
     .filter(Boolean) as AdViewDataLoader[];
   if (loaderObjects.length === 1) {
     return loaderObjects[0];
@@ -80,6 +98,10 @@ function wrapLoaders(
     return new SmartDataLoader(loaderObjects);
   }
   return undefined;
+}
+
+function testSource(val: string, sources?: string[] | undefined): boolean {
+  return !sources || sources.length < 1 || sources.indexOf(val) >= 0;
 }
 
 export default getDataLoaderFromConfig;

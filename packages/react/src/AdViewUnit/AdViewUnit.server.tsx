@@ -12,6 +12,9 @@ import AdViewUnitTracking from './AdViewUnitTracking';
 
 export type AdViewUnitServerProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
+  wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
+  trackingWrapperClassName?: string;
+  sources?: string[];
 };
 
 async function AdViewUnitServer({
@@ -20,6 +23,9 @@ async function AdViewUnitServer({
   children,
   limit,
   query,
+  wrapper,
+  trackingWrapperClassName,
+  sources,
   ...config
 }: AdViewUnitServerProps) {
   const checkFormat = (f: string) => {
@@ -30,7 +36,10 @@ async function AdViewUnitServer({
   };
 
   const baseConfig = getResolveConfig(config);
-  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig);
+  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(
+    baseConfig,
+    sources,
+  );
   const response = await dataLoader.fetchAdData(
     unitId,
     limit || 1,
@@ -73,11 +82,19 @@ async function AdViewUnitServer({
     ];
   }
 
+  if (!wrapper) {
+    wrapper = (elms: React.ReactNode[]) => <>{elms}</>;
+  }
+
   if (groupItems && groupItems.length) {
-    return groupItems.map(
-      ({ tracker, ...data }: AdViewGroupItem, index: number) => {
+    return wrapper(
+      groupItems.map(({ tracker, ...data }: AdViewGroupItem, index: number) => {
         return (
-          <AdViewUnitTracking key={data.id} {...tracker}>
+          <AdViewUnitTracking
+            key={data.id}
+            {...tracker}
+            className={trackingWrapperClassName}
+          >
             {renderAnyTemplates(children, {
               unitId,
               index,
@@ -88,12 +105,12 @@ async function AdViewUnitServer({
             })}
           </AdViewUnitTracking>
         );
-      },
+      }),
     );
   }
 
-  return (
-    <AdViewUnitTracking {...customTracker}>
+  return wrapper([
+    <AdViewUnitTracking {...customTracker} className={trackingWrapperClassName}>
       {renderAnyTemplates(children, {
         unitId,
         index: -1,
@@ -102,8 +119,8 @@ async function AdViewUnitServer({
         error,
         state: state,
       })}
-    </AdViewUnitTracking>
-  );
+    </AdViewUnitTracking>,
+  ]);
 }
 
 export default AdViewUnitServer;

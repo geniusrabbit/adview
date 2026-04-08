@@ -12,6 +12,7 @@ export type AdViewDataLoaderConstructor = new (
 
 /** A registered data loader paired with its type checker */
 export interface AdViewDataLoaderItem {
+  code: string;
   checker: AdViewDataLoaderItemChecker;
   loader: AdViewDataLoaderConstructor;
 }
@@ -40,14 +41,15 @@ const registryDataLoaders = getGlobalRegistry();
  * @param checker - Determines if loader handles the given type
  */
 export function registerDataLoader(
+  code: string,
   loader: AdViewDataLoaderConstructor,
   checker: AdViewDataLoaderItemChecker,
 ) {
-  if (registryDataLoaders.some(item => item.loader === loader)) {
+  if (registryDataLoaders.some(item => item.code === code)) {
     return;
   }
 
-  registryDataLoaders.push({ loader, checker });
+  registryDataLoaders.push({ code, loader, checker });
 }
 
 /**
@@ -65,9 +67,13 @@ export function getRegisteredDataLoaders(): AdViewDataLoaderItem[] {
  */
 export function findAndCreateDataLoaderForType(
   tp: AdViewDataLoaderAbstractType,
+  sources?: string[] | undefined,
 ): AdViewDataLoader | undefined {
   for (const item of registryDataLoaders) {
-    if (item.checker(tp)) {
+    if (
+      (!sources || sources.length < 1 || sources.indexOf(item.code) >= 0) &&
+      item.checker(tp)
+    ) {
       return new item.loader(tp);
     }
   }

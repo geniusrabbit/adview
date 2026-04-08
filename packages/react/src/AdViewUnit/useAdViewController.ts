@@ -14,13 +14,17 @@ function useAdViewController(
   limit: number = 1,
   format?: string | string[],
   query?: { [key: string]: any },
+  sources?: string[],
 ): UseAdViewControllerProps {
   const [adLoadState, setAdLoadState] = useState<string>('initial');
   const [adData, setAdData] = useState<AdViewData | null>(null);
   const [errorMessage, setErrorMessage] = useState<Error | null>(null);
   const globalConfig = useContext(AdViewProviderContext);
   const baseConfig = getResolveConfig({ ...adUnitConfig, ...globalConfig });
-  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig);
+  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(
+    baseConfig,
+    sources,
+  );
 
   const loadAd = async () => {
     setAdLoadState('loading');

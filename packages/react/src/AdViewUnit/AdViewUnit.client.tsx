@@ -14,6 +14,7 @@ export type AdViewUnitClientProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
   wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
   trackingWrapperClassName?: string;
+  sources?: string[];
 };
 
 // AdViewUnitClient is a client-side component that fetches ad data and renders it
@@ -42,6 +43,7 @@ function AdViewUnitClient({
   children,
   wrapper,
   trackingWrapperClassName,
+  sources,
   ...config
 }: AdViewUnitClientProps) {
   const checkFormat = (f: string) => {
@@ -57,6 +59,7 @@ function AdViewUnitClient({
     limit || 1,
     format,
     query,
+    sources,
   );
 
   const {
