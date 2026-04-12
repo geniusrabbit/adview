@@ -2,6 +2,7 @@ import {
   AdViewConfig,
   AdViewDataLoader,
   AdViewDataLoaderAbstractType,
+  AdViewStaticData,
 } from 'typings';
 import { findAndCreateDataLoaderForType } from './dataLoaderRegistry';
 import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
@@ -29,7 +30,7 @@ function getDataLoaderFromConfig(
           config.defaultAdData,
         );
       } else {
-        config.source = new HardDataLoader(config.defaultAdData);
+        config.source = new HardDataLoader('', undefined, config.defaultAdData);
       }
     }
   } else if (Array.isArray(config.sourceLoader)) {
@@ -44,7 +45,7 @@ function getDataLoaderFromConfig(
     );
   }
   if (!config.source) {
-    config.source = new HardDataLoader(config.defaultAdData);
+    config.source = new HardDataLoader('', undefined, config.defaultAdData);
   }
   return config.source;
 }
@@ -68,13 +69,20 @@ function createLoaderFromType(
   }
   if (Array.isArray(tp)) {
     if (testSource('static', sources)) {
-      return new HardDataLoader(tp);
+      return new HardDataLoader('', undefined, tp);
     }
     return undefined;
   }
   if (typeof tp === 'function') {
     if (testSource('function', sources)) {
       return new FuncDataLoader(tp as FuncDataLoaderType);
+    }
+    return undefined;
+  }
+  if (typeof tp === 'object') {
+    if (testSource('static', sources) && 'defaultData' in tp) {
+      const { version, adsourceInfo, defaultData } = tp as AdViewStaticData;
+      return new HardDataLoader(version || '', adsourceInfo, defaultData);
     }
     return undefined;
   }

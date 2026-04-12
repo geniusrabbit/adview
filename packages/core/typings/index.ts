@@ -256,11 +256,18 @@ export interface AdViewDataLoader {
   ) => Promise<AdViewData | Error>;
 }
 
+export type AdViewStaticData = {
+  version?: string;
+  adsourceInfo?: AdViewAdSourceInfo[];
+  defaultData?: AdViewGroupItem[];
+};
+
 // Abstract type for data loader configurations.
 export type AdViewDataLoaderAbstractType =
   | AdViewDataLoader
   | string
-  | AdViewGroupItem[];
+  | AdViewGroupItem[]
+  | AdViewStaticData;
 
 /**
  * Configuration options for AdView components.
