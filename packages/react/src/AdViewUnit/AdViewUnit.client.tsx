@@ -1,6 +1,6 @@
 'use client';
 
-import { AdViewGroupItem } from '@adview/core';
+import { AdViewData, AdViewGroupItem } from '@adview/core';
 import React from 'react';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
 import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
@@ -12,7 +12,10 @@ import useAdViewController from './useAdViewController';
 
 export type AdViewUnitClientProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
-  wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
+  wrapper?: (
+    adViewData: AdViewData | null,
+    elms: React.ReactNode[],
+  ) => React.ReactNode;
   trackingWrapperClassName?: string;
   sources?: string[];
 };
@@ -66,8 +69,14 @@ function AdViewUnitClient({
     responseGroup: _,
     customTracker,
     groupItems,
+    adViewData,
   } = error
-    ? { responseGroup: null, customTracker: {}, groupItems: [] }
+    ? {
+        responseGroup: null,
+        customTracker: {},
+        groupItems: [],
+        adViewData: null,
+      }
     : (() => {
         for (let responseGroup of response?.groups || []) {
           const customTracker = responseGroup?.custom_tracker ?? {};
@@ -75,10 +84,20 @@ function AdViewUnitClient({
             .map(it => (checkFormat(it.type) ? it : null))
             .filter(Boolean);
           if (groupItems && groupItems.length > 0) {
-            return { responseGroup, customTracker, groupItems };
+            return {
+              responseGroup,
+              customTracker,
+              groupItems,
+              adViewData: response,
+            };
           }
         }
-        return { responseGroup: null, customTracker: {}, groupItems: [] };
+        return {
+          responseGroup: null,
+          customTracker: {},
+          groupItems: [],
+          adViewData: response,
+        };
       })();
 
   if (!children) {
@@ -90,11 +109,12 @@ function AdViewUnitClient({
   }
 
   if (!wrapper) {
-    wrapper = (elms: React.ReactNode[]) => <>{elms}</>;
+    wrapper = (_: AdViewData | null, elms: React.ReactNode[]) => <>{elms}</>;
   }
 
   if (groupItems && groupItems?.length > 0) {
     return wrapper(
+      adViewData,
       (groupItems as AdViewGroupItem[]).map(({ tracker, ...data }, index) => {
         return (
           <AdViewUnitTracking
@@ -116,7 +136,7 @@ function AdViewUnitClient({
     );
   }
 
-  return wrapper([
+  return wrapper(adViewData, [
     <AdViewUnitTracking {...customTracker} className={trackingWrapperClassName}>
       {renderAnyTemplates(children, {
         unitId,
