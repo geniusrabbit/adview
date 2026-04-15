@@ -48,6 +48,10 @@ class DynamicFetcherDataLoader implements AdViewDataLoader {
       // Fetch ad data from the server
       const response = await fetch(targetURL, {
         signal: AbortSignal.timeout(this.timeout),
+        headers: {
+          'X-Page-Path': window?.location?.pathname || '',
+          'X-Page-Domain': window?.location?.hostname || '',
+        },
       });
       // Check if the HTTP response was successful
       if (!response.ok) {
