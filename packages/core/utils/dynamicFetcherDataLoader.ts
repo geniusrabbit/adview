@@ -50,7 +50,8 @@ class DynamicFetcherDataLoader implements AdViewDataLoader {
         signal: AbortSignal.timeout(this.timeout),
         headers: {
           'X-Page-Path': window?.location?.pathname || '',
-          'X-Page-Domain': window?.location?.hostname || '',
+          'X-Page-Domain':
+            window?.location?.host || window?.location?.hostname || '',
         },
       });
       // Check if the HTTP response was successful
