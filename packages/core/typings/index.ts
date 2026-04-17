@@ -96,20 +96,56 @@ export interface AdViewItemAsset {
 }
 
 /**
+ * Information about the advertiser.
+ * Contains details about who is running the advertisement campaign.
+ */
+export interface AdViewAdvertiserInfo {
+  /** Unique identifier for the advertiser */
+  id: string;
+  /** Optional human-readable name for the advertiser */
+  name?: string;
+  /** Optional URL to the advertiser's about page */
+  about_url?: string;
+  /** Optional URL for contacting the advertiser */
+  contact_url?: string;
+  /** Optional URL to the advertiser's privacy policy */
+  privacy_url?: string;
+  /** Optional URL to the advertiser's terms of service */
+  terms_url?: string;
+}
+
+export interface AdViewAdMetaInfo {
+  /** Unique identifier for the ad */
+  id?: string;
+  /** Optional campaign identifier */
+  campaign_id?: string;
+  /** Optional ad source identifier */
+  adsource_id?: string;
+  /** Optional description of the ad */
+  description?: string;
+  /** Optional minimum age requirement for viewers */
+  min_age?: number;
+  /** Optional URL to the advertiser's about page */
+  about_url?: string;
+  /** Optional URL for contacting the advertiser */
+  contact_url?: string;
+  /** Optional URL to the advertiser's privacy policy */
+  privacy_url?: string;
+  /** Optional URL to the advertiser's terms of service */
+  terms_url?: string;
+}
+
+/**
  * Information about the particular advertisement.
  * Who bought it, what campaign it belongs to, etc.
  * Useful for advanced use cases like reporting, debugging, or custom handling based on the ad source.
  */
 export interface AdViewAdInfo {
-  /** Unique identifier for the ad */
-  id: string;
-  /** Optional source identifier for the ad (e.g., ad network, campaign) */
-  adsourceId?: string;
-  /** Optional description of the ad */
-  description?: string;
+  /** Advertiser information associated with this ad */
+  advertiser?: AdViewAdvertiserInfo;
   /** Optional additional metadata about the ad */
-  metadata?: { [key: string]: any };
-
+  ad?: AdViewAdMetaInfo;
+  /** Optional array of call-to-action links related to the ad */
   actions?: {
     type?: string;
     title?: string;
@@ -138,7 +174,7 @@ export interface AdViewGroupItem {
   /** Optional additional metadata about the ad item */
   metadata?: { [key: string]: any };
   /** Optional information about the ad source or campaign */
-  adInfo?: AdViewAdInfo;
+  adinfo?: AdViewAdInfo;
 }
 
 /**
@@ -155,9 +191,9 @@ export interface AdViewAdSourceInfo {
   /** Optional domain associated with the ad source (e.g., 'example.com') */
   domain?: string;
   /** Optional URL to the ad source's icon */
-  iconURL?: string;
+  icon_url?: string;
   /** Optional URL to the ad source's logo */
-  logoURL?: string;
+  logo_url?: string;
   /** Optional URL to the ad source's website or documentation */
   url?: string;
   /** Optional additional metadata about the ad source */

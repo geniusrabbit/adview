@@ -41,7 +41,7 @@ class HardDataLoader implements AdViewDataLoader {
     return {
       version: this.version,
       adsources: this.adsourceInfo?.filter(info =>
-        items.some(item => item.adInfo?.adsourceId === info.id),
+        items.some(item => item.adinfo?.ad?.adsource_id === info.id),
       ),
       groups: [
         {
