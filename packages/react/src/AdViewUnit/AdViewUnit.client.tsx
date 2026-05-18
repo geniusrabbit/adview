@@ -18,6 +18,7 @@ export type AdViewUnitClientProps = AdViewUnitPropsBase & {
   ) => React.ReactNode;
   trackingWrapperClassName?: string;
   sources?: string[];
+  acceptedFormatTypes?: string[];
 };
 
 // AdViewUnitClient is a client-side component that fetches ad data and renders it
@@ -47,11 +48,19 @@ function AdViewUnitClient({
   wrapper,
   trackingWrapperClassName,
   sources,
+  acceptedFormatTypes,
   ...config
 }: AdViewUnitClientProps) {
   const checkFormat = (f: string) => {
     if (!format) {
       return true;
+    }
+    if (acceptedFormatTypes && acceptedFormatTypes.length > 0) {
+      return (
+        acceptedFormatTypes.includes(f) ||
+        acceptedFormatTypes.includes('all') ||
+        acceptedFormatTypes.includes('*')
+      );
     }
     return Array.isArray(format) ? format.includes(f) : f === format;
   };
