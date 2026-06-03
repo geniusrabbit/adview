@@ -12,7 +12,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "version": "changeset version",
-    "release": "changeset publish",
+    "release": "npm_config_provenance=false changeset publish",
     "popunder:dev": "npm run dev --workspace=packages/popunder",
     "popunder:build": "npm run build --workspace=packages/popunder",
     "popunder:clean": "npm run clean --workspace=packages/popunder",
