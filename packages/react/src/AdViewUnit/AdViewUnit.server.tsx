@@ -12,6 +12,7 @@ import AdViewUnitTracking from './AdViewUnitTracking';
 
 export type AdViewUnitServerProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
+  filterItems?: (items: AdViewGroupItem[]) => AdViewGroupItem[];
   wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
   trackingWrapperClassName?: string;
   sources?: string[];
@@ -23,6 +24,7 @@ async function AdViewUnitServer({
   children,
   limit,
   query,
+  filterItems,
   wrapper,
   trackingWrapperClassName,
   sources,
@@ -55,7 +57,7 @@ async function AdViewUnitServer({
     isError: isLoadingError,
   };
 
-  const {
+  let {
     responseGroup: _,
     customTracker,
     groupItems,
@@ -84,6 +86,10 @@ async function AdViewUnitServer({
 
   if (!wrapper) {
     wrapper = (elms: React.ReactNode[]) => <>{elms}</>;
+  }
+
+  if (filterItems && groupItems && groupItems.length > 0) {
+    groupItems = filterItems(groupItems);
   }
 
   if (groupItems && groupItems.length) {

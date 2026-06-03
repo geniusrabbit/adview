@@ -10,12 +10,16 @@ import { renderAnyTemplates } from './AdViewUnitTemplate';
 import AdViewUnitTracking from './AdViewUnitTracking';
 import useAdViewController from './useAdViewController';
 
+export type AdViewUnitClientWrapperParams = {
+  adViewData: AdViewData | null;
+  groupItems: AdViewGroupItem[];
+  elms: React.ReactNode[];
+};
+
 export type AdViewUnitClientProps = AdViewUnitPropsBase & {
   children?: AdViewUnitClientChildren;
-  wrapper?: (
-    adViewData: AdViewData | null,
-    elms: React.ReactNode[],
-  ) => React.ReactNode;
+  filterItems?: (items: AdViewGroupItem[]) => AdViewGroupItem[];
+  wrapper?: (params: AdViewUnitClientWrapperParams) => React.ReactNode;
   trackingWrapperClassName?: string;
   sources?: string[];
   acceptedFormatTypes?: string[];
@@ -45,6 +49,7 @@ function AdViewUnitClient({
   format,
   query,
   children,
+  filterItems,
   wrapper,
   trackingWrapperClassName,
   sources,
@@ -74,7 +79,7 @@ function AdViewUnitClient({
     sources,
   );
 
-  const {
+  let {
     responseGroup: _,
     customTracker,
     groupItems,
@@ -118,45 +123,59 @@ function AdViewUnitClient({
   }
 
   if (!wrapper) {
-    wrapper = (_: AdViewData | null, elms: React.ReactNode[]) => <>{elms}</>;
+    wrapper = ({ elms }: AdViewUnitClientWrapperParams) => <>{elms}</>;
+  }
+
+  if (filterItems && groupItems && groupItems.length > 0) {
+    groupItems = filterItems(groupItems as AdViewGroupItem[]);
   }
 
   if (groupItems && groupItems?.length > 0) {
-    return wrapper(
+    return wrapper({
       adViewData,
-      (groupItems as AdViewGroupItem[]).map(({ tracker, ...data }, index) => {
-        return (
-          <AdViewUnitTracking
-            key={data.id}
-            {...tracker}
-            className={trackingWrapperClassName}
-          >
-            {renderAnyTemplates(children, {
-              unitId,
-              index,
-              data,
-              type: data.type || 'default',
-              error,
-              state: loadState,
-            })}
-          </AdViewUnitTracking>
-        );
-      }),
-    );
+      groupItems: groupItems as AdViewGroupItem[],
+      elms: (groupItems as AdViewGroupItem[]).map(
+        ({ tracker, ...data }, index) => {
+          return (
+            <AdViewUnitTracking
+              key={data.id}
+              {...tracker}
+              className={trackingWrapperClassName}
+            >
+              {renderAnyTemplates(children, {
+                unitId,
+                index,
+                data,
+                type: data.type || 'default',
+                error,
+                state: loadState,
+              })}
+            </AdViewUnitTracking>
+          );
+        },
+      ),
+    });
   }
 
-  return wrapper(adViewData, [
-    <AdViewUnitTracking {...customTracker} className={trackingWrapperClassName}>
-      {renderAnyTemplates(children, {
-        unitId,
-        index: -1,
-        data: null,
-        type: 'default',
-        error,
-        state: loadState,
-      })}
-    </AdViewUnitTracking>,
-  ]);
+  return wrapper({
+    adViewData,
+    groupItems: [],
+    elms: [
+      <AdViewUnitTracking
+        {...customTracker}
+        className={trackingWrapperClassName}
+      >
+        {renderAnyTemplates(children, {
+          unitId,
+          index: -1,
+          data: null,
+          type: 'default',
+          error,
+          state: loadState,
+        })}
+      </AdViewUnitTracking>,
+    ],
+  });
 }
 
 export default AdViewUnitClient;
