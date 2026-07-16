@@ -1,4 +1,4 @@
-import { AdViewData, AdViewDataLoader } from 'typings';
+import { AdViewData, AdViewDataLoader, AdViewSourceItem } from 'typings';
 
 export type FuncDataLoaderType = (
   unitId: string,
@@ -15,8 +15,13 @@ export type FuncDataLoaderType = (
 class FuncDataLoader implements AdViewDataLoader {
   fetchAdDataFnk: FuncDataLoaderType;
 
-  constructor(fetchAdData: FuncDataLoaderType) {
-    this.fetchAdDataFnk = fetchAdData;
+  constructor(source: AdViewSourceItem);
+  constructor(fetchAdData: FuncDataLoaderType);
+  constructor(fetchAdDataOrSource: FuncDataLoaderType | AdViewSourceItem) {
+    this.fetchAdDataFnk =
+      typeof fetchAdDataOrSource === 'function'
+        ? fetchAdDataOrSource
+        : (fetchAdDataOrSource.params || {}).fetchAdData;
   }
 
   async fetchAdData(

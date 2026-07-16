@@ -1,72 +1,58 @@
+# Versions packages via Changesets (opens/updates a Version PR).
+# Does NOT publish to npm — that happens only in publish.yml on a version tag.
+
 name: Release
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Release with Changesets
+    name: Version packages (Changesets)
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
       pull-requests: write
-      id-token: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch full history for changesets
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
-        run: npm ci
-      
+        run: make deps-ci
+
       - name: Build packages
         run: make build
-      
-      - name: Create Release Pull Request or Publish
-        id: changesets
+
+      - name: Create Version Pull Request
         uses: changesets/action@v1
         with:
-          # This expects you to have a script called "release" which does a build before calling changeset publish
-          publish: npm run release
-          title: "Release: Version Packages"
-          commit: "chore: version packages"
+          # Version only — do not pass `publish` (that would push to npmjs).
+          version: make version
+          title: 'Release: Version Packages'
+          commit: 'chore: version packages'
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-      
-      - name: Create git tags for published packages
-        if: steps.changesets.outputs.published == 'true'
+
+      - name: Reminder — publish via tag
         run: |
-          echo "Published packages:"
-          echo "${{ steps.changesets.outputs.publishedPackages }}"
-          
-          # Create tags for each published package
-          echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | "\(.name)@\(.version)"' | while read tag; do
-            echo "Creating tag: $tag"
-            git tag "$tag"
-            git push origin "$tag"
-          done
-      
-      - name: Send notification on success
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          echo "🎉 Packages published successfully!"
-          echo "Published packages: ${{ steps.changesets.outputs.publishedPackages }}"
+          echo "Changesets manages version bumps only."
+          echo "After merging the Version Packages PR, publish with:"
+          echo "  git tag v\$(node -p \"require('./packages/core/package.json').version\")"
+          echo "  git push origin --tags"
+          echo "→ publish.yml will publish to npmjs."

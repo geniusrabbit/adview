@@ -4,7 +4,8 @@ import AdViewUnitDefaultTemplate from './AdViewUnit/AdViewUnitDefaultTemplate';
 import AdViewUnitNativeTemplate from './AdViewUnit/AdViewUnitNativeTemplate';
 import AdViewUnitProxyTemplate from './AdViewUnit/AdViewUnitProxyTemplate';
 import AdViewUnitTemplate from './AdViewUnit/AdViewUnitTemplate';
-import {
+
+export type {
   AdViewOptionalDataProps,
   AdViewUnitClientChildren,
   AdViewUnitTemplateProps,
@@ -12,16 +13,12 @@ import {
 } from './types';
 
 export {
-  AdViewOptionalDataProps,
   AdViewUnitBannerTemplate,
-  AdViewUnitClientChildren,
   AdViewUnitDefaultTemplate,
   AdViewUnitNativeTemplate,
   AdViewUnitProxyTemplate,
   AdViewUnitServer,
   AdViewUnitTemplate,
-  AdViewUnitTemplateProps,
-  AdViewUnitTemplateTypeProps,
 
   /**
    * Components renamed for easier imports
@@ -31,6 +28,5 @@ export {
   AdViewUnitNativeTemplate as NativeTemplate,
   AdViewUnitProxyTemplate as ProxyTemplate,
   AdViewUnitTemplate as Template,
-  AdViewUnitServer as Unit
+  AdViewUnitServer as Unit,
 };
-

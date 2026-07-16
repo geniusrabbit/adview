@@ -1,20 +1,24 @@
-import { AdViewDataLoader, AdViewDataLoaderAbstractType } from 'typings';
+import {
+  AdViewDataLoader,
+  AdViewDriverConstructor,
+  AdViewSourceItem,
+} from 'typings';
+import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
+import FuncDataLoader from './funcDataLoader';
+import HardDataLoader from './hardDataLoader';
 
-/** Checks if a data loader can handle a given type */
-export type AdViewDataLoaderItemChecker = (
-  type: AdViewDataLoaderAbstractType,
-) => boolean;
+/** Built-in drivers resolved directly, without needing explicit registration */
+const BUILTIN_DRIVERS: { [driverName: string]: AdViewDriverConstructor } = {
+  dynamic: DynamicFetcherDataLoader,
+  static: HardDataLoader,
+  function: FuncDataLoader,
+};
 
-/** Constructor for instantiating a data loader */
-export type AdViewDataLoaderConstructor = new (
-  type: AdViewDataLoaderAbstractType,
-) => AdViewDataLoader;
-
-/** A registered data loader paired with its type checker */
+/** A registered driver implementation paired with its name and optional matcher */
 export interface AdViewDataLoaderItem {
-  code: string;
-  checker: AdViewDataLoaderItemChecker;
-  loader: AdViewDataLoaderConstructor;
+  driverName: string;
+  driver: AdViewDriverConstructor;
+  matcher?: (source: AdViewSourceItem) => boolean;
 }
 
 /** Global key for client-side registry */
@@ -32,50 +36,70 @@ function getGlobalRegistry(): AdViewDataLoaderItem[] {
   return globalRef[REGISTRY_KEY];
 }
 
-/** Global registry storing all registered data loaders */
+/** Global registry storing all registered drivers */
 const registryDataLoaders = getGlobalRegistry();
 
 /**
- * Registers a data loader with a type checker
- * @param loader - Constructor for the data loader
- * @param checker - Determines if loader handles the given type
+ * Registers a driver implementation under a given name.
+ *
+ * Matching a source config against a registered driver always requires
+ * `source.driver === driverName` first; `matcher` (and/or a static
+ * `matchDriver` implemented on `driver` itself) can further refine that
+ * match, but neither can bypass the mandatory name check.
+ *
+ * @param driverName - Name referenced by `AdViewSourceItem.driver`
+ * @param driver - Constructor for the driver implementation
+ * @param matcher - Optional extra check to confirm the source config fits this driver
  */
 export function registerDataLoader(
-  code: string,
-  loader: AdViewDataLoaderConstructor,
-  checker: AdViewDataLoaderItemChecker,
+  driverName: string,
+  driver: AdViewDriverConstructor,
+  matcher?: (source: AdViewSourceItem) => boolean,
 ) {
-  if (registryDataLoaders.some(item => item.code === code)) {
+  if (registryDataLoaders.some(item => item.driverName === driverName)) {
     return;
   }
 
-  registryDataLoaders.push({ code, loader, checker });
+  registryDataLoaders.push({ driverName, driver, matcher });
 }
 
 /**
- * Gets all registered data loaders
- * @returns Array of data loader items
+ * Gets all registered drivers
+ * @returns Array of registered driver items
  */
 export function getRegisteredDataLoaders(): AdViewDataLoaderItem[] {
   return registryDataLoaders;
 }
 
 /**
- * Finds and instantiates a data loader for the given type
- * @param tp - The type to match
- * @returns A new data loader instance or undefined if no match found
+ * Finds and instantiates the driver implementation for the given source
+ * config: explicitly registered drivers are checked first (so a driver
+ * name such as 'dynamic' can be overridden), falling back to the built-in
+ * drivers ('dynamic', 'static', 'function') resolved directly with no
+ * registration step required.
+ * @param source - The declarative source config to resolve
+ * @returns A new data loader instance, or undefined if no driver matches
  */
-export function findAndCreateDataLoaderForType(
-  tp: AdViewDataLoaderAbstractType,
-  sources?: string[] | undefined,
+export function findDataLoaderForSource(
+  source: AdViewSourceItem,
 ): AdViewDataLoader | undefined {
   for (const item of registryDataLoaders) {
-    if (
-      (!sources || sources.length < 1 || sources.indexOf(item.code) >= 0) &&
-      item.checker(tp)
-    ) {
-      return new item.loader(tp);
+    if (item.driverName !== source.driver) {
+      continue;
     }
+    if (item.matcher && !item.matcher(source)) {
+      continue;
+    }
+    if (item.driver.matchDriver && !item.driver.matchDriver(source)) {
+      continue;
+    }
+    return new item.driver(source);
   }
+
+  const builtinDriver = BUILTIN_DRIVERS[source.driver];
+  if (builtinDriver) {
+    return new builtinDriver(source);
+  }
+
   return undefined;
 }

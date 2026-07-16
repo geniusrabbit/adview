@@ -1,3 +1,6 @@
+# CI: lint, build, test, dry-run pack checks.
+# Never publishes to npm (no registry-url, no NPM_TOKEN).
+
 name: CI
 
 on:
@@ -17,44 +20,27 @@ jobs:
   test:
     name: Test and Build
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [18, 20]
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: Install dependencies
-        run: npm ci
-      
-      - name: Run linting
-        run: |
-          echo "🔍 Running ESLint..."
-          npm run lint || echo "⚠️ Linting completed with warnings"
-      
-      - name: Build packages
-        run: |
-          echo "🔧 Building all packages..."
-          make build
-      
-      - name: Run tests
-        run: |
-          echo "🧪 Running tests..."
-          npm run test || echo "ℹ️ No tests configured"
-      
-      - name: Check package readiness
-        run: |
-          echo "✅ Checking packages are ready for publishing..."
-          make publish-check
-      
+        run: make deps-ci
+
+      - name: CI checks
+        run: make ci
+
       - name: Check for changeset files
         if: github.event_name == 'pull_request'
         run: |
@@ -63,57 +49,5 @@ jobs:
             echo "Consider adding one with: npx changeset add"
             echo "This is not blocking, but recommended for tracking changes."
           else
-            echo "✅ Changeset files found - changes will be versioned properly"
+            echo "✅ Changeset files found"
           fi
-
-  publish-check:
-    name: Dry-run publish check
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build packages
-        run: make build
-      
-      - name: Test Core package publishing (dry-run)
-        continue-on-error: true
-        run: |
-          echo "📦 Testing Core package publication..."
-          cd packages/core && \
-          npm publish --dry-run || echo "⚠️ Core package dry-run publish failed (ignored)"
-
-      - name: Test React package publishing (dry-run)
-        continue-on-error: true
-        run: |
-          echo "📦 Testing React package publication..."
-          cd packages/react && \
-          npm publish --dry-run || echo "⚠️ React package dry-run publish failed (ignored)"
-      
-      - name: Verify package contents
-        continue-on-error: true
-        run: |
-          echo "🔍 Verifying package contents..."
-
-          # Check Core package
-          echo "Core package files:"
-          cd packages/core && \
-          npm pack --dry-run || echo "⚠️ Core package dry-run failed (ignored)"
-          
-          # Check React package  
-          echo "React package files:"
-          cd packages/react && \
-          npm pack --dry-run || echo "⚠️ React package dry-run failed (ignored)"
-          
-          echo "✅ Package contents verified"

@@ -16,12 +16,17 @@ export type AdViewUnitClientWrapperParams = {
   elms: React.ReactNode[];
 };
 
-export type AdViewUnitClientProps = AdViewUnitPropsBase & {
+export type AdViewUnitClientProps = Omit<AdViewUnitPropsBase, 'sources'> & {
   children?: AdViewUnitClientChildren;
   filterItems?: (items: AdViewGroupItem[]) => AdViewGroupItem[];
   wrapper?: (params: AdViewUnitClientWrapperParams) => React.ReactNode;
   trackingWrapperClassName?: string;
+  /** Filters/prioritizes sources by name (see `AdViewConfig.sources`) */
   sources?: string[];
+  /** Filters sources by tag (see `AdViewConfig.sources`) */
+  tags?: string[];
+  /** Filters sources by driver name (see `AdViewConfig.sources`) */
+  drivers?: string[];
   acceptedFormatTypes?: string[];
 };
 
@@ -53,6 +58,8 @@ function AdViewUnitClient({
   wrapper,
   trackingWrapperClassName,
   sources,
+  tags,
+  drivers,
   acceptedFormatTypes,
   ...config
 }: AdViewUnitClientProps) {
@@ -76,7 +83,7 @@ function AdViewUnitClient({
     limit || 1,
     format,
     query,
-    sources,
+    { sources, tags, drivers },
   );
 
   let {
@@ -116,9 +123,9 @@ function AdViewUnitClient({
 
   if (!children) {
     children = [
-      <AdViewUnitBannerTemplate />,
-      <AdViewUnitNativeTemplate />,
-      <AdViewUnitProxyTemplate />,
+      <AdViewUnitBannerTemplate key="banner-template" />,
+      <AdViewUnitNativeTemplate key="native-template" />,
+      <AdViewUnitProxyTemplate key="proxy-template" />,
     ];
   }
 
@@ -138,7 +145,7 @@ function AdViewUnitClient({
         ({ tracker, ...data }, index) => {
           return (
             <AdViewUnitTracking
-              key={data.id}
+              key={data.id || `${unitId}-${index}`}
               {...tracker}
               className={trackingWrapperClassName}
             >
@@ -162,6 +169,7 @@ function AdViewUnitClient({
     groupItems: [],
     elms: [
       <AdViewUnitTracking
+        key={`${unitId}-empty`}
         {...customTracker}
         className={trackingWrapperClassName}
       >

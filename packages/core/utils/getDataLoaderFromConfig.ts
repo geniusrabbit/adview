@@ -4,7 +4,9 @@ import {
   AdViewDataLoaderAbstractType,
   AdViewStaticData,
 } from 'typings';
-import { findAndCreateDataLoaderForType } from './dataLoaderRegistry';
+import buildLoaderFromSources, {
+  AdViewSourceFilters,
+} from './buildLoaderFromSources';
 import DynamicFetcherDataLoader from './dynamicFetcherDataLoader';
 import FuncDataLoader, { FuncDataLoaderType } from './funcDataLoader';
 import HardDataLoader from './hardDataLoader';
@@ -12,42 +14,56 @@ import SmartDataLoader from './smartDataLoader';
 
 /**
  * Retrieves or creates an AdViewDataLoader based on the provided configuration.
- * Supports custom loaders, smart loaders, and default fetcher loaders.
+ * Supports the declarative `sources` config, custom loaders, smart loaders,
+ * and default fetcher loaders.
+ *
+ * Does not mutate `config` — `config.source` is only honored when the caller
+ * explicitly passed a pre-built loader (never written back for shared Provider props).
  */
 function getDataLoaderFromConfig(
   config: AdViewConfig,
-  sources: string[] | undefined = undefined,
+  filters: AdViewSourceFilters | undefined = undefined,
 ): AdViewDataLoader {
-  if (!!config.source) {
+  // Explicit user-provided loader override
+  if (config.source) {
     return config.source;
   }
-  // If no source loader is provided, create one based on srcURL or defaultAdData
+
+  // Declarative `sources` — rebuild every call so per-Unit filters stay correct
+  if (config.sources && config.sources.length > 0) {
+    const loader = buildLoaderFromSources(config.sources, filters);
+    if (loader) {
+      return loader;
+    }
+  }
+
+  const sources = filters?.sources;
+  let resolved: AdViewDataLoader | undefined;
+
   if (!config.sourceLoader) {
     if (testSource('default', sources)) {
       if (config.srcURL) {
-        config.source = new DynamicFetcherDataLoader(
+        resolved = new DynamicFetcherDataLoader(
           config.srcURL || '',
           config.defaultAdData,
         );
       } else {
-        config.source = new HardDataLoader('', undefined, config.defaultAdData);
+        resolved = new HardDataLoader('', undefined, config.defaultAdData);
       }
     }
   } else if (Array.isArray(config.sourceLoader)) {
-    config.source = wrapLoaders(
+    resolved = wrapLoaders(
       config.sourceLoader as AdViewDataLoaderAbstractType[],
       sources,
     );
   } else {
-    config.source = createLoaderFromType(
+    resolved = createLoaderFromType(
       config.sourceLoader as AdViewDataLoaderAbstractType,
       sources,
     );
   }
-  if (!config.source) {
-    config.source = new HardDataLoader('', undefined, config.defaultAdData);
-  }
-  return config.source;
+
+  return resolved || new HardDataLoader('', undefined, config.defaultAdData);
 }
 
 function createLoaderFromType(
@@ -56,10 +72,6 @@ function createLoaderFromType(
 ): AdViewDataLoader | undefined {
   if (!tp) {
     return undefined;
-  }
-  let loader = findAndCreateDataLoaderForType(tp, sources);
-  if (loader) {
-    return loader;
   }
   if (typeof tp === 'string') {
     if (testSource('dynamic', sources)) {
@@ -83,6 +95,10 @@ function createLoaderFromType(
     if (testSource('static', sources) && 'defaultData' in tp) {
       const { version, adsourceInfo, defaultData } = tp as AdViewStaticData;
       return new HardDataLoader(version || '', adsourceInfo, defaultData);
+    }
+    // Already an AdViewDataLoader instance
+    if ('fetchAdData' in tp && typeof (tp as AdViewDataLoader).fetchAdData === 'function') {
+      return tp as AdViewDataLoader;
     }
     return undefined;
   }

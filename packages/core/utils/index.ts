@@ -1,12 +1,12 @@
 // Core utility functions
 export {
-  findAndCreateDataLoaderForType, getRegisteredDataLoaders, registerDataLoader
+  findDataLoaderForSource, getRegisteredDataLoaders, registerDataLoader
 } from './dataLoaderRegistry';
 export type {
-  AdViewDataLoaderConstructor,
-  AdViewDataLoaderItem,
-  AdViewDataLoaderItemChecker
+  AdViewDataLoaderItem
 } from './dataLoaderRegistry';
+export { default as buildLoaderFromSources } from './buildLoaderFromSources';
+export type { AdViewSourceFilters } from './buildLoaderFromSources';
 export { default as executeImpressionsTracking } from './executeImpressionsTracking';
 export { default as getAssetByName } from './getAssetByName';
 export {

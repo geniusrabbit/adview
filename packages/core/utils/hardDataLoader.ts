@@ -3,6 +3,7 @@ import {
   AdViewData,
   AdViewDataLoader,
   AdViewGroupItem,
+  AdViewSourceItem,
 } from 'typings';
 import { RandomAdItems } from './getCollectPageData';
 
@@ -15,14 +16,28 @@ class HardDataLoader implements AdViewDataLoader {
   version = '';
   adsourceInfo: AdViewAdSourceInfo[] | undefined;
   defaultData: AdViewGroupItem[] | undefined;
+
+  constructor(source: AdViewSourceItem);
   constructor(
-    version: string = '',
+    version?: string,
+    adsourceInfo?: AdViewAdSourceInfo[],
+    defaultData?: AdViewGroupItem[],
+  );
+  constructor(
+    versionOrSource: string | AdViewSourceItem = '',
     adsourceInfo?: AdViewAdSourceInfo[],
     defaultData?: AdViewGroupItem[],
   ) {
-    this.version = version;
-    this.adsourceInfo = adsourceInfo;
-    this.defaultData = defaultData;
+    if (typeof versionOrSource === 'object') {
+      const params = versionOrSource.params || {};
+      this.version = params.version || '';
+      this.adsourceInfo = params.adsourceInfo;
+      this.defaultData = params.defaultData;
+    } else {
+      this.version = versionOrSource;
+      this.adsourceInfo = adsourceInfo;
+      this.defaultData = defaultData;
+    }
   }
 
   async fetchAdData(

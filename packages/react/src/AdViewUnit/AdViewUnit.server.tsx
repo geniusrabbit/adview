@@ -10,12 +10,17 @@ import AdViewUnitProxyTemplate from './AdViewUnitProxyTemplate';
 import { renderAnyTemplates } from './AdViewUnitTemplate';
 import AdViewUnitTracking from './AdViewUnitTracking';
 
-export type AdViewUnitServerProps = AdViewUnitPropsBase & {
+export type AdViewUnitServerProps = Omit<AdViewUnitPropsBase, 'sources'> & {
   children?: AdViewUnitClientChildren;
   filterItems?: (items: AdViewGroupItem[]) => AdViewGroupItem[];
   wrapper?: (elms: React.ReactNode[]) => React.ReactNode;
   trackingWrapperClassName?: string;
+  /** Filters/prioritizes sources by name (see `AdViewConfig.sources`) */
   sources?: string[];
+  /** Filters sources by tag (see `AdViewConfig.sources`) */
+  tags?: string[];
+  /** Filters sources by driver name (see `AdViewConfig.sources`) */
+  drivers?: string[];
 };
 
 async function AdViewUnitServer({
@@ -28,6 +33,8 @@ async function AdViewUnitServer({
   wrapper,
   trackingWrapperClassName,
   sources,
+  tags,
+  drivers,
   ...config
 }: AdViewUnitServerProps) {
   const checkFormat = (f: string) => {
@@ -38,10 +45,11 @@ async function AdViewUnitServer({
   };
 
   const baseConfig = getResolveConfig(config);
-  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(
-    baseConfig,
+  const dataLoader: AdViewDataLoader = getDataLoaderFromConfig(baseConfig, {
     sources,
-  );
+    tags,
+    drivers,
+  });
   const response = await dataLoader.fetchAdData(
     unitId,
     limit || 1,
@@ -78,9 +86,9 @@ async function AdViewUnitServer({
 
   if (!children) {
     children = [
-      <AdViewUnitBannerTemplate />,
-      <AdViewUnitNativeTemplate />,
-      <AdViewUnitProxyTemplate />,
+      <AdViewUnitBannerTemplate key="banner-template" />,
+      <AdViewUnitNativeTemplate key="native-template" />,
+      <AdViewUnitProxyTemplate key="proxy-template" />,
     ];
   }
 
@@ -97,7 +105,7 @@ async function AdViewUnitServer({
       groupItems.map(({ tracker, ...data }: AdViewGroupItem, index: number) => {
         return (
           <AdViewUnitTracking
-            key={data.id}
+            key={data.id || `${unitId}-${index}`}
             {...tracker}
             className={trackingWrapperClassName}
           >
@@ -116,7 +124,11 @@ async function AdViewUnitServer({
   }
 
   return wrapper([
-    <AdViewUnitTracking {...customTracker} className={trackingWrapperClassName}>
+    <AdViewUnitTracking
+      key={`${unitId}-empty`}
+      {...customTracker}
+      className={trackingWrapperClassName}
+    >
       {renderAnyTemplates(children, {
         unitId,
         index: -1,

@@ -12,7 +12,7 @@
     },
     "test": {
       "dependsOn": ["^test"],
-      "inputs": ["$TURBO_DEFAULT$", "jest.config.js", "vitest.config.ts"]
+      "inputs": ["$TURBO_DEFAULT$", "jest.config.js", "jest.config.cjs", "vitest.config.ts"]
     },
     "dev": {
       "cache": false,

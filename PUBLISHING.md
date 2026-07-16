@@ -354,21 +354,18 @@ Runs on every push and pull request to `main` and `develop` branches:
 
 #### 2. Release Workflow (`.github/workflows/release.yml`)
 
-Runs on pushes to `main` branch using Changesets:
+Runs on pushes to `main` using Changesets:
 
-- **Automated versioning**: Uses changesets to determine version bumps
-- **Release PR creation**: Creates PRs for version updates
-- **Automated publishing**: Publishes to npm when release PR is merged
-- **Git tagging**: Creates git tags for published versions
+- **Version PR only**: bumps package versions from changeset files
+- **Does not publish to npm** (no `NPM_TOKEN`, no `changeset publish`)
 
-#### 3. Manual Tag Publishing (`.github/workflows/publish.yml`)
+#### 3. Publish Workflow (`.github/workflows/publish.yml`) — **only npm publisher**
 
-Runs when version tags are manually created:
+Runs when a version tag is pushed (`v*`):
 
-- **Tag-based publishing**: Triggers on `v*` or `*.*.*` tags
-- **Security checks**: Only runs on actual tags
-- **Full publication**: Builds and publishes all packages
-- **GitHub releases**: Creates GitHub releases with changelog
+- Validates semver tag format
+- Builds, lints, tests, then `changeset publish` to npmjs
+- Creates a GitHub Release
 
 ### Setup Requirements
 
@@ -412,42 +409,29 @@ Ensure your npm account has:
 
 ### Publishing Workflows
 
-#### Method 1: Changesets (Recommended)
-
-This is the main workflow for regular releases:
+#### Recommended: Changesets + tag publish
 
 ```bash
-# 1. Make your changes
-git checkout -b feature/my-feature
-
-# 2. Add changeset describing changes
+# 1. Feature work + changeset
 npx changeset add
-
-# 3. Commit and create PR
-git add .
-git commit -m "feat: add new feature"
 git push origin feature/my-feature
+# Merge PR → release.yml opens "Version Packages" PR
 
-# 4. Merge PR to main
-# → Triggers release workflow
-# → Creates version PR or publishes if version PR is merged
+# 2. Merge the Version Packages PR on main
+
+# 3. Tag and push (triggers publish.yml → npmjs)
+git checkout main && git pull
+git tag "v$(node -p "require('./packages/core/package.json').version")"
+git push origin --tags
 ```
 
-#### Method 2: Manual Tag Publishing
-
-For hotfixes or manual releases:
+#### Hotfix / manual tag
 
 ```bash
-# 1. Ensure main branch is ready
-git checkout main
-git pull origin main
-
-# 2. Create and push version tag
+git checkout main && git pull
 git tag v1.0.1
 git push origin v1.0.1
-
-# → Triggers publish workflow
-# → Publishes packages and creates GitHub release
+# → publish.yml only
 ```
 
 ### Workflow Examples
@@ -600,39 +584,22 @@ The repository includes three automated workflows:
 - Verifies package contents
 - Checks for changeset files on PRs
 
-#### 2. Publish Workflow (`.github/workflows/publish.yml`)
+#### 2. Publish Workflow (`.github/workflows/publish.yml`) — **only path to npmjs**
 
-**Triggered on**: Version tag push (e.g., `v1.0.0`, `1.2.3`)
-**What it does**:
-
-- Validates semantic version format
-- Builds all packages
-- Runs tests and linting
-- Publishes to npm registry
-- Creates GitHub release
-- Provides detailed success/failure notifications
+**Triggered on**: Version tag push (e.g. `v1.0.0`)
+**What it does**: build → test → `changeset publish` → GitHub Release
 
 #### 3. Release Workflow (`.github/workflows/release.yml`)
 
-**Triggered on**: Push to main branch
-**What it does**:
-
-- Manages changeset-based releases
-- Creates release PRs for version bumps
-- Auto-publishes when release PR is merged
+**Triggered on**: Push to `main`
+**What it does**: Creates/updates the Changesets Version PR only (no npm publish)
 
 ### Publishing via Tags
 
-The easiest way to trigger automated publishing:
-
 ```bash
-# Create and push a version tag
 git tag v1.0.1
 git push origin v1.0.1
-
-# Or use npm version to create tag automatically
-npm version patch  # creates v1.0.1 tag
-git push --follow-tags
+# → publish.yml
 ```
 
 ### Setup Requirements

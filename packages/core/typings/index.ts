@@ -306,6 +306,39 @@ export type AdViewDataLoaderAbstractType =
   | AdViewStaticData;
 
 /**
+ * Declarative configuration for a single ad source.
+ * Represents one entry in `AdViewConfig.sources`, matched to a registered
+ * driver implementation via `driver`.
+ */
+export interface AdViewSourceItem {
+  /** Unique name of this source, used for the per-unit `sources` filter/priority */
+  name: string;
+  /** Name of the registered driver implementation to use (e.g. 'dynamic', 'static', 'function') */
+  driver: string;
+  /** Relative weight; used as the default ordering when no explicit priority is given */
+  weight?: number;
+  /** Tags used for filtering sources via the per-unit `tags` prop */
+  tags?: string[];
+  /** Arbitrary parameters passed to the driver's factory/constructor */
+  params?: { [key: string]: any };
+}
+
+/**
+ * Optional interface a driver constructor can implement (on its static side)
+ * to self-report whether it matches a given source config, in addition to
+ * the mandatory `driver` name check.
+ */
+export interface AdViewDataMatcher {
+  matchDriver(source: AdViewSourceItem): boolean;
+}
+
+/** Constructor shape expected by `registerDataLoader` for driver implementations. */
+export type AdViewDriverConstructor = (new (
+  source: AdViewSourceItem,
+) => AdViewDataLoader) &
+  Partial<AdViewDataMatcher>;
+
+/**
  * Configuration options for AdView components.
  * Contains server URL and other global settings.
  */
@@ -318,4 +351,9 @@ export type AdViewConfig = {
   sourceLoader?: AdViewDataLoaderAbstractType | AdViewDataLoaderAbstractType[];
   /** Optional smart data loader configuration */
   source?: AdViewDataLoader;
+  /**
+   * Declarative sources config — an alternative to, and eventual replacement
+   * of, `srcURL` / `defaultAdData` / `sourceLoader` / `source` above.
+   */
+  sources?: AdViewSourceItem[];
 };

@@ -2,614 +2,380 @@
 
 [![npm version](https://img.shields.io/npm/v/@adview/react.svg)](https://www.npmjs.com/package/@adview/react)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![React](https://img.shields.io/badge/React-18%2F19-61dafb)](https://reactjs.org/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-A modern, type-safe React library for displaying and managing advertisements in web applications. Provides flexible components for multiple ad formats with built-in tracking, error handling, and both client-side and server-side rendering support.
+React components for displaying ads with declarative sources, multi-template rendering, built-in tracking, and SSR support. Built on [`@adview/core`](../core).
 
 ## Features
 
-- 🎯 **Multiple Ad Formats**: Banner, native, and proxy advertisements
-- 🔄 **Dual Rendering**: Client-side and server-side rendering support
-- 📊 **Built-in Tracking**: Automatic impression and click tracking
-- 🛡️ **Type Safety**: Full TypeScript support with comprehensive types
-- 🎨 **Customizable**: Flexible styling system with CSS class tokens
-- 🚀 **Performance**: Optimized loading states and error handling
-- 🔧 **Extensible**: Custom render functions and fallback content
+- **Declarative sources** — configure backends via `sources[]` (drivers, weights, tags)
+- **Waterfall fill** — multiple sources top each other up until `limit` is met
+- **Per-unit filters** — select sources by `tags`, `drivers`, or name priority
+- **Custom templates** — several `AdView.Template` children per Unit, plus `type="*"` and `DefaultTemplate`
+- **Built-in formats** — Banner, Native, Proxy templates
+- **Tracking** — impression / view / click pixels via wrappers
+- **SSR** — `@adview/react/server` for server components
+- **Extensible drivers** — `registerDataLoader` for custom `AdViewDataLoader` adapters
 
 ## Installation
 
 ```bash
 npm install @adview/react
-```
-
-```bash
-yarn add @adview/react
+# peer: react ^18 || ^19
+# pulls in @adview/core
 ```
 
 ## Quick Start
 
-### Basic Usage
-
 ```tsx
-import { AdViewUnitClient } from '@adview/react';
+import * as AdView from '@adview/react';
 
 function App() {
   return (
-    <AdViewUnitClient
-      unitId="ca-pub-1234567890123456/9876543210"
-      format="banner"
-      srcURL="https://your-ad-server.com/ads/{<id>}"
-    />
+    <AdView.Provider
+      sources={[
+        {
+          name: 'primary',
+          driver: 'dynamic',
+          params: { url: 'https://ads.example.com/b/dynamic/{<id>}' },
+        },
+      ]}
+    >
+      <AdView.Unit unitId="home-banner" format="banner" />
+      <AdView.Unit unitId="sidebar" format="native" tags={['sidebar']} />
+    </AdView.Provider>
   );
 }
 ```
 
-### With Provider (Recommended)
-
-```tsx
-import { AdViewProvider, AdViewUnitClient } from '@adview/react';
-
-function App() {
-  return (
-    <AdViewProvider srcURL="https://your-ad-server.com/ads/{<id>}">
-      <AdViewUnitClient unitId="ca-pub-1234567890123456/1122334455" format="banner" />
-      <AdViewUnitClient unitId="ca-pub-1234567890123456/5544332211" format="native" />
-    </AdViewProvider>
-  );
-}
-```
+Legacy `srcURL` / `defaultAdData` / `sourceLoader` still work on Provider and Unit; prefer `sources` for new code.
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [API Reference](#api-reference)
-  - [AdViewUnitClient](#adviewunitclient)
-  - [AdViewUnitServer](#adviewunitserver)
-  - [AdViewProvider](#adviewprovider)
-  - [Component Props](#component-props)
-  - [Loading States](#loading-states)
-- [Usage Examples](#usage-examples)
-  - [Client-Side Rendering](#client-side-rendering)
-  - [Server-Side Rendering](#server-side-rendering)
-  - [Custom Rendering](#custom-rendering)
-  - [Fallback Content](#fallback-content)
-  - [Style Customization](#style-customization)
-- [Ad Formats](#ad-formats)
-- [TypeScript Support](#typescript-support)
-- [Migration Guide](#migration-guide)
+- [@adview/react](#adviewreact)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Quick Start](#quick-start)
+  - [Table of Contents](#table-of-contents)
+  - [Exports](#exports)
+  - [Configuration](#configuration)
+    - [Declarative sources](#declarative-sources)
+    - [Built-in drivers](#built-in-drivers)
+    - [Custom drivers](#custom-drivers)
+  - [AdView.Unit](#adviewunit)
+    - [Props](#props)
+    - [Source filters](#source-filters)
+    - [Custom render props](#custom-render-props)
+    - [Custom templates](#custom-templates)
+  - [SSR](#ssr)
+  - [Tracking](#tracking)
+  - [Loading states](#loading-states)
+  - [Playground](#playground)
+  - [License](#license)
 
-## API Reference
+## Exports
 
-### AdViewUnitClient
+```ts
+import {
+  Provider,           // AdViewProvider
+  Unit,               // AdViewUnitClient
+  Template,           // AdViewUnitTemplate
+  DefaultTemplate,    // empty-inventory fallback
+  BannerTemplate,
+  NativeTemplate,
+  ProxyTemplate,
+} from '@adview/react';
 
-Client-side ad component with loading states and error handling.
-
-```tsx
-import { AdViewUnitClient } from '@adview/react';
-
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/9876543210"
-  format="banner"
-  srcURL="https://ads.example.com/{<id>}"
-  onDefault={() => <div>No ads available</div>}
->
-  {({ data, state, error, onDefault }) => {
-    // Custom render logic
-  }}
-</AdViewUnitClient>
+import { Unit as UnitServer } from '@adview/react/server';
 ```
 
-### AdViewUnitServer
+Types: `AdViewUnitTemplateTypeProps`, `AdViewUnitTemplateProps`, `AdViewUnitClientChildren`, …
 
-Server-side ad component for SSR applications.
+Core utilities (drivers, registry):
+
+```ts
+import { registerDataLoader } from '@adview/core/utils';
+import type {
+  AdViewSourceItem,
+  AdViewDataLoader,
+  AdViewConfig,
+} from '@adview/core/typings';
+```
+
+## Configuration
+
+### Declarative sources
+
+Pass `sources` on `AdView.Provider` (or on a Unit). Each entry:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Unique id; used by Unit `sources` filter / priority |
+| `driver` | `string` | Registered driver name (`dynamic`, `static`, `function`, or custom) |
+| `weight` | `number?` | Default order when Unit does not pass `sources` names (higher first) |
+| `tags` | `string[]?` | Placement labels; filtered by Unit `tags` |
+| `params` | `object?` | Passed into the driver constructor |
 
 ```tsx
-import { AdViewUnitServer } from '@adview/react/server';
+<AdView.Provider
+  sources={[
+    {
+      name: 'premium',
+      driver: 'dynamic',
+      weight: 30,
+      tags: ['feed', 'sidebar'],
+      params: {
+        url: 'https://ads.example.com/{<id>}?limit={<limit>}',
+        timeout: 5000,
+      },
+    },
+    {
+      name: 'house',
+      driver: 'static',
+      weight: 10,
+      tags: ['feed'],
+      params: { defaultData: houseAds },
+    },
+  ]}
+>
+  {/* units */}
+</AdView.Provider>
+```
 
-<AdViewUnitServer
-  unitId="ca-pub-1234567890123456/9876543210"
-  format="banner"
-  srcURL="https://ads.example.com/{<id>}"
+When several sources match, their loaders are chained: each next one tops up the previous until `limit` is reached.
+
+### Built-in drivers
+
+| `driver` | Class | Main `params` |
+|----------|--------|----------------|
+| `dynamic` | `DynamicFetcherDataLoader` | `url`, `timeout`, `defaultData`, `dataPreparer` |
+| `static` | `HardDataLoader` | `defaultData`, `version`, `adsourceInfo` |
+| `function` | `FuncDataLoader` | `fetchAdData` |
+
+URL placeholders for `dynamic`: `{<id>}`, `{<format>}`, `{<limit>}`, `{<locale>}`, `{<q.key>}` / `{<query.key>}` (other query keys are appended).
+
+### Custom drivers
+
+```ts
+import { registerDataLoader } from '@adview/core/utils';
+import type {
+  AdViewData,
+  AdViewDataLoader,
+  AdViewSourceItem,
+} from '@adview/core/typings';
+
+class PartnerLoader implements AdViewDataLoader {
+  constructor(private source: AdViewSourceItem) {}
+
+  static matchDriver(source: AdViewSourceItem) {
+    return Boolean(source.params?.apiKey);
+  }
+
+  async fetchAdData(
+    unitId: string,
+    limit = 1,
+    format?: string | string[],
+    query?: Record<string, unknown>,
+  ): Promise<AdViewData | Error> {
+    // fetch from your network using this.source.params
+    return { version: '1', groups: [{ id: unitId, items: [] }] };
+  }
+}
+
+// Call once at app bootstrap
+registerDataLoader('partner', PartnerLoader);
+// optional: registerDataLoader('partner', PartnerLoader, (s) => !!s.params?.apiKey)
+```
+
+```tsx
+<AdView.Provider
+  sources={[
+    {
+      name: 'partner-eu',
+      driver: 'partner',
+      params: { apiKey: '…', region: 'eu' },
+    },
+  ]}
+>
+  <AdView.Unit unitId="slot" format="native" />
+</AdView.Provider>
+```
+
+Matching order: `source.driver === registeredName`, then optional `matcher` from `registerDataLoader`, then optional static `matchDriver` on the class.
+
+## AdView.Unit
+
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `unitId` | `string` | Ad unit id (required) |
+| `format` | `string \| string[]` | Requested format(s) |
+| `limit` | `number` | Max items to fill (default `1`) |
+| `query` | `object` | Extra request params |
+| `sources` | `string[]` | Filter/prioritize by source **name** |
+| `tags` | `string[]` | Keep sources whose tags intersect |
+| `drivers` | `string[]` | Keep sources with these driver names |
+| `acceptedFormatTypes` | `string[]` | Client-side item filter (`*` / `all` accepts any) |
+| `trackingWrapperClassName` | `string` | Class on tracking wrappers |
+| `filterItems` | `(items) => items` | Post-fetch item filter |
+| `wrapper` | `(params) => ReactNode` | Wrap rendered ad elements |
+| `children` | render prop **or** templates | See below |
+
+Also accepts legacy config fields: `srcURL`, `defaultAdData`, `sourceLoader`, `source`, `sources` (config array belongs on Provider; Unit’s `sources` prop is the name filter).
+
+### Source filters
+
+```tsx
+{/* By placement tags */}
+<AdView.Unit unitId="side" format="banner" tags={['sidebar']} />
+
+{/* By name + priority (order = request order) */}
+<AdView.Unit
+  unitId="hero"
+  format="native"
+  sources={['premium', 'house']}
+  limit={2}
 />
 ```
 
-### AdViewProvider
-
-Context provider for global configuration.
+### Custom render props
 
 ```tsx
-import { AdViewProvider } from '@adview/react';
-
-<AdViewProvider srcURL="https://ads.example.com/{<id>}">
-  {/* Ad components inherit the srcURL */}
-</AdViewProvider>
+<AdView.Unit unitId="custom" format="native">
+  {({ data, state, error }) => {
+    if (state.isLoading) return <Skeleton />;
+    if (error || !data) return <Fallback />;
+    return (
+      <article>
+        <h3>{data.fields?.title}</h3>
+        <p>{data.fields?.description}</p>
+      </article>
+    );
+  }}
+</AdView.Unit>
 ```
 
-### Component Props
+### Custom templates
 
-#### AdViewUnitClient & AdViewUnitServer
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `unitId` | `string` | ✓ | Unique identifier for the ad unit |
-| `format` | `'banner' \| 'native' \| 'proxy'` | ✗ | Ad format type |
-| `srcURL` | `string` | ✗* | Ad server URL template with `{<id>}` placeholder |
-| `onDefault` | `ReactNode \| (() => ReactNode)` | ✗ | Fallback content when no ads available |
-| `children` | `function \| ReactElement` | ✗ | Custom render function or component |
-
-*Required if not provided by AdViewProvider
-
-### Loading States
-
-The `state` object in client components provides detailed loading information:
-
-```typescript
-type AdLoadState = {
-  isInitial: boolean;  // Component just mounted
-  isLoading: boolean;  // Actively fetching ad data
-  isError: boolean;    // Error occurred during loading
-  isComplete: boolean; // Loading finished (success or error)
-};
-```
-
-## Usage Examples
-
-### Client-Side Rendering
-
-#### Basic Ad Unit
+A Unit can take several template children. The first whose `type` matches the ad wins; use `type="*"` as catch-all; put `DefaultTemplate` last for empty inventory.
 
 ```tsx
-import { AdViewUnitClient } from '@adview/react';
+'use client';
 
-function HomePage() {
+import * as AdView from '@adview/react';
+import type { AdViewUnitTemplateTypeProps } from '@adview/react';
+
+function VideoPrerollTemplate({
+  type = 'video',
+  ...props
+}: Omit<AdViewUnitTemplateTypeProps, 'type'> & { type?: 'video' }) {
   return (
-    <AdViewUnitClient
-      unitId="ca-pub-1234567890123456/1234567890"
+    <AdView.Template type={type} {...props}>
+      {({ data: ad }) => (
+        <div>{/* render video preroll from ad */}</div>
+      )}
+    </AdView.Template>
+  );
+}
+
+VideoPrerollTemplate.defaults = { type: 'video' };
+
+function FeedSlot({ unitId }: { unitId: string }) {
+  return (
+    <AdView.Unit
+      unitId={unitId}
+      format={['native', 'banner', 'proxy', 'proxy_300x250', 'video']}
+      limit={5}
+      acceptedFormatTypes={['*']}
+      trackingWrapperClassName="w-full h-full"
+    >
+      <VideoPrerollTemplate />
+      <AdView.BannerTemplate />
+      <AdView.NativeTemplate />
+
+      {/* Catch-all for unmatched types */}
+      <AdView.Template type="*">
+        {({ data }) => <GeneralCard data={data} />}
+      </AdView.Template>
+
+      {/* No data */}
+      <AdView.DefaultTemplate>
+        <div>No ads available</div>
+      </AdView.DefaultTemplate>
+    </AdView.Unit>
+  );
+}
+```
+
+**Notes**
+
+- Order matters: specific types before `type="*"`.
+- If a `*` template renders for empty data, return `null` so `DefaultTemplate` can run.
+- Set `Component.defaults = { type: '…' }` when the template is used without an explicit `type` prop.
+
+## SSR
+
+```tsx
+import { Unit } from '@adview/react/server';
+
+export default async function Page() {
+  return (
+    <Unit
+      unitId="ssr-banner"
       format="banner"
-      srcURL="https://ads.example.com/b/dynamic/{<id>}"
+      sources={[
+        {
+          name: 'primary',
+          driver: 'dynamic',
+          params: { url: 'https://ads.example.com/{<id>}' },
+        },
+      ]}
     />
   );
 }
 ```
 
-#### Using Provider for Multiple Units
+Or wrap with client `Provider` and use server `Unit` with inherited config where your framework allows.
+
+## Tracking
+
+Each ad item may include `tracker.impressions`, `tracker.views`, and `tracker.clicks`. The Unit wraps items in tracking that:
+
+- fires **impressions** on mount
+- fires **views** when the wrapper intersects the viewport
+- fires **clicks** on wrapper click
 
 ```tsx
-import { AdViewProvider, AdViewUnitClient } from '@adview/react';
-
-function App() {
-  return (
-    <AdViewProvider srcURL="https://ads.example.com/b/dynamic/{<id>}">
-      <header>
-        <AdViewUnitClient
-          unitId="ca-pub-1234567890123456/7788990011"
-          format="banner"
-        />
-      </header>
-      
-      <aside>
-        <AdViewUnitClient
-          unitId="ca-pub-1234567890123456/1100998877"
-          format="native"
-        />
-      </aside>
-    </AdViewProvider>
-  );
-}
-```
-
-### Server-Side Rendering
-
-#### Next.js Server Component
-
-```tsx
-import { AdViewUnitServer } from '@adview/react/server';
-
-export default function HomePage() {
-  return (
-    <div>
-      <h1>Welcome to our site</h1>
-      <AdViewUnitServer
-        unitId="ca-pub-1234567890123456/2233445566"
-        format="banner"
-        srcURL="https://ads.example.com/b/dynamic/{<id>}"
-      />
-    </div>
-  );
-}
-```
-
-#### With Tailwind CSS Styling
-
-```tsx
-import { AdViewUnitServer } from '@adview/react/server';
-import { AdViewUnitTypeSwitch } from '@adview/react';
-
-export default function SidebarAd() {
-  return (
-    <AdViewUnitServer
-      unitId="ca-pub-1234567890123456/6677889900"
-      format="native"
-      srcURL="https://ads.example.com/b/dynamic/{<id>}"
-      onDefault={() => (
-        <div className="text-center p-4 bg-gray-100 rounded">
-          <h4 className="text-gray-600">Advertisement</h4>
-          <p className="text-sm text-gray-500">No ads available</p>
-        </div>
-      )}
-    >
-      <AdViewUnitTypeSwitch
-        classNames={{
-          native: {
-            container: 'flex flex-col gap-3 bg-white shadow-lg rounded-lg p-4 border',
-            label: 'text-blue-600 text-xs font-semibold px-2 py-1 bg-blue-50 rounded-full self-start',
-            titleLink: 'block text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors',
-            descriptionLink: 'block text-sm text-gray-600 leading-relaxed',
-            image: 'w-full h-48 object-cover rounded-md',
-          }
-        }}
-      />
-    </AdViewUnitServer>
-  );
-}
-```
-
-### Custom Rendering
-
-#### Advanced Loading States
-
-```tsx
-import { AdViewUnitClient } from '@adview/react';
-
-function CustomAdUnit() {
-  return (
-    <AdViewUnitClient
-      unitId="ca-pub-1234567890123456/4455667788"
-      format="banner"
-      srcURL="https://ads.example.com/b/dynamic/{<id>}"
-    >
-      {({ data, state, error, onDefault }) => {
-        const { isInitial, isLoading, isComplete, isError } = state;
-
-        if (isLoading) {
-          return (
-            <div className="animate-pulse bg-gray-200 h-32 rounded flex items-center justify-center">
-              <span className="text-gray-500">Loading ad...</span>
-            </div>
-          );
-        }
-
-        if (isError) {
-          console.error('Ad loading error:', error);
-          return (
-            <div className="bg-red-50 border border-red-200 rounded p-4 text-center">
-              <p className="text-red-600">Failed to load advertisement</p>
-            </div>
-          );
-        }
-
-        if (isComplete && data) {
-          return (
-            <div className="custom-ad-container">
-              <MyCustomAdRenderer data={data} />
-            </div>
-          );
-        }
-
-        return onDefault();
-      }}
-    </AdViewUnitClient>
-  );
-}
-```
-
-#### Custom Ad Renderer
-
-```tsx
-import { AdData } from '@adview/react';
-
-interface CustomAdRendererProps {
-  data: AdData;
-}
-
-function MyCustomAdRenderer({ data }: CustomAdRendererProps) {
-  return (
-    <div className="relative overflow-hidden rounded-lg shadow-lg">
-      {data.image && (
-        <img
-          src={data.image}
-          alt={data.title || 'Advertisement'}
-          className="w-full h-auto"
-        />
-      )}
-      
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-        {data.title && (
-          <h3 className="text-white font-bold text-lg">{data.title}</h3>
-        )}
-        {data.description && (
-          <p className="text-white/90 text-sm mt-1">{data.description}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-```
-
-### Fallback Content
-
-#### Static Fallback
-
-```tsx
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/3344556677"
+<AdView.Unit
+  unitId="tracked"
   format="banner"
-  srcURL="https://ads.example.com/b/dynamic/{<id>}"
-  onDefault={
-    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 rounded-lg text-center">
-      <h3 className="text-xl font-bold">Your Brand Here</h3>
-      <p className="mt-2">Advertise with us today!</p>
-    </div>
-  }
+  trackingWrapperClassName="ad-track"
 />
 ```
 
-#### Dynamic Fallback
+## Loading states
 
-```tsx
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/8899001122"
-  format="native"
-  srcURL="https://ads.example.com/b/dynamic/{<id>}"
-  onDefault={() => {
-    const promoItems = ['Special Offer', 'New Product', 'Limited Time'];
-    const randomPromo = promoItems[Math.floor(Math.random() * promoItems.length)];
-    
-    return (
-      <div className="border-2 border-dashed border-gray-300 p-6 text-center rounded-lg">
-        <h4 className="font-semibold text-gray-700">{randomPromo}</h4>
-        <p className="text-sm text-gray-500 mt-2">Check out our latest updates</p>
-      </div>
-    );
-  }}
-/>
-```
-
-### Style Customization
-
-#### Native Ad Styling Tokens
-
-The library provides comprehensive styling tokens for native ads:
-
-```typescript
-type AdViewStyleTokensNative = {
-  container?: string;        // Main container wrapper
-  imageLink?: string;        // Image link wrapper
-  image?: string;           // Image element
-  label?: string;           // "Ad" or sponsor label
-  titleLink?: string;       // Title link element
-  descriptionLink?: string; // Description link element
-  brandNameLink?: string;   // Brand name link
-  phoneLink?: string;       // Phone number link
-  urlLink?: string;         // URL link element
+```ts
+type AdLoadState = {
+  isInitial?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
+  isComplete?: boolean;
 };
 ```
 
-#### Complete Styling Example
+Available in render-prop `state` and on template props.
 
-```tsx
-import { AdViewUnitClient, AdViewUnitTypeSwitch } from '@adview/react';
+## Playground
 
-function StyledNativeAd() {
-  return (
-    <AdViewUnitClient
-      unitId="ca-pub-1234567890123456/5566778899"
-      format="native"
-      srcURL="https://ads.example.com/b/dynamic/{<id>}"
-    >
-      <AdViewUnitTypeSwitch
-        classNames={{
-          native: {
-            container: 'max-w-sm mx-auto bg-white rounded-xl shadow-md overflow-hidden',
-            imageLink: 'block',
-            image: 'w-full h-48 object-cover',
-            label: 'absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded',
-            titleLink: 'block p-4 pb-2 text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors',
-            descriptionLink: 'block px-4 pb-4 text-gray-600 text-sm leading-relaxed',
-            brandNameLink: 'block px-4 pb-2 text-sm font-medium text-gray-800',
-          }
-        }}
-      />
-    </AdViewUnitClient>
-  );
-}
+The monorepo includes an interactive playground (`test-project`) with ebony UI demos for sources, mix/waterfall, filters, custom drivers, and templates:
+
+```bash
+make dev-project   # http://localhost:3002
 ```
-
-## Ad Formats
-
-### Banner Ads
-
-Banner ads are traditional rectangular advertisements displayed in designated areas of your website.
-
-```tsx
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/1357924680"
-  format="banner"
-  srcURL="https://ads.example.com/b/dynamic/{<id>}"
-/>
-```
-
-**Common Banner Sizes:**
-
-- Leaderboard: 728x90
-- Medium Rectangle: 300x250
-- Wide Skyscraper: 160x600
-- Mobile Banner: 320x50
-
-### Native Ads
-
-Native ads blend seamlessly with your content, providing a non-intrusive advertising experience.
-
-```tsx
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/2468013579"
-  format="native"
-  srcURL="https://ads.example.com/b/dynamic/{<id>}"
->
-  <AdViewUnitTypeSwitch
-    classNames={{
-      native: {
-        container: 'border rounded-lg p-4 bg-gray-50',
-        titleLink: 'font-semibold text-lg',
-        descriptionLink: 'text-gray-600 mt-2',
-      }
-    }}
-  />
-</AdViewUnitClient>
-```
-
-**Native Ad Components:**
-
-- Title
-- Description
-- Image
-- Brand name
-- Call-to-action
-- Sponsor label
-
-### Proxy Ads
-
-Proxy ads are served through an intermediary service for additional control and targeting.
-
-```tsx
-<AdViewUnitClient
-  unitId="ca-pub-1234567890123456/9753102468"
-  format="proxy"
-  srcURL="https://proxy.ads.example.com/serve/{<id>}"
-/>
-```
-
-## TypeScript Support
-
-The library is built with TypeScript and provides comprehensive type definitions for all components and data structures.
-
-### Type Definitions
-
-```typescript
-import type {
-  AdData,
-  AdViewUnitProps,
-  AdViewStyleTokens,
-  AdLoadState,
-  AdFormat,
-} from '@adview/react';
-
-// Ad data structure
-interface AdData {
-  id: string;
-  title?: string;
-  description?: string;
-  image?: string;
-  url?: string;
-  brandName?: string;
-  phone?: string;
-  // ... other properties
-}
-
-// Component props
-interface AdViewUnitProps {
-  unitId: string;
-  format?: AdFormat;
-  srcURL?: string;
-  onDefault?: React.ReactNode | (() => React.ReactNode);
-  children?: React.ReactNode | AdRenderFunction;
-}
-
-// Render function signature
-type AdRenderFunction = (params: {
-  data: AdData | null;
-  state: AdLoadState;
-  error: Error | null;
-  onDefault: () => React.ReactNode;
-}) => React.ReactNode;
-```
-
-### Custom Hook Types
-
-```typescript
-import { useAdData } from '@adview/react';
-
-function MyComponent() {
-  const { data, state, error } = useAdData({
-    unitId: 'ca-pub-1234567890123456/8642097531',
-    srcURL: 'https://ads.example.com/{<id>}'
-  });
-
-  // TypeScript infers correct types
-  if (data?.title) {
-    // data.title is safely typed as string
-  }
-}
-```
-
-## Migration Guide
-
-### From Version 1.x to 2.x
-
-#### Breaking Changes
-
-1. **Component Names**: Updated to be more descriptive
-
-   ```tsx
-   // Old
-   import { AdUnit } from '@adview/react';
-   
-   // New
-   import { AdViewUnitClient } from '@adview/react';
-   ```
-
-2. **Props Restructuring**: Some props have been renamed
-
-   ```tsx
-   // Old
-   <AdUnit id="ca-pub-1234567890123456/9876543210" type="banner" source="..." />
-   
-   // New
-   <AdViewUnitClient unitId="ca-pub-1234567890123456/9876543210" format="banner" srcURL="..." />
-   ```
-
-3. **Server Components**: New separate import
-
-   ```tsx
-   // Old
-   import { AdUnit } from '@adview/react';
-   
-   // New
-   import { AdViewUnitServer } from '@adview/react/server';
-   ```
-
-#### Migration Steps
-
-1. Update component imports
-2. Rename props (`id` → `unitId`, `type` → `format`, `source` → `srcURL`)
-3. Update server-side usage to use dedicated server components
-4. Review and update custom styling tokens if used
-
-### Performance Considerations
-
-- Use `AdViewProvider` for multiple ad units to share configuration
-- Implement proper fallback content to prevent layout shifts
-- Consider lazy loading for below-the-fold advertisements
-- Use server-side rendering for better initial page load performance
-
----
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](../../CONTRIBUTING.md) for details.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Apache-2.0 — see [LICENSE](LICENSE).
