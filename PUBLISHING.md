@@ -346,7 +346,7 @@ The repository includes several GitHub Actions workflows for automated testing a
 
 Runs on every push and pull request to `main` and `develop` branches:
 
-- **Matrix testing**: Tests on Node.js 18 and 20
+- **Matrix testing**: Tests on Node.js 20 and 22
 - **Linting**: Runs ESLint on codebase
 - **Building**: Ensures all packages build successfully
 - **Dry-run publishing**: Tests package publication without actually publishing
@@ -577,7 +577,7 @@ The repository includes three automated workflows:
 **Triggered on**: Push to main/develop branches, Pull Requests
 **What it does**:
 
-- Tests builds on Node.js 18 and 20
+- Tests builds on Node.js 20 and 22
 - Runs linting and tests
 - Performs dry-run publish checks
 
@@ -673,7 +673,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: make build
