@@ -201,4 +201,59 @@ describe('AdViewUnitClient', () => {
       expect(screen.getByTestId('bottom')).toHaveTextContent('Bottom Ad');
     });
   });
+
+  it('applies selection plan: main first, then parallel backup stage', async () => {
+    render(
+      <AdViewProvider
+        sources={[
+          {
+            name: 'main',
+            driver: 'static',
+            params: {
+              defaultData: [
+                { id: 'm1', type: 'banner', fields: { title: 'Main' } },
+              ],
+            },
+          },
+          {
+            name: 'second',
+            driver: 'static',
+            params: {
+              defaultData: [
+                { id: 's1', type: 'banner', fields: { title: 'Second' } },
+              ],
+            },
+          },
+          {
+            name: 'other',
+            driver: 'static',
+            params: {
+              defaultData: [
+                { id: 'o1', type: 'banner', fields: { title: 'Other' } },
+              ],
+            },
+          },
+        ]}
+      >
+        <AdViewUnitClient
+          unitId="unit-sel"
+          format="banner"
+          limit={2}
+          selection={['main', ['second', 'other']]}
+          wrapper={({ elms }) => <div data-testid="rail">{elms}</div>}
+        >
+          {({ data }) => (
+            <span data-testid="item">{data?.id || 'none'}</span>
+          )}
+        </AdViewUnitClient>
+      </AdViewProvider>,
+    );
+
+    await waitFor(() => {
+      const items = screen.getAllByTestId('item').map(n => n.textContent);
+      expect(items).toHaveLength(2);
+      expect(items[0]).toBe('m1');
+      expect(['s1', 'o1']).toContain(items[1]);
+    });
+  });
 });

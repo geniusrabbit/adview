@@ -26,6 +26,11 @@ export const NAV_ITEMS: NavItem[] = [
     description: 'Pick by tags or source name',
   },
   {
+    href: '/selection-plan',
+    label: 'Selection plan',
+    description: 'Stages · parallel · weights',
+  },
+  {
     href: '/waterfall',
     label: 'Waterfall fill',
     description: 'Top-up until limit',

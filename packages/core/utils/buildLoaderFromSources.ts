@@ -1,22 +1,26 @@
-import { AdViewDataLoader, AdViewSourceItem } from 'typings';
+import { AdViewDataLoader, AdViewSelectionPlan, AdViewSourceItem } from 'typings';
 import { findDataLoaderForSource } from './dataLoaderRegistry';
-import SmartDataLoader from './smartDataLoader';
+import SmartDataLoader, { LoaderItem } from './smartDataLoader';
 
 /** Filters applied on top of `AdViewConfig.sources` when resolving a data loader */
 export type AdViewSourceFilters = {
-  /** Source names to keep; also defines the request priority order */
+  /** Source names to keep; also defines sequential selection when `selection` is omitted */
   sources?: string[];
   /** Keep only sources that have at least one of these tags */
   tags?: string[];
   /** Keep only sources whose `driver` is one of these */
   drivers?: string[];
+  /**
+   * Staged selection plan (waterfall / parallel weighted shuffle).
+   * When set, overrides the sequential order implied by `sources`.
+   */
+  selection?: AdViewSelectionPlan;
 };
 
 /**
  * Resolves `AdViewConfig.sources` into a single `AdViewDataLoader`,
- * applying the `drivers`/`tags`/`sources` filters and, when several sources
- * match, chaining their loaders so each next one tops up the previous
- * one's results (via `SmartDataLoader`'s sequential fill behavior).
+ * applying the `drivers`/`tags`/`sources` filters and chaining loaders
+ * via `SmartDataLoader` with an optional selection plan.
  */
 function buildLoaderFromSources(
   items: AdViewSourceItem[],
@@ -38,10 +42,11 @@ function buildLoaderFromSources(
 
   if (filters?.sources && filters.sources.length > 0) {
     const byName = new Map(filteredItems.map(item => [item.name, item]));
+    // Keep filter order for pool membership; selection plan may reorder stages
     filteredItems = filters.sources
       .map(name => byName.get(name))
       .filter(Boolean) as AdViewSourceItem[];
-  } else {
+  } else if (!filters?.selection) {
     filteredItems = [...filteredItems].sort(
       (a, b) => (b.weight ?? 1) - (a.weight ?? 1),
     );
@@ -62,17 +67,34 @@ function buildLoaderFromSources(
       }))
     : filteredItems;
 
-  const loaders = resolvedItems
-    .map(item => findDataLoaderForSource(item))
-    .filter(Boolean) as AdViewDataLoader[];
+  const loaderItems = resolvedItems
+    .map(item => {
+      const loader = findDataLoaderForSource(item);
+      if (!loader) {
+        return null;
+      }
+      return new LoaderItem({
+        loader,
+        name: item.name,
+        weight: item.weight,
+      });
+    })
+    .filter(Boolean) as LoaderItem[];
 
-  if (loaders.length === 0) {
+  if (loaderItems.length === 0) {
     return undefined;
   }
-  if (loaders.length === 1) {
-    return loaders[0];
+  if (loaderItems.length === 1 && !filters?.selection) {
+    return loaderItems[0]!.loader;
   }
-  return new SmartDataLoader(loaders, 'roundrobin');
+
+  const selection: AdViewSelectionPlan | undefined =
+    filters?.selection ||
+    (filters?.sources && filters.sources.length > 0
+      ? filters.sources
+      : loaderItems.map(item => item.name!));
+
+  return new SmartDataLoader(loaderItems, selection);
 }
 
 export default buildLoaderFromSources;

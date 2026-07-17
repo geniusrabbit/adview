@@ -22,6 +22,7 @@ Left navigation switches between demos:
 - Declarative `sources` / drivers
 - Mix ads from multiple sources
 - Conditional selection by `tags` or source name
+- Selection plan (waterfall stages · parallel · weighted shuffle)
 - Waterfall top-up until `limit`
 - Custom `AdViewDataLoader` adapter
 - Custom templates (multi-type + `*` + DefaultTemplate)

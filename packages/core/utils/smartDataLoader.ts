@@ -1,14 +1,35 @@
-import { AdViewData, AdViewDataLoader, AdViewGroup } from 'typings';
+import {
+  AdViewData,
+  AdViewDataLoader,
+  AdViewGroup,
+  AdViewGroupItem,
+  AdViewSelectionPlan,
+  AdViewSelectionStage,
+} from 'typings';
+import {
+  dedupeById,
+  isMultiSourceStage,
+  isSelectionPlan,
+  normalizeStage,
+  resolveSourceRef,
+  weightedShuffle,
+  type ResolvedSourceRef,
+  type WeightedItem,
+} from './selectionPlan';
 
 type alghoritmType = 'roundrobin' | 'random' | ((curIndex: number) => number);
 
 export interface LoaderItemIface {
+  name?: string;
+  weight?: number;
   unitIds?: string[];
   formats?: string[];
   loader: AdViewDataLoader;
 }
 
 export class LoaderItem implements LoaderItemIface {
+  name?: string;
+  weight?: number;
   unitIds?: string[];
   formats?: string[];
   loader: AdViewDataLoader;
@@ -17,10 +38,36 @@ export class LoaderItem implements LoaderItemIface {
     loader: AdViewDataLoader,
     unitIds?: string[],
     formats?: string[],
+    name?: string,
+    weight?: number,
+  );
+  constructor(item: LoaderItemIface);
+  constructor(
+    loaderOrItem: AdViewDataLoader | LoaderItemIface,
+    unitIds?: string[],
+    formats?: string[],
+    name?: string,
+    weight?: number,
   ) {
-    this.loader = loader;
+    if (
+      loaderOrItem &&
+      typeof loaderOrItem === 'object' &&
+      'loader' in loaderOrItem &&
+      typeof (loaderOrItem as LoaderItemIface).loader?.fetchAdData === 'function'
+    ) {
+      const item = loaderOrItem as LoaderItemIface;
+      this.loader = item.loader;
+      this.unitIds = item.unitIds;
+      this.formats = item.formats;
+      this.name = item.name;
+      this.weight = item.weight;
+      return;
+    }
+    this.loader = loaderOrItem as AdViewDataLoader;
     this.unitIds = unitIds;
     this.formats = formats;
+    this.name = name;
+    this.weight = weight;
   }
 
   testUnitId(unitId: string): boolean {
@@ -43,41 +90,66 @@ export class LoaderItem implements LoaderItemIface {
 }
 
 /**
- * SmartDataLoader is an implementation of AdViewDataLoader that
- * selects from multiple data loaders based on unit ID and format.
- * It supports different selection algorithms like round-robin and random.
+ * SmartDataLoader selects from multiple data loaders.
+ *
+ * - Legacy: second arg `'roundrobin' | 'random' | fn` walks loaders sequentially.
+ * - Selection plan: second arg `AdViewSelectionPlan` runs staged waterfall /
+ *   parallel weighted-shuffle merge (see typings).
  */
 class SmartDataLoader implements AdViewDataLoader {
   private loaders: LoaderItem[] = [];
   private algorithm: (curIndex: number) => number;
+  private selection: AdViewSelectionPlan | null = null;
+  private useSelectionPlan = false;
 
   constructor(
     loaders: (LoaderItemIface | AdViewDataLoader)[],
-    algorithm: alghoritmType = 'roundrobin',
+    selectionOrAlgorithm?:
+      | AdViewSelectionPlan
+      | alghoritmType,
   ) {
-    this.loaders = loaders.map(item => {
+    this.loaders = loaders.map((item, index) => {
       if (item instanceof LoaderItem) {
+        if (!item.name) {
+          item.name = `loader-${index}`;
+        }
         return item;
       }
       if (
+        item &&
+        typeof item === 'object' &&
         'loader' in item &&
-        typeof item.loader === 'object' &&
-        typeof item.loader.fetchAdData === 'function'
+        typeof (item as LoaderItemIface).loader?.fetchAdData === 'function'
       ) {
-        return new LoaderItem(item.loader, item.unitIds, item.formats);
+        const iface = item as LoaderItemIface;
+        return new LoaderItem({
+          ...iface,
+          name: iface.name || `loader-${index}`,
+        });
       }
-      return new LoaderItem(item as AdViewDataLoader);
+      return new LoaderItem(
+        item as AdViewDataLoader,
+        undefined,
+        undefined,
+        `loader-${index}`,
+      );
     });
+
+    if (isSelectionPlan(selectionOrAlgorithm)) {
+      this.useSelectionPlan = true;
+      this.selection = selectionOrAlgorithm;
+      this.algorithm = (curIndex: number) => curIndex + 1;
+      return;
+    }
+
+    const algorithm: alghoritmType = selectionOrAlgorithm || 'roundrobin';
     switch (algorithm) {
       case 'roundrobin':
-        this.algorithm = (curIndex: number) => {
-          return curIndex + 1;
-        };
+        this.algorithm = (curIndex: number) => curIndex + 1;
         break;
       case 'random':
-        this.algorithm = (_: number) => {
-          return Math.floor(Math.random() * this.loaders.length);
-        };
+        this.algorithm = (_: number) =>
+          Math.floor(Math.random() * this.loaders.length);
         break;
       default:
         this.algorithm = algorithm;
@@ -91,16 +163,233 @@ class SmartDataLoader implements AdViewDataLoader {
     format?: string | string[],
     query?: { [key: string]: any },
   ): Promise<AdViewData | Error> {
+    if (this.useSelectionPlan && this.selection) {
+      return this.fetchWithSelectionPlan(unitId, limit, format, query);
+    }
+    return this.fetchLegacy(unitId, limit, format, query);
+  }
+
+  private async fetchWithSelectionPlan(
+    unitId: string,
+    limit: number,
+    format?: string | string[],
+    query?: { [key: string]: any },
+  ): Promise<AdViewData | Error> {
+    let err: Error | null = null;
+    let collected: AdViewGroupItem[] = [];
+    let adsources: AdViewData['adsources'] = [];
+    let version: string | undefined;
+
+    for (const stage of this.selection!) {
+      const remaining = Math.max(0, limit - collected.length);
+      if (remaining <= 0) {
+        break;
+      }
+
+      const seenIds = new Set(collected.map(item => item.id));
+      const stageResult = await this.runStage(
+        stage,
+        unitId,
+        remaining,
+        format,
+        query,
+        seenIds,
+      );
+
+      if (stageResult.error) {
+        err = stageResult.error;
+      }
+      if (stageResult.version) {
+        version = version || stageResult.version;
+      }
+      if (stageResult.adsources?.length) {
+        adsources = [...(adsources || []), ...stageResult.adsources];
+      }
+
+      if (stageResult.items.length > 0) {
+        collected = dedupeById([...collected, ...stageResult.items]).slice(
+          0,
+          limit,
+        );
+      }
+    }
+
+    if (collected.length > 0) {
+      return {
+        version,
+        adsources,
+        groups: [{ id: unitId, items: collected }],
+      };
+    }
+
+    return (
+      err || new Error('No suitable data loader found or all loaders failed.')
+    );
+  }
+
+  private async runStage(
+    stage: AdViewSelectionStage,
+    unitId: string,
+    remaining: number,
+    format?: string | string[],
+    query?: { [key: string]: any },
+    seenIds: Set<string> = new Set(),
+  ): Promise<{
+    items: AdViewGroupItem[];
+    adsources?: AdViewData['adsources'];
+    version?: string;
+    error: Error | null;
+  }> {
+    const refs = normalizeStage(stage)
+      .map(ref => {
+        const name = typeof ref === 'string' ? ref : ref.source;
+        const loader = this.findLoaderByName(name);
+        return resolveSourceRef(ref, loader?.weight);
+      })
+      .filter(ref => {
+        if (ref.weight <= 0) {
+          return false;
+        }
+        if (!this.findLoaderByName(ref.source)) {
+          if (typeof console !== 'undefined' && console.warn) {
+            console.warn(
+              `[SmartDataLoader] Unknown source in selection plan: "${ref.source}"`,
+            );
+          }
+          return false;
+        }
+        return true;
+      });
+
+    if (refs.length === 0) {
+      return { items: [], error: null };
+    }
+
+    const multi = isMultiSourceStage(stage) && refs.length > 1;
+    // Over-fetch a bit so duplicates already taken in prior stages can be skipped
+    const fetchLimit = remaining + seenIds.size;
+
+    if (!multi) {
+      // Solo stage — order preserved, no shuffle
+      const ref = refs[0]!;
+      const fetched = await this.fetchFromRef(
+        ref,
+        unitId,
+        fetchLimit,
+        format,
+        query,
+      );
+      const items = fetched.items
+        .filter(item => !seenIds.has(item.id))
+        .slice(0, remaining);
+      return {
+        items,
+        adsources: fetched.adsources,
+        version: fetched.version,
+        error: fetched.error,
+      };
+    }
+
+    // Parallel fetch each source, then weighted shuffle
+    const results = await Promise.all(
+      refs.map(ref =>
+        this.fetchFromRef(ref, unitId, fetchLimit, format, query),
+      ),
+    );
+
+    let error: Error | null = null;
+    let version: string | undefined;
+    let adsources: AdViewData['adsources'] = [];
+    const pool: WeightedItem[] = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i]!;
+      const ref = refs[i]!;
+      if (result.error) {
+        error = result.error;
+      }
+      if (result.version) {
+        version = version || result.version;
+      }
+      if (result.adsources?.length) {
+        adsources = [...(adsources || []), ...result.adsources];
+      }
+      for (const item of result.items) {
+        if (seenIds.has(item.id)) {
+          continue;
+        }
+        pool.push({ item, weight: ref.weight, source: ref.source });
+      }
+    }
+
+    const items = weightedShuffle(dedupeByIdPool(pool), remaining);
+    return { items, adsources, version, error };
+  }
+
+  private async fetchFromRef(
+    ref: ResolvedSourceRef,
+    unitId: string,
+    limit: number,
+    format?: string | string[],
+    query?: { [key: string]: any },
+  ): Promise<{
+    items: AdViewGroupItem[];
+    adsources?: AdViewData['adsources'];
+    version?: string;
+    error: Error | null;
+  }> {
+    const loaderItem = this.findLoaderByName(ref.source);
+    if (!loaderItem) {
+      return { items: [], error: null };
+    }
+
+    const formatArray = Array.isArray(format) ? format : format ? [format] : [];
+    if (
+      !loaderItem.testUnitId(unitId) ||
+      !loaderItem.testFormat(formatArray)
+    ) {
+      return { items: [], error: null };
+    }
+
+    try {
+      const data = await loaderItem.loader.fetchAdData(
+        unitId,
+        limit,
+        format,
+        query,
+      );
+      if (data instanceof Error) {
+        return { items: [], error: data };
+      }
+      const group =
+        data.groups?.find(g => g.id === unitId) || data.groups?.[0];
+      return {
+        items: [...(group?.items || [])],
+        adsources: data.adsources,
+        version: data.version,
+        error: null,
+      };
+    } catch (e) {
+      return { items: [], error: e as Error };
+    }
+  }
+
+  private findLoaderByName(name: string): LoaderItem | undefined {
+    return this.loaders.find(item => item.name === name);
+  }
+
+  private async fetchLegacy(
+    unitId: string,
+    limit: number = 1,
+    format?: string | string[],
+    query?: { [key: string]: any },
+  ): Promise<AdViewData | Error> {
     const formatArray = Array.isArray(format) ? format : format ? [format] : [];
     let err: Error | null = null;
     let res: AdViewData | null = null;
-    let visitedLoaders = new Set<number>();
+    const visitedLoaders = new Set<number>();
     let currentIndex = -1;
 
-    /**
-     * Iterate through loaders until we either fulfill the request
-     * or exhaust all available loaders.
-     */
     while (visitedLoaders.size < this.loaders.length) {
       const nextLoader = this.nextLoader(
         unitId,
@@ -195,7 +484,6 @@ class SmartDataLoader implements AdViewDataLoader {
       if (!mergedGroups[group.id]) {
         mergedGroups[group.id] = { ...group, items: [...(group.items || [])] };
       } else {
-        // We know that group.items is defined because it was set in the previous step
         mergedGroups[group.id]!.items!.push(...(group.items || []));
       }
     }
@@ -223,6 +511,19 @@ class SmartDataLoader implements AdViewDataLoader {
     }
     return 0;
   }
+}
+
+function dedupeByIdPool(pool: WeightedItem[]): WeightedItem[] {
+  const seen = new Set<string>();
+  const out: WeightedItem[] = [];
+  for (const entry of pool) {
+    if (seen.has(entry.item.id)) {
+      continue;
+    }
+    seen.add(entry.item.id);
+    out.push(entry);
+  }
+  return out;
 }
 
 export default SmartDataLoader;

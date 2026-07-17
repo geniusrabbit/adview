@@ -26,4 +26,11 @@ export { default as DynamicFetcherDataLoader } from './dynamicFetcherDataLoader'
 export { default as HardDataLoader } from './hardDataLoader';
 export { LoaderItem, default as SmartDataLoader } from './smartDataLoader';
 export type { LoaderItemIface } from './smartDataLoader';
+export {
+  dedupeById,
+  isSelectionPlan,
+  resolveSourceRef,
+  weightedShuffle,
+} from './selectionPlan';
+export type { ResolvedSourceRef, WeightedItem } from './selectionPlan';
 

@@ -324,6 +324,33 @@ export interface AdViewSourceItem {
 }
 
 /**
+ * Reference to a named source inside a selection plan.
+ * Plain string ≡ `{ source: name, weight: 1 }`.
+ */
+export type AdViewSourceRef = string | { source: string; weight?: number };
+
+/**
+ * One waterfall stage in a selection plan:
+ * - a single ref → exclusive fill from that source (order preserved)
+ * - an array of refs → fetch in parallel, then weighted-shuffle into remaining slots
+ */
+export type AdViewSelectionStage = AdViewSourceRef | AdViewSourceRef[];
+
+/**
+ * Staged priority / merge plan for SmartDataLoader and Unit `selection` prop.
+ * Stages run left-to-right until `limit` is satisfied.
+ *
+ * @example
+ * // strict waterfall
+ * ['main', 'second', 'other']
+ * // main first, then parallel merge of second+other
+ * ['main', ['second', 'other']]
+ * // weighted shuffle of main+second, then other fallback
+ * [[{ source: 'main', weight: 90 }, { source: 'second', weight: 20 }], 'other']
+ */
+export type AdViewSelectionPlan = AdViewSelectionStage[];
+
+/**
  * Optional interface a driver constructor can implement (on its static side)
  * to self-report whether it matches a given source config, in addition to
  * the mandatory `driver` name check.

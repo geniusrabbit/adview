@@ -136,4 +136,66 @@ describe('buildLoaderFromSources', () => {
     ]);
     expect(loader).toBeInstanceOf(HardDataLoader);
   });
+
+  it('applies selection plan stages over named sources', async () => {
+    const loader = buildLoaderFromSources(sourcesFixture(), {
+      selection: ['primary', ['secondary', 'native-src']],
+    });
+    expect(loader).toBeInstanceOf(SmartDataLoader);
+
+    const data = (await loader!.fetchAdData('u1', 2)) as AdViewData;
+    const ids = data.groups?.[0]?.items.map(i => i.id) || [];
+    expect(ids[0]).toBe('a');
+    expect(ids).toHaveLength(2);
+    expect(ids.slice(1)[0]).toMatch(/^[bc]$/);
+  });
+
+  it('selection plan skips later stages when primary fills limit', async () => {
+    const backupFetch = jest.fn(
+      async (unitId: string, limit: number) =>
+        ({
+          version: '1',
+          groups: [
+            {
+              id: unitId,
+              items: [makeAdItem({ id: 'b1', type: 'banner' })].slice(0, limit),
+            },
+          ],
+        }) as AdViewData,
+    );
+
+    const loader = buildLoaderFromSources(
+      [
+        {
+          name: 'main',
+          driver: 'function',
+          params: {
+            fetchAdData: async (unitId: string, limit: number) =>
+              ({
+                version: '1',
+                groups: [
+                  {
+                    id: unitId,
+                    items: [
+                      makeAdItem({ id: 'm1', type: 'banner' }),
+                      makeAdItem({ id: 'm2', type: 'banner' }),
+                    ].slice(0, limit),
+                  },
+                ],
+              }) as AdViewData,
+          },
+        },
+        {
+          name: 'backup',
+          driver: 'function',
+          params: { fetchAdData: backupFetch },
+        },
+      ],
+      { selection: ['main', 'backup'] },
+    );
+
+    const data = (await loader!.fetchAdData('u1', 2)) as AdViewData;
+    expect(data.groups?.[0]?.items.map(i => i.id)).toEqual(['m1', 'm2']);
+    expect(backupFetch).not.toHaveBeenCalled();
+  });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { AdViewData, AdViewDataLoader } from '@adview/core';
-import { AdViewGroupItem } from '@adview/core/typings';
+import { AdViewGroupItem, AdViewSelectionPlan } from '@adview/core/typings';
 import { getDataLoaderFromConfig, getResolveConfig } from '@adview/core/utils';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
 import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
@@ -21,6 +21,11 @@ export type AdViewUnitServerProps = Omit<AdViewUnitPropsBase, 'sources'> & {
   tags?: string[];
   /** Filters sources by driver name (see `AdViewConfig.sources`) */
   drivers?: string[];
+  /**
+   * Staged selection plan: waterfall stages and parallel weighted-shuffle merges.
+   * When omitted, `sources` order is used as a sequential plan.
+   */
+  selection?: AdViewSelectionPlan;
 };
 
 async function AdViewUnitServer({
@@ -35,6 +40,7 @@ async function AdViewUnitServer({
   sources,
   tags,
   drivers,
+  selection,
   ...config
 }: AdViewUnitServerProps) {
   const checkFormat = (f: string) => {
@@ -49,6 +55,7 @@ async function AdViewUnitServer({
     sources,
     tags,
     drivers,
+    selection,
   });
   const response = await dataLoader.fetchAdData(
     unitId,

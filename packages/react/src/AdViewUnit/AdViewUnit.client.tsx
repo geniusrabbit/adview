@@ -1,6 +1,7 @@
 'use client';
 
 import { AdViewData, AdViewGroupItem } from '@adview/core';
+import type { AdViewSelectionPlan } from '@adview/core/typings';
 import React from 'react';
 import { AdViewUnitClientChildren, AdViewUnitPropsBase } from '../types';
 import AdViewUnitBannerTemplate from './AdViewUnitBannerTemplate';
@@ -27,6 +28,11 @@ export type AdViewUnitClientProps = Omit<AdViewUnitPropsBase, 'sources'> & {
   tags?: string[];
   /** Filters sources by driver name (see `AdViewConfig.sources`) */
   drivers?: string[];
+  /**
+   * Staged selection plan: waterfall stages and parallel weighted-shuffle merges.
+   * When omitted, `sources` order is used as a sequential plan.
+   */
+  selection?: AdViewSelectionPlan;
   acceptedFormatTypes?: string[];
 };
 
@@ -60,6 +66,7 @@ function AdViewUnitClient({
   sources,
   tags,
   drivers,
+  selection,
   acceptedFormatTypes,
   ...config
 }: AdViewUnitClientProps) {
@@ -83,7 +90,7 @@ function AdViewUnitClient({
     limit || 1,
     format,
     query,
-    { sources, tags, drivers },
+    { sources, tags, drivers, selection },
   );
 
   let {

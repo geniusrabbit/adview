@@ -218,6 +218,7 @@ Matching order: `source.driver === registeredName`, then optional `matcher` from
 | `tags` | `string[]` | Keep sources whose tags intersect |
 | `drivers` | `string[]` | Keep sources with these driver names |
 | `acceptedFormatTypes` | `string[]` | Client-side item filter (`*` / `all` accepts any) |
+| `selection` | `AdViewSelectionPlan` | Staged waterfall / parallel weighted-shuffle plan |
 | `trackingWrapperClassName` | `string` | Class on tracking wrappers |
 | `filterItems` | `(items) => items` | Post-fetch item filter |
 | `wrapper` | `(params) => ReactNode` | Wrap rendered ad elements |
@@ -237,6 +238,42 @@ Also accepts legacy config fields: `srcURL`, `defaultAdData`, `sourceLoader`, `s
   format="native"
   sources={['premium', 'house']}
   limit={2}
+/>
+```
+
+### Selection plan
+
+`selection` describes **stages**. Stages run left-to-right while remaining slots `R = limit - taken > 0`. A string stage fetches one source (order preserved). An array stage fetches all listed sources in parallel, then **weighted-shuffles** the pool (default weight `1`) and takes up to `R`. Flat `sources={['a','b']}` ≡ `selection={['a','b']}`.
+
+```tsx
+{/* 1) Strict waterfall */}
+<AdView.Unit
+  unitId="hero"
+  format="banner"
+  limit={3}
+  selection={['main', 'second', 'other']}
+/>
+
+{/* 2) main first; if short, parallel merge of second + other */}
+<AdView.Unit
+  unitId="hero"
+  format="banner"
+  limit={4}
+  selection={['main', ['second', 'other']]}
+/>
+
+{/* 3) weighted shuffle of main+second, then other fallback */}
+<AdView.Unit
+  unitId="hero"
+  format="banner"
+  limit={5}
+  selection={[
+    [
+      { source: 'main', weight: 90 },
+      { source: 'second', weight: 20 },
+    ],
+    'other',
+  ]}
 />
 ```
 
