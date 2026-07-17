@@ -95,7 +95,6 @@ function useAdViewController(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unitId, limit, formatKey, queryKey, filtersKey, sourcesKey, configKey]);
 
   const loadState: AdLoadState = {

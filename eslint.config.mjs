@@ -1,29 +1,32 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import unicorn from 'eslint-plugin-unicorn';
+import tsParser from '@typescript-eslint/parser';
 import tseslint from 'typescript-eslint';
-import prettierEslint from 'eslint-plugin-prettier';
-import tsParser from '@typescript-eslint/parser'; // Added TypeScript parser
 
-const __dirname = new URL('.', import.meta.url).pathname;
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-export default tseslint.config([
+/**
+ * Minimal flat config for the monorepo.
+ * Type-aware project linting is intentionally off so package `examples/`,
+ * build output, and tooling configs do not fail CI with parser project errors.
+ */
+export default tseslint.config(
   {
-    ignores: ['dist/*'],
+    ignores: [
+      '**/dist/**',
+      '**/examples/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/*.css.d.ts',
+      'test-project/**',
+      '**/*.{js,cjs,mjs}',
+      'eslint.config.*',
+    ],
   },
   {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: './tsconfig.json',
+        ecmaVersion: 2020,
+        sourceType: 'module',
       },
     },
-    plugins: {
-      '@typescript-eslint': tseslint,
-      unicorn,
-      prettier: prettierEslint,
-    },
   },
-]);
+);
